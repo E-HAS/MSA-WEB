@@ -2,18 +2,26 @@
 // create and run Web Socket connection
 //const socket = new WebSocket("ws://" + window.location.host + "/signal");
 console.log(window.location.host);
-const socket = new WebSocket("ws://"+window.location.host+"/signal");
+const socket = new WebSocket("wss://"+window.location.host+"/signal");
 
+function guid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
 // UI elements
 const videoButtonOff = document.querySelector('#video_off');
 const videoButtonOn = document.querySelector('#video_on');
 const audioButtonOff = document.querySelector('#audio_off');
 const audioButtonOn = document.querySelector('#audio_on');
 const exitButton = document.querySelector('#exit');
-const localRoom = document.querySelector('input#id').value;
+//const localRoom = document.querySelector('input#id').value;
+const localRoom = 1;
 const localVideo = document.getElementById('local_video');
 const remoteVideo = document.getElementById('remote_video');
-const localUserName = localStorage.getItem("uuid");
+//const localUserName = localStorage.getItem("uuid");
+const localUserName = guid();
 
 // WebRTC STUN servers
 const peerConnectionConfig = {
@@ -200,6 +208,7 @@ function handlePeerConnection(message) {
     createPeerConnection();
     getMedia(mediaConstraints);
     if (message.data === "true") {
+	     log('message.data === "true"');
         myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
     }
 }
