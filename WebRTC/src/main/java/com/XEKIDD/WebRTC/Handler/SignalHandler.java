@@ -54,7 +54,7 @@ public class SignalHandler extends TextWebSocketHandler {
 	    
 	    @Override
 	    public void afterConnectionClosed(final WebSocketSession session, final CloseStatus status) {
-	        logger.debug("[ws] Session has been closed with status {}", status);
+	        logger.info("[ws] Session has been closed with status {}", status);
 	        sessionIdToRoomMap.remove(session.getId());
 	    }
 

@@ -140,8 +140,8 @@ function stop() {
         myPeerConnection.close();
         myPeerConnection = null;
 
-        log('Close the socket');
         if (socket != null) {
+			log('Close the socket ( use Fun )');
             socket.close();
         }
     }
@@ -232,6 +232,7 @@ function getLocalMediaStream(mediaStream) {
     localVideo.srcObject = mediaStream;
     localStream.getTracks().forEach(track => myPeerConnection.addTrack(track, localStream));
 }
+
 
 // handle get media error
 function handleGetUserMediaError(error) {

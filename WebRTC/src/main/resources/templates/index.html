@@ -27,6 +27,41 @@
         .btn.active span:last-child  {
             display: none;
         }
+        
+        
+        
+        #results {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#results > div {
+  width: 33%;
+  text-align: center;
+  line-height: 24px;
+}
+
+@media (max-width: 814px) {
+
+  #results {
+    flex-flow: column;
+  }
+  
+  #results > div {
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+}
+
+video, canvas {
+  object-fit: contain;
+  border: 2px solid rgba(255, 255, 255, 1);
+  background: #263238;
+  height: 198px;
+  width: 100%;
+}
     </style>
     <!-- <link rel="stylesheet" type="text/css" href="/css/main.css"/> -->
 </head>
@@ -63,7 +98,7 @@
                     </div>
 
                     <!--<button type="button" class="btn btn-outline-success" id="audio" data-toggle="button">Audio</button>-->
-                    <a th:href="@{/room/{id}/user/{uuid}/exit(id=${id},uuid=${uuid})}">
+                    <a >
                         <button type="button" class="btn btn-outline-danger" id="exit" name="exit">
                             Exit Room
                         </button>
@@ -79,10 +114,15 @@
             <div class="col-lg-6 mb-3">
                 <video id="remote_video" autoplay playsinline></video>
             </div>
+            
+            <div class="col-lg-6 mb-3">
+                <canvas id="local_canvas"></canvas>
+            </div>
         </div>
     </div>
 </main>
 
-<script src="/js/webrtc_client.js"></script>
+<!-- <script src="/js/webrtc_client.js"></script> -->
+<script src="/js/webrtc_meet_client.js"></script>
 </body>
 </html>
