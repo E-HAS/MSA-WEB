@@ -9,21 +9,22 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 import com.XEKIDD.WebRTC.Handler.SignalHandler;
+import com.XEKIDD.WebRTC.Repository.RoomRepository;
+
+import lombok.RequiredArgsConstructor;
 
 
 @Configuration
+@RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketConfigurer {
-
-	  @Override
+		private final SignalHandler signalHandler;
+	
+	   @Override
 	    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-	        registry.addHandler(signalHandler(), "/signal")
+	        registry.addHandler(signalHandler, "/signal")
 	                .setAllowedOrigins("*"); // allow all origins
 	    }
 
-	    @Bean
-	    public WebSocketHandler signalHandler() {
-	        return new SignalHandler();
-	    }
 
 	    @Bean
 	    public ServletServerContainerFactoryBean createWebSocketContainer() {

@@ -9,6 +9,7 @@ import lombok.Data;
 
 @Data
 public class Room {
-	private final Long id;
+	private final String id;
+	private String roomName;
     private final Map<String, WebSocketSession> clients = new HashMap<>();
 }
