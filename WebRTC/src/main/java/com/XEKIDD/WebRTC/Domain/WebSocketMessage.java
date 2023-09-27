@@ -14,6 +14,7 @@ public class WebSocketMessage {
     private String to;
     
     private String roomId;
+    private String userName;
     private String type;
     private String data;
     

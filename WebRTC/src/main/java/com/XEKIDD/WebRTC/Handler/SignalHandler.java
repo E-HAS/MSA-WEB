@@ -19,7 +19,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import com.XEKIDD.WebRTC.Domain.Room;
+import com.XEKIDD.WebRTC.Domain.MeetRoom;
+import com.XEKIDD.WebRTC.Domain.MeetUserSession;
 import com.XEKIDD.WebRTC.Domain.WebSocketMessage;
 import com.XEKIDD.WebRTC.Domain.WebSocketMessage.WebSocketMessageBuilder;
 import com.XEKIDD.WebRTC.Repository.RoomRepository;
@@ -51,13 +52,13 @@ public class SignalHandler extends TextWebSocketHandler {
 
 	    @PostConstruct
 	    public void init() {
-	    	roomRepository.addRoom(new Room("1"));
 	    }
 	    
 	    @Override
 	    public void afterConnectionClosed(final WebSocketSession session, final CloseStatus status) {
 	        logger.info("Session closed with status {}", status);
 	        roomRepository.removeRoomMaps(session.getId());
+	        roomRepository.removeInRoom("1",session.getId());
 	    }
 
 	    @Override
@@ -79,25 +80,26 @@ public class SignalHandler extends TextWebSocketHandler {
 	    	
 	        try {
 	        	 WebSocketMessage message = objectMapper.readValue(textMessage.getPayload(), WebSocketMessage.class);
-	        	 String userName = message.getFrom();
+	        	 String FromId = message.getFrom();
+	        	 String userName = message.getUserName();
 	        	 
-	        	 Room room = null;
+	        	 MeetRoom room = null;
 	        	 room = roomRepository.getRoomInRoomMaps(session.getId());
 	        	 
 	        	 switch(message.getType()) {
 	        	 case  MSG_TYPE_JOIN:
-	        		 logger.info("handleTextMessage >>>> MSG_TYPE_JOIN {}",session);
+	        		 logger.info("handleTextMessage >>>> MSG_TYPE_JOIN Data : {}", message.getData());
 	        		 
 	        		 String joinRoomId = message.getData();
 	        		 room = roomRepository.findRoomByStringId(joinRoomId) // 해당 방번호가 있는지 확인
 	                            .orElseThrow(() -> new IOException("Invalid room number received!"));
 	        		 
-	        		 roomRepository.addClient(room, userName, session); // 해당 방에 이름, 세션 저장 
+	        		 roomRepository.addClient(room, FromId,userName, session); // 해당 방에 이름, 세션 저장 
 	        		 roomRepository.putRoomMaps(session.getId(), room); //해당 세션이 들어가있는 방 정보 추가
 	        		 
 	        		 break;
 	        	 case MSG_TYPE_OFFER:
-	        		 logger.info("handleTextMessage >>>> MSG_TYPE_OFFER {}",session);
+	        		 logger.info("handleTextMessage >>>> MSG_TYPE_OFFER Message : {}",message.getFrom());
 	        		 
 	        		 if(room != null) {
 	        			 sendSDPinOtherSessions(room, message);
@@ -105,7 +107,7 @@ public class SignalHandler extends TextWebSocketHandler {
 	        		 
 	        		 break;
 	        	 case MSG_TYPE_ANSWER:
-	        		 logger.info("handleTextMessage >>>> MSG_TYPE_ANSWER {}",session);
+	        		 logger.info("handleTextMessage >>>> MSG_TYPE_ANSWER Message : {}",message.getFrom());
 	        		 
 	        		 if(room != null) {
 	        			 sendSDPinOtherSessions(room, message);
@@ -113,7 +115,7 @@ public class SignalHandler extends TextWebSocketHandler {
 	        		 
 	        		 break;
 	        	 case  MSG_TYPE_ICE:
-	        		 logger.info("handleTextMessage >>>> MSG_TYPE_ICE {}",session);
+	        		 logger.info("handleTextMessage >>>> MSG_TYPE_ICE Message : {}",message.getFrom());
 	                 
 	                 if(room != null) {
 	        			 sendSDPinOtherSessions(room, message);
@@ -142,12 +144,12 @@ public class SignalHandler extends TextWebSocketHandler {
 	        }
 	    }
 	    
-	    private void sendSDPinOtherSessions(Room room, WebSocketMessage message) {
-       	 Map<String, WebSocketSession> clients = roomRepository.getClients(room); // 해당 룸에 접속한 세션들 가져오기
-       	 	for(Map.Entry<String, WebSocketSession> client : clients.entrySet())  { 
+	    private void sendSDPinOtherSessions(MeetRoom room, WebSocketMessage message) {
+       	 Map<String, MeetUserSession> clients = roomRepository.getClients(room); // 해당 룸에 접속한 세션들 가져오기
+       	 	for(Map.Entry<String, MeetUserSession> client : clients.entrySet())  { 
        	 		if (!client.getKey().equals(message.getFrom())) { // 룸에 자신 세션 제외한 나머지 메시지 전송(signal)
 	
-                 sendMessage(client.getValue(), WebSocketMessage
+                 sendMessage(client.getValue().getWebSocketSession(), WebSocketMessage
                 		 						.builder()
                 		 						.from(message.getFrom())
                 		 						.type(message.getType())

@@ -44,18 +44,22 @@ $(function(){
                 break;
 
             case "offer":
+            	console.log('offer >> message');
                 startOffer(message);
                 break;
 
             case "answer":
+            	console.log('answer >> message');
                 startAnswer(message);
                 break;
 
             case "ice":
+            	console.log('ice >> message');
                 startICECandidate(message)
                 break;
 
             case "join":
+            	console.log('join >> message');
                 startPeerConnection(message);
                 break;
 
@@ -98,13 +102,14 @@ function startPeerConnection(message){
     .then(getUserMediaSuccess).catch(getUserMediaError);
     // set local, stream
     
-    CallerPeerConnection.onnegotiationneeded = setOnNegotiationNeeded;
+	CallerPeerConnection.onnegotiationneeded = setOnNegotiationNeeded;
     // sent offer(sdp), set localDescription
 }
 
 ////////////
 function setOnIceCandiate(args) {
     if (args.candidate) {
+		console.log("Sending ice packet to other peer");
         sendToSocket({
             from: localUserName,
             type: 'ice',
@@ -114,9 +119,9 @@ function setOnIceCandiate(args) {
     }
 }
 function setOnTrack(args) {
-    log('ontrack >> remoteVide set Stream');
+    console.log('ontrack >> remoteVide set Stream');
     //remoteVideo.srcObject = args.streams[0];
-    remoteVideo.srcObject = args.streams;
+    remoteVideo.srcObject = args.streams[0];
 }
 
 ////////////
@@ -136,6 +141,7 @@ function setOnNegotiationNeeded(){
 	    return CallerPeerConnection.setLocalDescription(offer);
 	})
 	.then(function(){
+			console.log("Sending offer packet to other peer");
 		sendToSocket({
             from: localUserName,
             type: 'offer',
@@ -167,6 +173,7 @@ function startOffer(message) {
 			return navigator.mediaDevices.getUserMedia(mediaConstraints);
 		})
 		.then(function(stream){
+			console.log("offer >> CallerPeerConnection.addStream");
 			    try {
                     localVideo.srcObject = stream;
                 } catch (error) {
@@ -175,12 +182,15 @@ function startOffer(message) {
                  CallerPeerConnection.addStream(stream);
 		})
 		.then(function () {
+			console.log("offer >> createAnswer");
 			return CallerPeerConnection.createAnswer();
 		})
-		.then(function () {
+		.then(function (answer) {
+			console.log("offer >> CallerPeerConnection.setLocalDescription");
 			 return CallerPeerConnection.setLocalDescription(answer);
 		})
 		.then(function () {
+			console.log("Sending answer packet to other peer");
 			sendToSocket({
             from: localUserName,
             type: 'answer',

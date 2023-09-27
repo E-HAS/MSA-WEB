@@ -5,11 +5,14 @@ import java.util.Map;
 
 import org.springframework.web.socket.WebSocketSession;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class Room {
-	private final String id;
+@Builder
+public class MeetRoom {
+	private final String roomId;
 	private String roomName;
-    private final Map<String, WebSocketSession> clients = new HashMap<>();
+	private String roomPasswrd;
+    private final Map<String, MeetUserSession> clients = new HashMap<>();
 }
