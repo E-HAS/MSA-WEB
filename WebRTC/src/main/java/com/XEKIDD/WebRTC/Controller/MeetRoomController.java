@@ -1,5 +1,7 @@
 package com.XEKIDD.WebRTC.Controller;
 
+import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -39,35 +41,75 @@ public class MeetRoomController {
 	public String enterRoom(@PathVariable String roomId, @PathVariable String userName, @RequestParam String roomPwd, RedirectAttributes reAttr) {
 		logger.info("/Enter/{roomId}/{userName} >>");
 		Boolean pwCheck = roomRepository.checkPwdInRoom(roomId, roomPwd);
-		MeetRoom mtRoom = MeetRoom.builder()
-							.roomId(roomId)
-							.roomPasswrd(roomPwd).build();
 		if(pwCheck) {
-			reAttr.addFlashAttribute("room",mtRoom);
+			Optional<MeetRoom> mtRoom = roomRepository.findRoomByStringId(roomId);
+			
+			MeetRoomDto mtRoomDto = new MeetRoomDto();
+			mtRoomDto.setRoomId(roomId);
+			mtRoomDto.setRoomName(mtRoom.get().getRoomName());
+			mtRoomDto.setRoomPassword(roomPwd);
+			mtRoomDto.setUserName(userName);
+			
+			reAttr.addFlashAttribute("room",mtRoomDto);
 			reAttr.addFlashAttribute("isName",userName);
-			reAttr.addFlashAttribute("isAdmin",true);
-			return "/Meet/Room";
+			reAttr.addFlashAttribute("isAdmin",false);
+			return "redirect:/Meet/MeetRoom";
 		}else {
-			reAttr.addFlashAttribute("room",mtRoom);
+			//reAttr.addFlashAttribute("room",mtRoom.get());
 			reAttr.addFlashAttribute("isName",userName);
-			return "/Meet/Enter";
+			return "Meet/Enter";
 		}
 	}
 	
 	@PostMapping("/Create/{roomName}/{userName}")
 	public String CreateRoom(@PathVariable String roomName, @PathVariable String userName, @RequestParam String roomPwd, RedirectAttributes reAttr) {
-		logger.info("/Create/{}/{} >> RoomPassword {}",roomName, userName, roomPwd);
-		String roomId = UUID.randomUUID().toString();
-		MeetRoom mtRoom = MeetRoom.builder()
-									.roomId(roomId)
-									.roomName(roomName)
-									.roomPasswrd(roomPwd).build();
+		logger.info("/Create//{}/{} >> RoomPassword {}",roomName, userName, roomPwd);
+		//String roomId = UUID.randomUUID().toString();
+		String roomId =randomId();
+		MeetRoomDto mtRoom = new MeetRoomDto();
+		mtRoom.setRoomId(roomId);
+		mtRoom.setRoomName(roomName);
+		mtRoom.setRoomPassword(roomPwd);
+		mtRoom.setUserName(userName);
 		
-		roomRepository.addRoom(mtRoom);
+		
+		roomRepository.addRoom(
+								MeetRoom.builder()
+								.roomId(roomId)
+								.roomName(roomName)
+								.roomPasswrd(roomPwd).build());
 		reAttr.addFlashAttribute("room",mtRoom);
 		reAttr.addFlashAttribute("isName",userName);
 		reAttr.addFlashAttribute("isAdmin",true);
 		
-		return "/Meet/Room";
+		return "redirect:/Meet/MeetRoom";
+	}
+	
+	@RequestMapping("/MeetRoom")
+	public String inMeetRoom(Model model) {
+		 model.addAttribute("Model", model);
+		logger.info("/Meet/MeetRoom >>");
+		return "Meet/MeetRoom";
+	}
+	
+	private String randomId() {
+		 StringBuffer key = new StringBuffer();
+	      Random rnd = new Random();
+
+	      for (int i = 0; i < 6; i++) { 
+	    	 int index = rnd.nextInt(3);
+	           switch (index) {
+	           case 0:
+	               key.append((char)((int) (rnd.nextInt(26)) + 97));
+	               break;
+	           case 1:
+	               key.append((char)((int) (rnd.nextInt(26)) + 65));
+	               break;
+	           case 2:
+	               key.append((rnd.nextInt(10)));
+	               break;
+	           }
+	      }
+	      return key.toString();
 	}
 }

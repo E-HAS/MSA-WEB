@@ -2,14 +2,18 @@ package com.XEKIDD.WebRTC.Domain;
 
 import java.util.Map;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Data
-@Builder
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class MeetRoomDto {
-	private final String roomId;
+	private String roomId;
 	private String roomName;
-	private String roomPasswrd;
+	private String roomPassword;
 	private String userName;
 }

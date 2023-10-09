@@ -1,133 +1,225 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-<meta charset="UTF-8">
-<title>Web Meet Chat</title>
+	<meta charset="UTF-8">
+	<title>Web Meet Chat</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+		crossorigin="anonymous"></script>
 
-<style>
-		html,body {
-		  height: 100%;
-		}
-		
+	<style>
+		html,
 		body {
-		  display: flex;
-		  align-items: center;
-		  padding-top: 40px;
-		  padding-bottom: 40px;
-		  background-color: #f5f5f5;
+			height: 100%;
 		}
-		
-		.form-signin {
-		  max-width: 330px;
-		  padding: 15px;
+
+		body {
+			display: flex;
+			align-items: center;
+			padding-top: 40px;
+			padding-bottom: 40px;
+			background-color: #f5f5f5;
 		}
-		
-		.form-signin .form-floating:focus-within {
-		  z-index: 2;
+
+		.form-signin input[type="text"] {
+			margin-bottom: 10px;
+			border-bottom-right-radius: 0;
+			border-bottom-left-radius: 0;
 		}
-		
-		.form-signin input[type="email"] {
-		  margin-bottom: -1px;
-		  border-bottom-right-radius: 0;
-		  border-bottom-left-radius: 0;
-		}
-		
+
 		.form-signin input[type="password"] {
-		  margin-bottom: 10px;
-		  border-top-left-radius: 0;
-		  border-top-right-radius: 0;
+			margin-bottom: 10px;
+			border-top-left-radius: 0;
+			border-top-right-radius: 0;
 		}
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-      }
 
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
-        }
-      }
+		.bd-placeholder-img {
+			font-size: 1.125rem;
+			text-anchor: middle;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			user-select: none;
+		}
 
-      .b-example-divider {
-        height: 3rem;
-        background-color: rgba(0, 0, 0, .1);
-        border: solid rgba(0, 0, 0, .15);
-        border-width: 1px 0;
-        box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
-      }
+		@media (min-width: 768px) {
+			.bd-placeholder-img-lg {
+				font-size: 3.5rem;
+			}
+		}
 
-      .b-example-vr {
-        flex-shrink: 0;
-        width: 1.5rem;
-        height: 100vh;
-      }
+		.b-example-divider {
+			height: 3rem;
+			background-color: rgba(0, 0, 0, .1);
+			border: solid rgba(0, 0, 0, .15);
+			border-width: 1px 0;
+			box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+		}
 
-      .bi {
-        vertical-align: -.125em;
-        fill: currentColor;
-      }
+		.b-example-vr {
+			flex-shrink: 0;
+			width: 1.5rem;
+			height: 100vh;
+		}
 
-      .nav-scroller {
-        position: relative;
-        z-index: 2;
-        height: 2.75rem;
-        overflow-y: hidden;
-      }
+		.bi {
+			vertical-align: -.125em;
+			fill: currentColor;
+		}
 
-      .nav-scroller .nav {
-        display: flex;
-        flex-wrap: nowrap;
-        padding-bottom: 1rem;
-        margin-top: -1px;
-        overflow-x: auto;
-        text-align: center;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-      }
-</style>
+		.nav-scroller {
+			position: relative;
+			z-index: 2;
+			height: 2.75rem;
+			overflow-y: hidden;
+		}
+
+		.nav-scroller .nav {
+			display: flex;
+			flex-wrap: nowrap;
+			padding-bottom: 1rem;
+			margin-top: -1px;
+			overflow-x: auto;
+			text-align: center;
+			white-space: nowrap;
+			-webkit-overflow-scrolling: touch;
+		}
+	</style>
+
+	<script>
+		window.onload = function () {
+			var btnCreate = document.getElementById("btnCreate");
+			btnCreate.addEventListener("click", function () {
+				var form = document.getElementById("createForm");
+				var userName = document.getElementById("userName");
+				var roomName = document.getElementById("roomName");
+				var roomPassword = document.getElementById("roomPassword");
+
+				form.action = "/Meet/Create/" + roomName.value + "/" + userName.value + "?roomPwd=" + roomPassword.value;
+				form.mothod = "Post";
+				form.submit();
+			});
+
+			var btnEnter = document.getElementById("btnEnter");
+			btnEnter.addEventListener("click", function () {
+				var form = document.getElementById("enterForm");
+				var enterCode = document.getElementById("enterCode");
+				var userName = document.getElementById("enterUserName");
+				var roomPassword = document.getElementById("enterRoomPassword");
+
+				form.action = "/Meet/Enter/" + enterCode.value + "/" + userName.value + "?roomPwd=" + roomPassword.value;
+				form.mothod = "Post";
+				form.submit();
+			});
+			
+			settinginOutPut();
+		}
+
+	</script>
 </head>
-	<body class="text-center">
-	    
-	<main class="form-signin w-100 m-auto">
-	  <form th:action="@{'/Meet/Create/' + ${roomName} + '/' + ${userName}+'?roomPwd='+${roomPassword}}" 
-	  th:object="${MeetRoomDto}" method="post">
-	    <img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
-	    <h1 class="h3 mb-3 fw-normal">Create Meet Room</h1>
-	
-		<div class="form-floating">
-	      <input type="text" class="form-control" th:id="userName" th:field="*{userName}" placeholder="">
-	      <label for="floatingInput">Meet User Name</label>
-	    </div>
-	    <div class="form-floating">
-	      <input type="text" class="form-control" th:id="roomName" th:field="*{roomName}" placeholder="">
-	      <label for="floatingInput">Meet Room Name</label>
-	    </div>
-	    <div class="form-floating">
-	      <input type="password" class="form-control" th:id="roomPassword" th:field="*{roomPassword}" placeholder="">
-	      <label for="floatingPassword">Meet Room Password</label>
-	    </div>
-	
-	    <button class="w-100 btn btn-lg btn-primary" type="submit">Create</button>
-	  </form>
-	  
-	  
-	 <form>
-	 	<h1 class="h3 mb-3 fw-normal">Join Meet Room</h1>
-	    <div class="form-floating">
-	      <input type="text" class="form-control" id="floatingInput" placeholder="name@example.com">
-	      <label for="floatingInput">Meet Room Code</label>
-	    </div>
-	
-	    <button class="w-100 btn btn-lg btn-primary" type="submit">Join</button>
-	  </form>
-	  <p class="mt-5 mb-3 text-muted">&copy; 2023-09 ~ Current</p>
+
+<body>
+
+	<main class="form-signin w-75 m-auto">
+		<div class="container">
+			<div class="row text-center">
+				<img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="100" height="100">
+			</div>
+			<div class="row text-center">
+				<div class="col mb-3">
+					<!--<form th:action="@{'/Meet/Create/' + ${roomName} + '/' + ${userName}+'?roomPwd='+${roomPassword}}"-->
+					<form id="createForm" onsubmit="return false;" method="post">
+						<h1 class="h3 mb-3 fw-normal">Create Meet Room</h1>
+
+						<div class="form-floating">
+							<input type="text" class="form-control" id="userName" placeholder="">
+							<label for="floatingInput">Meet User Name</label>
+						</div>
+						<div class="form-floating">
+							<input type="text" class="form-control" id="roomName" placeholder="">
+							<label for="floatingInput">Meet Room Name</label>
+						</div>
+						<div class="form-floating">
+							<input type="password" class="form-control" id="roomPassword" placeholder="">
+							<label for="floatingPassword">Meet Room Password</label>
+						</div>
+
+						<button class="w-100 btn btn-lg btn-primary" id="btnCreate">Create</button>
+					</form>
+				</div>
+
+				<div class="col mb-3">
+					<form id="enterForm" onsubmit="return false;" method="post">
+						<h1 class="h3 mb-3 fw-normal">Join Meet Room</h1>
+						<div class="form-floating">
+							<input type="text" class="form-control" id="enterCode" placeholder="">
+							<label for="enterCode">Meet Room Code</label>
+						</div>
+						<div class="form-floating">
+							<input type="text" class="form-control" id="enterUserName" placeholder="">
+							<label for="floatingInput">Meet User Name</label>
+						</div>
+						<div class="form-floating">
+							<input type="password" class="form-control" id="enterRoomPassword" placeholder="">
+							<label for="floatingPassword">Meet Room Password</label>
+						</div>
+
+						<button class="w-100 btn btn-lg btn-primary" id="btnEnter">Join</button>
+					</form>
+				</div>
+			</div>
+			<div class="row text-center">
+				<div class="col">
+					<h1 class="h3 mb-3 fw-normal">Devices setting</h1>
+				</div>
+			</div>
+			<div class="row p-2">
+				<div class="card mb-3 w-100" >
+					  <div class="row g-0">
+					    <div class="col-md-8 p-2">
+					      <video class="img-fluid rounded-start" id="localVideo" poster="/img/camera_prepair.gif">
+					    </div>
+					    <div class="col-md-4">
+						  <div class="row">
+							  <div class="col mb-3">
+								  <div class="input-group">
+									  <label class="form-label">Camera</label>
+									  <img class="ms-2" th:src="@{/img/svg/video_play_off.svg}">
+								  </div>
+								   <select id="selectCamera" class="form-select form-select-sm w-100 mb-2"> </select>
+								   <div class="progress">
+									  <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width:15%;"></div>
+								    </div>
+							  </div>
+					      </div>
+						  <div class="row">
+							   <div class="col mb-3">
+								    <div class="input-group">
+									  <label class="form-label">Speaker</label>
+									  <img class="ms-2" th:src="@{/img/svg/video_play_off.svg}">
+								  	</div>
+							   		<select id="selectAudioOutput" class="form-select form-select-sm w-100"> </select>
+							   </div>
+					      </div>
+					      <div class="row">
+							  <div class="col mb-3">
+								  	<div class="input-group">
+									  <label class="form-label">Mike</label>
+									  <img class="ms-2" th:src="@{/img/svg/video_play_off.svg}">
+								  	</div>
+							  		<select id="selectAudioInput" class="form-select form-select-sm w-100"> </select>
+							  </div>
+					      </div>
+					    </div>
+					  </div>
+				</div>
+			</div>
+		</div>
+		<p class="mt-5 mb-3 text-muted">&copy; 2023-09 ~ Current</p>
 	</main>
-	
-	</body>
+<script src="/js/InOutPut.js"></script>
+</body>
 <html>

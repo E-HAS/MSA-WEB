@@ -23,6 +23,8 @@ import com.XEKIDD.WebRTC.Domain.MeetRoom;
 import com.XEKIDD.WebRTC.Domain.MeetUserSession;
 import com.XEKIDD.WebRTC.Domain.WebSocketMessage;
 import com.XEKIDD.WebRTC.Domain.WebSocketMessage.WebSocketMessageBuilder;
+import com.XEKIDD.WebRTC.Redis.Entity.UserSession;
+import com.XEKIDD.WebRTC.Redis.Repository.UserSessionRepository;
 import com.XEKIDD.WebRTC.Repository.RoomRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SignalHandler extends TextWebSocketHandler {
 		private final RoomRepository roomRepository;
+		private final UserSessionRepository userSessionRepository;
 	    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	 
 	    private final ObjectMapper objectMapper = new ObjectMapper();
@@ -57,18 +60,20 @@ public class SignalHandler extends TextWebSocketHandler {
 	    @Override
 	    public void afterConnectionClosed(final WebSocketSession session, final CloseStatus status) {
 	        logger.info("Session closed with status {}", status);
-	        roomRepository.removeRoomMaps(session.getId());
-	        roomRepository.removeInRoom("1",session.getId());
+	        MeetRoom rmRoom = roomRepository.removeRoomMaps(session.getId());//remove in user information
+	        roomRepository.removeInRoom(rmRoom.getRoomId(),session.getId()); //remove in global room
 	    }
 
 	    @Override
 	    public void afterConnectionEstablished(final WebSocketSession session) {
 	    	 logger.info("Session Connect with SessionId {}", session);
+	    	 /*
 	         sendMessage(session, WebSocketMessage
 	        		 				.builder()
 	        		 				.from("Server")
 	        		 				.type(MSG_TYPE_JOIN)
 	        		 				.build());
+	          */
 	         
 	    }
 
@@ -82,27 +87,39 @@ public class SignalHandler extends TextWebSocketHandler {
 	        	 WebSocketMessage message = objectMapper.readValue(textMessage.getPayload(), WebSocketMessage.class);
 	        	 String FromId = message.getFrom();
 	        	 String userName = message.getUserName();
+	        	 String sessionId = session.getId();
 	        	 
 	        	 MeetRoom room = null;
-	        	 room = roomRepository.getRoomInRoomMaps(session.getId());
+	        	 room = roomRepository.getRoomInRoomMaps(FromId);
 	        	 
 	        	 switch(message.getType()) {
 	        	 case  MSG_TYPE_JOIN:
 	        		 logger.info("handleTextMessage >>>> MSG_TYPE_JOIN Data : {}", message.getData());
 	        		 
-	        		 String joinRoomId = message.getData();
-	        		 room = roomRepository.findRoomByStringId(joinRoomId) // 해당 방번호가 있는지 확인
-	                            .orElseThrow(() -> new IOException("Invalid room number received!"));
+	        		 String joinRoomId = message.getRoomId();
 	        		 
-	        		 roomRepository.addClient(room, FromId,userName, session); // 해당 방에 이름, 세션 저장 
-	        		 roomRepository.putRoomMaps(session.getId(), room); //해당 세션이 들어가있는 방 정보 추가
+	        		 UserSession uSession = new UserSession();
+	        		 uSession.setSessionId(sessionId);
+	        		 uSession.setUserName(userName);
+	        		 uSession.setSessionType(0);
+	        		 
+	        		 userSessionRepository.save(uSession);
+	        		 
+	        		 room = roomRepository.findRoomByStringId(joinRoomId) // 해당 방번호가 있는지 확인
+	                            .orElseThrow(() -> new IOException("Invalid room received!"));
+	        		 
+	        		 roomRepository.putRoomMaps(FromId, room); // Add in user information
+	        		 roomRepository.addClient(room, FromId,userName, session); // Add in Global Room
+	        		 message.setData(roomRepository.getNameInClients(room));
+	        		 
+	        		 sendMessage(session, message);
 	        		 
 	        		 break;
 	        	 case MSG_TYPE_OFFER:
 	        		 logger.info("handleTextMessage >>>> MSG_TYPE_OFFER Message : {}",message.getFrom());
 	        		 
 	        		 if(room != null) {
-	        			 sendSDPinOtherSessions(room, message);
+	        			 sendSDPinOtherSessions(sessionId, room, message);
 	                 }
 	        		 
 	        		 break;
@@ -110,7 +127,7 @@ public class SignalHandler extends TextWebSocketHandler {
 	        		 logger.info("handleTextMessage >>>> MSG_TYPE_ANSWER Message : {}",message.getFrom());
 	        		 
 	        		 if(room != null) {
-	        			 sendSDPinOtherSessions(room, message);
+	        			 sendSDPinOtherSessions(sessionId, room, message);
 	                 }
 	        		 
 	        		 break;
@@ -118,12 +135,12 @@ public class SignalHandler extends TextWebSocketHandler {
 	        		 logger.info("handleTextMessage >>>> MSG_TYPE_ICE Message : {}",message.getFrom());
 	                 
 	                 if(room != null) {
-	        			 sendSDPinOtherSessions(room, message);
+	        			 sendSDPinOtherSessions(sessionId, room, message);
 	                 }
 	                 
 	        		 break;
 	        	 default:
-	        		 logger.info("handleTextMessage >>>> {} {}",message.getType(), session);
+	        		 logger.info("handleTextMessage XXXX {} {}",message.getType(), session);
 	        		 break;
 	        	 
 	        	 }
@@ -144,14 +161,15 @@ public class SignalHandler extends TextWebSocketHandler {
 	        }
 	    }
 	    
-	    private void sendSDPinOtherSessions(MeetRoom room, WebSocketMessage message) {
+	    private void sendSDPinOtherSessions(String sessionId, MeetRoom room, WebSocketMessage message) {
        	 Map<String, MeetUserSession> clients = roomRepository.getClients(room); // 해당 룸에 접속한 세션들 가져오기
        	 	for(Map.Entry<String, MeetUserSession> client : clients.entrySet())  { 
-       	 		if (!client.getKey().equals(message.getFrom())) { // 룸에 자신 세션 제외한 나머지 메시지 전송(signal)
-	
+       	 		//if (!client.getKey().equals(sessionId)) { // 룸에 자신 세션 제외한 나머지 메시지 전송(signal)
+       	 		 if (client.getKey().equals(message.getTo())) { // 룸에 자신 세션 제외한 나머지 메시지 전송(signal)
                  sendMessage(client.getValue().getWebSocketSession(), WebSocketMessage
                 		 						.builder()
                 		 						.from(message.getFrom())
+                		 						.to(message.getTo())
                 		 						.type(message.getType())
                 		 						.data(message.getData())
                 		 						.candidate(message.getCandidate())
