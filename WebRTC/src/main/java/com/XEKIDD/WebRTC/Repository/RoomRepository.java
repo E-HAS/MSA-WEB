@@ -18,7 +18,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.XEKIDD.WebRTC.Domain.MeetRoom;
-import com.XEKIDD.WebRTC.Domain.MeetUserSession;
 
 @Repository
 public class RoomRepository {
@@ -28,8 +27,8 @@ public class RoomRepository {
 	 private Set<MeetRoom> rooms = new TreeSet<MeetRoom>(Comparator.comparing(MeetRoom::getRoomId));
 	 
 	 // user information
-	 // session ID, room
-	 private ConcurrentHashMap<String, MeetRoom> RoomMaps = new ConcurrentHashMap<>();
+	 // fromId, room
+	 private ConcurrentHashMap<String, MeetRoom> userMaps = new ConcurrentHashMap<>();
 	 
 	    // add in Global Room
 	    public Boolean addRoom(final MeetRoom room) {
@@ -44,7 +43,7 @@ public class RoomRepository {
 	    public void removeInRoom(String roomId, String sessionId) {
 	    	Optional<MeetRoom> _room = findRoomByStringId(roomId);  // find in Global Room
 	    	Optional<String> _key = _room.get().getClients().entrySet().stream() // user list in Global Room 
-	    							.filter(value -> value.getValue().getWebSocketSession().getId().equals(sessionId)) // session ID compare value
+	    							.filter(value -> value.getValue().getId().equals(sessionId)) // session ID compare value
 	    							.map(Map.Entry::getKey)
 	    							.findFirst();
 	    	_room.get().getClients().remove(_key.get()); // remove in Global Room
@@ -56,12 +55,12 @@ public class RoomRepository {
 		    
 	    }
 	    // add Client In Global Room
-	    public MeetUserSession addClient(final MeetRoom room, final String fromId, final String userName, final WebSocketSession session) {
-	        return room.getClients().put(fromId, MeetUserSession.builder().UserName(userName).webSocketSession(session).build());
+	    public WebSocketSession addClient(final MeetRoom room, final String fromId, final WebSocketSession session) {
+	        return room.getClients().put(fromId, session);
 	    }
 
 	    // get Clients In Global Room
-	    public Map<String, MeetUserSession> getClients(final MeetRoom room) {
+	    public Map<String, WebSocketSession> getClients(final MeetRoom room) {
 	        return Optional.ofNullable(room)
 	                .map(r -> Collections.unmodifiableMap(r.getClients())) // read-only 객체 생성
 	                .orElse(Collections.emptyMap());
@@ -76,17 +75,17 @@ public class RoomRepository {
 
 	    
 	    // add user information 
-	    public void putRoomMaps(String sessionId, MeetRoom room) {
-	    	RoomMaps.put(sessionId, room);
+	    public void putUserMaps(String fromId, MeetRoom room) {
+	    	userMaps.put(fromId, room);
 	    }
 	    
 	    // remove user information 
-	    public MeetRoom removeRoomMaps(String sessionId) {
-	    	return RoomMaps.remove(sessionId);
+	    public MeetRoom removeUserMaps(String fromId) {
+	    	return userMaps.remove(fromId);
 	    }
 	    
 	    // get user information 
-	    public MeetRoom getRoomInRoomMaps(String sessionId) {
-	    	return RoomMaps.get(sessionId);
+	    public MeetRoom getRoomInUserMaps(String fromId) {
+	    	return userMaps.get(fromId);
 	    }
 }

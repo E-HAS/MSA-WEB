@@ -1,9 +1,17 @@
 package com.XEKIDD.WebRTC.Controller;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.tomcat.util.json.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -11,9 +19,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 import com.XEKIDD.WebRTC.Domain.MeetRoom;
 import com.XEKIDD.WebRTC.Domain.MeetRoomDto;
@@ -85,10 +95,18 @@ public class MeetRoomController {
 		return "redirect:/Meet/MeetRoom";
 	}
 	
-	@RequestMapping("/MeetRoom")
-	public String inMeetRoom(Model model) {
+	@GetMapping("/MeetRoom")
+	public String inMeetRoom(Model model, HttpServletRequest request) {
 		 model.addAttribute("Model", model);
-		logger.info("/Meet/MeetRoom >>");
+		 Map<String, ?> flashMap =RequestContextUtils.getInputFlashMap(request);
+		logger.info("/Meet/MeetRoom >> GET {}", flashMap);
+		return "Meet/MeetRoom";
+	}
+	
+	@PostMapping("/MeetRoom")
+	public String inMeetRoom(Model model, @RequestBody Map<String, String> Map) {
+		 model.addAttribute("Model", model);
+		logger.info("/Meet/MeetRoom >> POST {}", Map);
 		return "Meet/MeetRoom";
 	}
 	

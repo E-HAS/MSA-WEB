@@ -14,5 +14,5 @@ public class MeetRoom {
 	private final String roomId;
 	private String roomName;
 	private String roomPasswrd;
-    private final Map<String, MeetUserSession> clients = new HashMap<>();
+    private final Map<String, WebSocketSession> clients = new HashMap<>();
 }
