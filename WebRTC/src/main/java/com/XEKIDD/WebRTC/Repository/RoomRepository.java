@@ -40,11 +40,11 @@ public class RoomRepository {
 	    }
 	    
 	    // remove in Global Room
-	    public void removeInRoom(String roomId, String sessionId) {
+	    public void removeInRoom(String roomId, String fromId) {
 	    	Optional<MeetRoom> _room = findRoomByStringId(roomId);  // find in Global Room
 	    	Optional<String> _key = _room.get().getClients().entrySet().stream() // user list in Global Room 
-	    							.filter(value -> value.getValue().getId().equals(sessionId)) // session ID compare value
-	    							.map(Map.Entry::getKey)
+	    							.filter(key -> key.getKey().equals(fromId)) // 
+	    							.map(key -> key.getKey())
 	    							.findFirst();
 	    	_room.get().getClients().remove(_key.get()); // remove in Global Room
 	    }

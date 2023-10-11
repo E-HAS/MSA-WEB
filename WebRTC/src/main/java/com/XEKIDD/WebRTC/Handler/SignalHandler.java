@@ -54,12 +54,14 @@ public class SignalHandler extends TextWebSocketHandler {
 	    @Override
 	    public void afterConnectionClosed(final WebSocketSession session, final CloseStatus status) {
 	        logger.info("Session closed with status {}", status);
-	        Optional<UserSession> uSession = userSessionRepository.findById(session.getId());
+	        String sessionId = session.getId();
+	        Optional<UserSession> uSession = userSessionRepository.findById(sessionId);
 	        if(uSession.isPresent()) {
 	        	String userName = uSession.get().getUserName();
-	        	MeetRoom rmRoom = roomRepository.removeUserMaps(userName);
-	        	roomRepository.removeInRoom(rmRoom.getRoomId(),session.getId());
+	        	MeetRoom rmRoom = roomRepository.removeUserMaps(userName); // remove in User Maps
+	        	roomRepository.removeInRoom(rmRoom.getRoomId(),userName); // remove in Global Room
 	        }
+	        userSessionRepository.deleteById(sessionId); // remove in Redis
 	    }
 
 	    @Override
@@ -100,7 +102,7 @@ public class SignalHandler extends TextWebSocketHandler {
 	        		 room = roomRepository.findRoomByStringId(joinRoomId) // check Exist RoomId
 	                            .orElseThrow(() -> new IOException("Invalid room received!"));
 	        		 
-	        		 roomRepository.putUserMaps(FromId, room); // Add in user information
+	        		 roomRepository.putUserMaps(FromId, room); // Add in User Maps
 	        		 roomRepository.addClient(room, FromId, session); // Add in Global Room
 	        		 
 	        		 message.setData(roomRepository.getNameInClients(room)); // list users in Global room
@@ -136,8 +138,6 @@ public class SignalHandler extends TextWebSocketHandler {
 	        		 break;
 	        	 
 	        	 }
-	            //WebSocketMessage message = objectMapper.readValue(textMessage.getPayload(), WebSocketMessage.class);
-	            //logger.debug("[ws] Message of {} type from {} PayLoad received", message.getType(), message.getPayload());
 
 	        } catch (IOException e) {
 	            logger.debug("An error occured: {}", e.getMessage());
@@ -154,9 +154,9 @@ public class SignalHandler extends TextWebSocketHandler {
 	    }
 	    
 	    private void sendSDPinOtherSessions(String sessionId, MeetRoom room, WebSocketMessage message) {
-       	 Map<String, WebSocketSession> clients = roomRepository.getClients(room); // 해당 룸에 접속한 유저 정보들 가져오기
+       	 Map<String, WebSocketSession> clients = roomRepository.getClients(room); // get Clients in Current Room
        	 	for(Map.Entry<String, WebSocketSession> client : clients.entrySet())  { 
-       	 		 if (client.getKey().equals(message.getTo())) { // 룸에 자신 세션 제외한 나머지 유저 메시지 전송(signal)
+       	 		 if (client.getKey().equals(message.getTo())) { // send Message exclude self
                  sendMessage(client.getValue(), WebSocketMessage
                 		 						.builder()
                 		 						.from(message.getFrom())
