@@ -187,30 +187,31 @@
 							  <div class="col mb-3">
 								  <div class="input-group">
 									  <label class="form-label">Camera</label>
-									  <img class="ms-2" th:src="@{/img/svg/video_play_off.svg}">
+									  <img  class="ms-2" src="/img/svg/play_off.svg">
 								  </div>
 								   <select id="selectCamera" class="form-select form-select-sm w-100 mb-2"> </select>
-								   <div class="progress">
-									  <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width:15%;"></div>
-								    </div>
 							  </div>
 					      </div>
 						  <div class="row">
 							   <div class="col mb-3">
 								    <div class="input-group">
 									  <label class="form-label">Speaker</label>
-									  <img class="ms-2" th:src="@{/img/svg/video_play_off.svg}">
+									  <img class="ms-2" th:src="@{/img/svg/play_off.svg}">
 								  	</div>
 							   		<select id="selectAudioOutput" class="form-select form-select-sm w-100"> </select>
+							   		<meter min="0" max="100" value="50" class="w-100"></meter></p>
+							   		<input type="range" class="form-range" id="customRange1">
 							   </div>
 					      </div>
 					      <div class="row">
 							  <div class="col mb-3">
 								  	<div class="input-group">
 									  <label class="form-label">Mike</label>
-									  <img class="ms-2" th:src="@{/img/svg/video_play_off.svg}">
+									  <img class="ms-2" th:src="@{/img/svg/play_off.svg}">
 								  	</div>
 							  		<select id="selectAudioInput" class="form-select form-select-sm w-100"> </select>
+							  		<meter min="0" max="100" value="50" class="w-100"></meter></p>
+							  		<input type="range" class="form-range" id="customRange1">
 							  </div>
 					      </div>
 					    </div>
