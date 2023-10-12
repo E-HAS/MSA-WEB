@@ -180,14 +180,14 @@
 				<div class="card mb-3 w-100" >
 					  <div class="row g-0">
 					    <div class="col-md-8 p-2">
-					      <video class="img-fluid rounded-start" id="localVideo" poster="/img/camera_prepair.gif">
+					      <video class="img-fluid rounded-start" id="localVideo" poster="/img/camera_prepair.gif" autoplay></video>
 					    </div>
 					    <div class="col-md-4">
 						  <div class="row">
 							  <div class="col mb-3">
 								  <div class="input-group">
 									  <label class="form-label">Camera</label>
-									  <img  class="ms-2" src="/img/svg/play_off.svg">
+									  <img  class="ms-2" src="/img/svg/play_off.svg" id="imgCemrea" onClick="playCamera('localVideo','selectCamera','imgCemrea')">
 								  </div>
 								   <select id="selectCamera" class="form-select form-select-sm w-100 mb-2"> </select>
 							  </div>
@@ -196,22 +196,22 @@
 							   <div class="col mb-3">
 								    <div class="input-group">
 									  <label class="form-label">Speaker</label>
-									  <img class="ms-2" th:src="@{/img/svg/play_off.svg}">
+									  <img class="ms-2" th:src="@{/img/svg/play_off.svg}" >
 								  	</div>
-							   		<select id="selectAudioOutput" class="form-select form-select-sm w-100"> </select>
+							   		<select id="selectAudioOutput" class="form-select form-select-sm w-100" > </select>
 							   		<meter min="0" max="100" value="50" class="w-100"></meter></p>
-							   		<input type="range" class="form-range" id="customRange1">
+							   		<input type="range" class="form-range" id="rangeSpeaker" min="0" max="1" step="0.001">
 							   </div>
 					      </div>
 					      <div class="row">
 							  <div class="col mb-3">
 								  	<div class="input-group">
 									  <label class="form-label">Mike</label>
-									  <img class="ms-2" th:src="@{/img/svg/play_off.svg}">
+									  <img class="ms-2" th:src="@{/img/svg/play_off.svg}" id="imgMike" onClick="playMike('localVideo','selectAudioInput','imgMike')">
 								  	</div>
 							  		<select id="selectAudioInput" class="form-select form-select-sm w-100"> </select>
 							  		<meter min="0" max="100" value="50" class="w-100"></meter></p>
-							  		<input type="range" class="form-range" id="customRange1">
+							  		<input type="range" class="form-range" id="rangeMike" min="0" max="1" step="0.001">
 							  </div>
 					      </div>
 					    </div>
