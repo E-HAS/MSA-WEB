@@ -41,9 +41,9 @@ let stompSendUrl = '/app/Stream/Send/'+RoomId;
         var socket = new SockJS("https://"+window.location.host+"/Stomp");
 
         stompClient = Stomp.over(socket);
-
+		stompClient.debug = null
         // connect(header,연결 성공시 콜백,에러발생시 콜백)
-        stompClient.connect({}, async function () {
+        stompClient.connect({State:'Connect', Type : 0 , UserId : UserName}, async function () {
 	
 	            createUser(UserName);
                 await navigator.mediaDevices
@@ -53,7 +53,7 @@ let stompSendUrl = '/app/Stream/Send/'+RoomId;
                 // subscribe(subscribe url, function)
                 stompClient.subscribe('/topic/Stream/Receive/'+RoomId+'/Join/'+UserName, function ( receive ) {
 					msg = JSON.parse(receive.body)
-					
+					console.log('join >> '+ msg.data);
 					for(let joinId of msg.data){
 						if(joinId in InMeetRoom.users){
 							
@@ -92,7 +92,7 @@ let stompSendUrl = '/app/Stream/Send/'+RoomId;
 					type : 0,
 					Data : 'Join'
 				};
-                sendServer(stompSendUrl+'/Join',{},data);
+                sendServer(stompSendUrl+'/Join',{}, data);
             },
             function(e){
                 alert('stome connect error : ' + e);
@@ -233,29 +233,9 @@ async function createUserPeerConnection(isName){
 																	    .forEach(track => PeerConnection.addTrack(track, myStream)
 																    */
 															};
-															
-	InMeetRoom.users[isName].CallerPeerConnection.onnegotiationneeded = function (){
-																			InMeetRoom.users[isName].CallerPeerConnection.createOffer()
-																			.then(function(offer){
-																			    return InMeetRoom.users[isName].CallerPeerConnection.setLocalDescription(offer);
-																			})
-																			.then(function(){
-																				console.log("Sending offer packet to other peer");
-																			    sendServer(stompSendUrl+'/Offer',{},{
-																		            from: UserName,
-																		            to:isName,
-																		            type: 'offer',
-																		            sdp: InMeetRoom.users[isName].CallerPeerConnection.localDescription
-																		        });
-																		    })
-																		    .catch(function(error){
-																				console.log(' setOnNegotiationNeeded >> error name :  '+ error.name);
-																				console.log(' setOnNegotiationNeeded >> error message :  '+ error.message);
-																			});
-																		};
 	InMeetRoom.users[isName].CallerPeerConnection.oniceconnectionstatechange = function (){
 																				let status = InMeetRoom.users[isName].CallerPeerConnection.iceConnectionState;
-																			
+																				
 																			    if(status === "connected"){
 																			        //log("status : "+status)
 																			        //$("#remote_video").show();
@@ -264,7 +244,27 @@ async function createUserPeerConnection(isName){
 
 																			    }
 																		};
+	PeerConnectionOffer(isName);															
 }
+function PeerConnectionOffer(isName){
+	InMeetRoom.users[isName].CallerPeerConnection.createOffer()
+	.then(function(offer){
+	return InMeetRoom.users[isName].CallerPeerConnection.setLocalDescription(offer);
+	})
+	.then(function(){
+	console.log("Sending offer packet to other peer");
+	sendServer(stompSendUrl+'/Offer',{},{
+		from: UserName,
+		to:isName,
+		type: 'offer',
+		sdp: InMeetRoom.users[isName].CallerPeerConnection.localDescription
+	});
+	}).catch(function(error){
+		console.log(' PeerConnectionOffer >> error name :  '+ error.name);
+		console.log(' PeerConnectionOffer >> error message :  '+ error.message);
+	});
+}
+
 
 
 

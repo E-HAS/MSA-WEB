@@ -1,8 +1,10 @@
 package com.xekidd.stomp.Controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -26,14 +28,13 @@ public class StreamController {
 	private final SimpMessagingTemplate simpMessagingTemplate;
 	// @Payload @Header
 	 
-	private List<String> lists = new ArrayList<String>();
+	private static List<String> lists = new CopyOnWriteArrayList<String>();
 	
     @MessageMapping("/Send/{RoomId}/Join")
     public void sendJoinMsg( @RequestBody StompMessage data
     					,@DestinationVariable String RoomId){
     	
     	lists.add(data.getFrom());
-    	
     	StompMessage msg = data;
     	msg.setData(lists);
     	String to = msg.getTo();
@@ -45,7 +46,6 @@ public class StreamController {
     @MessageMapping("/Send/{RoomId}/Offer")
     public void sendOfferMsg( @RequestBody StompMessage data
     					,@DestinationVariable String RoomId){  
-    	
     	StompMessage msg =  data;
     	String to = msg.getTo();
     	log.info("sendOfferMsg {} -> {}",data.getFrom(), to);
