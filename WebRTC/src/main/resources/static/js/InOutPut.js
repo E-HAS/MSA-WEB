@@ -18,6 +18,17 @@ selectAudioOutput = document.getElementById('selectAudioOutput');
 
  async function settinginOutPut() {
   try {
+  navigator.mediaDevices.enumerateDevices().then((devices) => {
+    devices.forEach((device) => {
+		console.log('device : '+device);
+		console.log('device deviceId :'+device.deviceId);
+		console.log('device groupId :'+device.groupId);
+		console.log('device kind :'+device.kind);
+		console.log('device label :'+device.label);
+    });
+  });
+  
+  
     const devices = await navigator.mediaDevices.enumerateDevices();
     
     const cameras = devices.filter((device) => device.kind === "videoinput");
@@ -99,8 +110,8 @@ function playCamera(videoId, selectId, imgId){
 								navigator.mediaDevices
 							    .getUserMedia({
 							    video: {
-							            width: 1980, // 최대 너비
-							            height: 1080, // 최대 높이
+									    width: { min: 1280 },
+									    height: { min: 720 },
 							            frameRate: 60, // 최대 프레임
 							            deviceId : {
 											exact: selectEl.value
@@ -130,6 +141,8 @@ function playMike(videoId, selectId, imgId){
 	 imgEl = document.querySelector('#'+imgId);
 	 selectVideo= document.querySelector('#'+videoId);
 	 
+	 selectOutEl = document.querySelector('#selectAudioOutput');
+	 
 	 if(playMikeOff){	 				
 								selectVideo.play();			
 								navigator.mediaDevices
@@ -138,11 +151,14 @@ function playMike(videoId, selectId, imgId){
 							            deviceId : {
 											exact: selectEl.value
 										}
-							    	} 
+										//sampleRate 	fixed: 48000
+							    	}
 								})
 								.then((stream) => {
 								 playMikeStream=stream
-								 selectVideo.srcObject = playMikeStream })
+								 selectVideo.srcObject = playMikeStream 
+								 selectVideo.setSinkId(selectOutEl.value)
+								 })
 								.catch( (e) => { console.log("error : "+e)})
 								
 								imgEl.src='/img/svg/play_on.svg';
