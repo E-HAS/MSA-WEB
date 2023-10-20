@@ -1,6 +1,7 @@
 package com.xekidd.stomp.Controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.xekidd.stomp.Entity.StompMessage;
+import com.xekidd.stomp.Redis.Entity.MeetRoom;
+import com.xekidd.stomp.Redis.Entity.MeetRoomUser;
+import com.xekidd.stomp.Service.MeetRoomService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,19 +30,25 @@ import lombok.extern.slf4j.Slf4j;
 @MessageMapping("/Stream")
 public class StreamController {
 	private final SimpMessagingTemplate simpMessagingTemplate;
+	private final MeetRoomService meetRoomService;
 	// @Payload @Header
-	 
-	private static List<String> lists = new CopyOnWriteArrayList<String>();
 	
     @MessageMapping("/Send/{RoomId}/Join")
     public void sendJoinMsg( @RequestBody StompMessage data
     					,@DestinationVariable String RoomId){
+    	String to = data.getTo();
+    	String from = data.getFrom();
+    	String roomId = data.getRoomId();
     	
-    	lists.add(data.getFrom());
-    	StompMessage msg = data;
-    	msg.setData(lists);
-    	String to = msg.getTo();
-    	log.info("sendJoinMsg {} -> {}",data.getFrom(), to);
+    	List<String> UserNameListInRoom = meetRoomService.findUserNameListInRoomByRoomId(RoomId);
+    	
+    	StompMessage msg = new StompMessage();
+    	msg.setTo(to);
+    	msg.setFrom(from);
+    	msg.setRoomId(roomId);
+    	msg.setData(UserNameListInRoom);
+    	
+    	log.info("roomId : {} sendJoinMsg {} -> {}", roomId,  from, to);
     	
         simpMessagingTemplate.convertAndSend("/topic/Stream/Receive/"+RoomId+"/Join/"+to,msg);
     }
@@ -47,8 +57,10 @@ public class StreamController {
     public void sendOfferMsg( @RequestBody StompMessage data
     					,@DestinationVariable String RoomId){  
     	StompMessage msg =  data;
-    	String to = msg.getTo();
-    	log.info("sendOfferMsg {} -> {}",data.getFrom(), to);
+    	String to = data.getTo();
+    	String from = data.getFrom();
+    	
+    	log.info("roomId : {} sendOfferMsg {} -> {}",RoomId,from, to);
     	
         simpMessagingTemplate.convertAndSend("/queue/Stream/Receive/"+RoomId+"/Offer/"+to,msg);
     }
@@ -58,8 +70,10 @@ public class StreamController {
     					,@DestinationVariable String RoomId){  
     	
     	StompMessage msg =  data;
-    	String to = msg.getTo();
-    	log.info("sendAnswerMsg {} -> {}",data.getFrom(), to);
+    	String to = data.getTo();
+    	String from = data.getFrom();
+    	
+    	log.info("roomId : {} sendAnswerMsg {} -> {}",RoomId ,from, to);
         simpMessagingTemplate.convertAndSend("/queue/Stream/Receive/"+RoomId+"/Answer/"+to,msg);
     }
     
@@ -68,8 +82,10 @@ public class StreamController {
     					,@DestinationVariable String RoomId){ 
     	
     	StompMessage msg =  data;
-    	String to = msg.getTo();
-    	log.info("sendIceMsg {} -> {}",data.getFrom(), to);
+    	String to = data.getTo();
+    	String from = data.getFrom();
+    	
+    	log.info("roomId : {} sendIceMsg {} -> {}",RoomId ,from, to);
     	
         simpMessagingTemplate.convertAndSend("/queue/Stream/Receive/"+RoomId+"/Ice/"+to,msg);
     }

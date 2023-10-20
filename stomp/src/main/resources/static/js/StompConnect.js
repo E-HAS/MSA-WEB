@@ -1,8 +1,12 @@
+
+const isRoomId =  document.querySelector('#hidRoomId').value;
+const isRoomName =  document.querySelector('#hidRoomName').value;
+const isUserName =  document.querySelector('#hidIsUserName').value;
+
+
 window.onload = function () {
 	connect();
 }
-
-const randId = Math.random().toString(16).substr(2, 8);
 
 
 let InMeetRoom ={
@@ -29,29 +33,25 @@ const mediaConstraints = {
 };
 
 
-let RoomId = 'abcdef';
-let RommName = 'roomName';
-let UserName =  randId;
-
 let stompClient;
 
-let stompSendUrl = '/app/Stream/Send/'+RoomId;
+let stompSendUrl = '/app/Stream/Send/'+isRoomId;
+
  function connect() {
-	 
         var socket = new SockJS("https://"+window.location.host+"/Stomp");
 
         stompClient = Stomp.over(socket);
 		stompClient.debug = null
         // connect(header,연결 성공시 콜백,에러발생시 콜백)
-        stompClient.connect({State:'Connect', Type : 0 , UserId : UserName}, async function () {
+        stompClient.connect({State:'Connect', Type : 0 , UserId : isUserName}, async function () {
 	
-	            createUser(UserName);
+	            createUser(isUserName);
                 await navigator.mediaDevices
 			    .getUserMedia(mediaConstraints)
 			    .then(getUserMediaSuccess).catch(mediaConstraints);
 			    
                 // subscribe(subscribe url, function)
-                stompClient.subscribe('/topic/Stream/Receive/'+RoomId+'/Join/'+UserName, function ( receive ) {
+                stompClient.subscribe('/topic/Stream/Receive/'+isRoomId+'/Join/'+isUserName, function ( receive ) {
 					msg = JSON.parse(receive.body)
 					console.log('join >> '+ msg.data);
 					for(let joinId of msg.data){
@@ -66,29 +66,29 @@ let stompSendUrl = '/app/Stream/Send/'+RoomId;
 					
                 });
                 
-                stompClient.subscribe('/queue/Stream/Receive/'+RoomId+'/Offer/'+UserName, async function ( receive ) {
+                stompClient.subscribe('/queue/Stream/Receive/'+isRoomId+'/Offer/'+isUserName, async function ( receive ) {
 					msg = JSON.parse(receive.body)
 					startOffer(msg);
                 });
                 
-                stompClient.subscribe('/queue/Stream/Receive/'+RoomId+'/Answer/'+UserName, async function ( receive ) {
+                stompClient.subscribe('/queue/Stream/Receive/'+isRoomId+'/Answer/'+isUserName, async function ( receive ) {
 					msg = JSON.parse(receive.body)
 					startAnswer(msg);
                 });
                 
-                stompClient.subscribe('/queue/Stream/Receive/'+RoomId+'/Ice/'+UserName, function ( receive ) {
+                stompClient.subscribe('/queue/Stream/Receive/'+isRoomId+'/Ice/'+isUserName, function ( receive ) {
 					msg = JSON.parse(receive.body)
 					startICECandidate(msg);
                 });
                 
-                stompClient.subscribe('/topic/Stream/Receive/'+RoomId+'/Msg', function ( receive ) {
+                stompClient.subscribe('/topic/Stream/Receive/'+isRoomId+'/Msg', function ( receive ) {
 					msg = JSON.parse(receive.body)
                 });
 			    
                 var data ={
-					roomId : RoomId,
-					from : UserName,
-					to : UserName,
+					roomId : isRoomId,
+					from : isUserName,
+					to : isUserName,
 					type : 0,
 					Data : 'Join'
 				};
@@ -111,7 +111,7 @@ let localVideo
 function getUserMediaSuccess(mediaStream){
 	  selfMediaStream=mediaStream;
 	  localVideo = mediaStream;
-	  InMeetRoom.users[UserName].localvideo.srcObject = selfMediaStream;
+	  InMeetRoom.users[isUserName].localvideo.srcObject = selfMediaStream;
 }
 
 function getUserMediaError(error){
@@ -161,7 +161,7 @@ async function startOffer(message) {
 		.then(function () {
 			console.log("Sending answer packet to other peer");
 			sendServer(stompSendUrl+'/Answer',{},{
-			from: UserName,
+			from: isUserName,
 			to: fromId,
 			type: 'answer',
 			sdp: InMeetRoom.users[fromId].CallerPeerConnection.localDescription
@@ -215,7 +215,7 @@ async function createUserPeerConnection(isName){
 																		    if (args.candidate) {
 																				console.log("Sending ice packet to other peer");
 																				sendServer(stompSendUrl+'/Ice',{},{
-																		            from: UserName,
+																		            from: isUserName,
 																		            to: isName,
 																		            type: 'ice',
 																		            candidate: args.candidate
@@ -254,7 +254,7 @@ function PeerConnectionOffer(isName){
 	.then(function(){
 	console.log("Sending offer packet to other peer");
 	sendServer(stompSendUrl+'/Offer',{},{
-		from: UserName,
+		from: isUserName,
 		to:isName,
 		type: 'offer',
 		sdp: InMeetRoom.users[isName].CallerPeerConnection.localDescription
