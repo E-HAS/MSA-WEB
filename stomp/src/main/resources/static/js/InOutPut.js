@@ -11,7 +11,7 @@ btnAudio.addEventListener("click", handleMuteClick);
 btnVideo.addEventListener("click", handleCameraClick);
 btnScreen.addEventListener("click", handleScreenClick);
  */
-
+let hostName = window.location.protocol + '//' + window.location.host;
 selectCamera = document.getElementById('selectCamera');
 selectAudioInput = document.getElementById('selectAudioInput');
 selectAudioOutput = document.getElementById('selectAudioOutput');
@@ -74,42 +74,6 @@ function playCamera(videoId, selectId, imgId){
 								navigator.mediaDevices
 							    .getUserMedia({
 							    video: {
-							            width: 1980, // 최대 너비
-							            height: 1080, // 최대 높이
-							            frameRate: 60, // 최대 프레임
-							            deviceId : {
-											exact: selectEl.value
-										}
-							    	} 
-								})
-								.then((stream) => {
-								 playCameraStream=stream
-								 selectVideo.srcObject = playCameraStream })
-								.catch( (e) => { console.log("error : "+e)})
-								
-								imgEl.src='/img/svg/play_on.svg';
-								playCameraOff=false;
-	}else{	
-		playCameraStream
-    	.getVideoTracks() // 스트림에서 getVideoTracks() 가져오기
-    	.forEach((track) => (track.enabled = !track.enabled));
-		imgEl.src='/img/svg/play_off.svg';
-		playCameraOff=true;
-	}
-}
-
-var playCameraOff=true;
-var playCameraStream;
-function playCamera(videoId, selectId, imgId){
-	 selectEl = document.querySelector('#'+selectId);
-	 imgEl = document.querySelector('#'+imgId);
-	 selectVideo= document.querySelector('#'+videoId);
-	 
-	 if(playCameraOff){	 				
-								selectVideo.play();			
-								navigator.mediaDevices
-							    .getUserMedia({
-							    video: {
 									    width: { min: 1280 },
 									    height: { min: 720 },
 							            frameRate: 60, // 최대 프레임
@@ -135,39 +99,49 @@ function playCamera(videoId, selectId, imgId){
 }
 
 var playMikeOff=true;
-var playMikeStream;
-function playMike(videoId, selectId, imgId){
-	 selectEl = document.querySelector('#'+selectId);
-	 imgEl = document.querySelector('#'+imgId);
-	 selectVideo= document.querySelector('#'+videoId);
+var playStream;
+function playMike(){
+	 tagImg = document.querySelector('#imgPlay');
 	 
-	 selectOutEl = document.querySelector('#selectAudioOutput');
+	 tagVideo= document.querySelector('#localVideo');
+	 
+	 selectVideo = document.querySelector('#selectCamera');
+	 checkVideo = selectVideo.value ?  {
+										    width: { min: 1280 },
+										    height: { min: 720 },
+								            frameRate: 60, // 최대 프레임
+								            deviceId : {exact: tagVideo.value}
+							    	} : false ;
+	 setVideo=checkVideo;
+	 selectMike = document.querySelector('#selectAudioInput');
+	 selectSpeacker = document.querySelector('#selectAudioOutput');
 	 
 	 if(playMikeOff){	 				
-								selectVideo.play();			
+								tagVideo.play();			
 								navigator.mediaDevices
 							    .getUserMedia({
+								video: checkVideo,
 							    audio: {
 							            deviceId : {
-											exact: selectEl.value
+											exact: selectMike.value
 										}
 										//sampleRate 	fixed: 48000
 							    	}
 								})
 								.then((stream) => {
-								 playMikeStream=stream
-								 selectVideo.srcObject = playMikeStream 
-								 selectVideo.setSinkId(selectOutEl.value)
+								 playStream=stream
+								 tagVideo.srcObject = playStream 
+								 tagVideo.setSinkId(selectSpeacker.value)
 								 })
 								.catch( (e) => { console.log("error : "+e)})
 								
-								imgEl.src='/img/svg/play_on.svg';
+								tagImg.src=hostName+'/img/svg/play_on.svg';
 								playMikeOff=false;
 	}else{	
-	    playMikeStream
+	    playStream
 	    .getAudioTracks() // 스트림에서 getAudioTrack() 가져오기
 	    .forEach((track) => (track.enabled = !track.enabled));
-		imgEl.src='/img/svg/play_off.svg';
+		tagImg.src=hostName+'/img/svg/play_off.svg';
 		playMikeOff=true;
 	}
 }

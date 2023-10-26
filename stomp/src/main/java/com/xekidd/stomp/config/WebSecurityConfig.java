@@ -43,7 +43,7 @@ public class WebSecurityConfig {
     	 				.antMatchers("/Meet/**"
     	 							,"/Stomp/**"
     	 							,"/css/**"
-    	 							, "/images/**"
+    	 							, "/img/**"
     	 							, "/js/**").permitAll()
     	 				.anyRequest().authenticated();
     	 				

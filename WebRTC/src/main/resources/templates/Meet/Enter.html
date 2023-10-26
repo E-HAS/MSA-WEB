@@ -39,14 +39,15 @@
 			color:  #f2f3f5;
 			background-color: #2f3136 ;
 			border: none;
-			border-radius: 15px;
+			border-radius: 20%;
 		}
 		select option {
 			width: 80%;
 			color:  #f2f3f5;
 			background-color: #2f3136 ;
 			border: none;
-			border-radius: 15px;
+			border-radius: 20%;
+			border:  1px solid  rgb(255, 255, 255);
 		}
 		.inputText {
 			font-size: 14px;
@@ -54,10 +55,7 @@
 			height: 30px;
 			color:  #f2f3f5;
 			background-color: #2f3136 ;
-			border-bottom:  1px solid  rgb(255, 255, 255);
-  			border-top: none;
-  			border-left: none;
-  			border-right: none;
+			border:  1px solid  rgb(255, 255, 255);
 
 		}
 		.card{
@@ -167,7 +165,7 @@
 				<img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="100" height="100">
 			</div>
 			<div class="row text-center">
-				<div class="col mb-3">
+				<div class="col mb-3 rounded-lg">
 					<div class="card mb-3" >
 					<!--<form th:action="@{'/Meet/Create/' + ${roomName} + '/' + ${userName}+'?roomPwd='+${roomPassword}}"-->
 					<form id="createForm" onsubmit="return false;" method="post">
@@ -189,7 +187,7 @@
 				</div>
 
 				<div class="col mb-3">
-					<div class="card mb-3" >
+					<div class="card mb-3 rounded-lg" >
 					<form id="enterForm" onsubmit="return false;" method="post">
 						<h1 class="h3 m-3 fw-normal">Join Meet Room</h1>
 						<div class="form-floating">
@@ -213,7 +211,7 @@
 				</div>
 			</div>
 			<div class="row p-2">
-				<div class="card mb-3 w-100" >
+				<div class="card mb-3 w-100 rounded-lg" >
 					  <div class="row g-0">
 					    <div class="col-md-8 p-2">
 					      <video class="img-fluid rounded-start" id="localVideo" poster="/img/camera_prepair.gif" autoplay></video>
