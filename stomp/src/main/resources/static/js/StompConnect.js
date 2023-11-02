@@ -4,6 +4,20 @@ const isRoomName =  document.querySelector('#hidRoomName').value;
 const isUserName =  document.querySelector('#hidIsUserName').value;
 
 
+const isCameraId =  document.querySelector('#hisCameraId').value ?  {
+										    width: { min: 1280 },
+										    height: { min: 720 },
+								            frameRate: 60, // 최대 프레임
+								            deviceId : {exact: document.querySelector('#hisCameraId').value}
+							    	} : false ;
+							    	
+const isMikeId =  document.querySelector('#hisMikeId').value? {
+							            deviceId : {
+											exact: document.querySelector('#hisMikeId').value
+										}
+							    	}: false;
+const isSpeackerId =  document.querySelector('#hisSpeackerId').value;
+
 window.onload = function () {
 	connect();
 }
@@ -24,12 +38,8 @@ const peerConnectionConfig = {
 
 // WebRTC media
 const mediaConstraints = {
-    audio: true,
-    video: {
-            width: 1980, // 최대 너비
-            height: 1080, // 최대 높이
-            frameRate: 60, // 최대 프레임
-    } 
+	video: isCameraId,
+    audio: isMikeId
 };
 
 
@@ -38,6 +48,10 @@ let stompClient;
 let stompSendUrl = '/app/Stream/Send/'+isRoomId;
 
  function connect() {
+	 	console.log(isCameraId);
+	 	console.log(isMikeId);
+	 	console.log(isSpeackerId);
+	 
         var socket = new SockJS("https://"+window.location.host+"/Stomp");
 
         stompClient = Stomp.over(socket);

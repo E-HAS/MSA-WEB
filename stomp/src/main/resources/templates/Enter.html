@@ -147,7 +147,7 @@
 	</style>
 
 	<script>
-		window.onload = function () {
+		window.onload = function () { 		
 			var btnCreate = document.getElementById("btnCreate");
 			btnCreate.addEventListener("click", function () {
 				var form = document.getElementById("createForm");
@@ -155,7 +155,16 @@
 				var roomName = document.getElementById("roomName");
 				var roomPassword = document.getElementById("roomPassword");
 
-				form.action = "/Meet/Create/" + roomName.value + "/" + userName.value + "?roomPwd=" + roomPassword.value;
+				var selectVideo = document.querySelector('#selectCamera').value ? document.querySelector('#selectCamera').value : '';
+				var selectMike = document.querySelector('#selectAudioInput').value ? document.querySelector('#selectAudioInput').value : '';
+		 		var selectSpeacker = document.querySelector('#selectAudioOutput').value ? document.querySelector('#selectAudioOutput').value : '';
+						
+				form.action = "/Meet/Create/" + roomName.value + "/" + userName.value 
+								+ '?roomPwd="' + roomPassword.value
+								+ '"&cameraId="' + selectVideo
+								+ '"&mikeId="' + selectMike
+								+ '"&speackerId="' + selectSpeacker+'"';
+										
 				form.mothod = "Post";
 				form.submit();
 			});
@@ -167,7 +176,15 @@
 				var userName = document.getElementById("enterUserName");
 				var roomPassword = document.getElementById("enterRoomPassword");
 
-				form.action = "/Meet/Enter/" + enterCode.value + "/" + userName.value + "?roomPwd=" + roomPassword.value;
+				var selectVideo = document.querySelector('#selectCamera').value ? document.querySelector('#selectCamera').value : '';
+				var selectMike = document.querySelector('#selectAudioInput').value ? document.querySelector('#selectAudioInput').value : '';
+		 		var selectSpeacker = document.querySelector('#selectAudioOutput').value ? document.querySelector('#selectAudioOutput').value : '';
+		
+				form.action = "/Meet/Enter/" + enterCode.value + "/" + userName.value 
+								+ '?roomPwd="' + roomPassword.value
+								+ '"&cameraId="' + selectVideo
+								+ '"&mikeId="' + selectMike
+								+ '"&speackerId="' + selectSpeacker+'"';
 				form.mothod = "Post";
 				form.submit();
 			});
@@ -260,13 +277,20 @@
 							  <div class="col mb-3">
 								  	<div class="input-group">
 									  <label class="form-label">Mike</label>
-									  <img class="ms-2" th:src="@{/img/svg/play_off.svg}" id="imgPlay" onClick="playMike()">
 								  	</div>
 							  		<select id="selectAudioInput" class=" form-select-sm w-100"> </select>
-							  		<meter min="0" max="100" value="50" class="w-100"></meter>
-							  		<input type="range" class="form-range" id="rangeMike" min="0" max="1" step="0.001">
+							  		<meter min="0" max="100" value="0" class="w-100" id="meterAudioInput"></meter>
+							  		<input type="range" class="form-range" id="rangeMike" min="0" max="1" step="0.001" value="1">
 							  </div>
+							 
 					      </div>
+					      <div class="row">
+							  <div class="col mb-3">
+								  <button class="w-100" onclick="playMike()">
+								  	 <img class="ms-2 h-75 w-50" th:src="@{/img/svg/play_off.svg}" id="imgPlay">
+								  </button>
+							  </div>
+						  </div>
 					    </div>
 					  </div>
 				</div>

@@ -43,6 +43,13 @@ public class MeetRoomController {
 	 private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final MeetRoomService meetRoomService;
 	
+	@GetMapping("/Index")
+	public String Index(Model model) {
+		 model.addAttribute("user", "user");
+		logger.info("/Enter >>");
+		return "Index";
+	}
+	
 	@GetMapping("/Enter")
 	public String enterRoom(Model model) {
 		 model.addAttribute("user", "user");
@@ -51,8 +58,12 @@ public class MeetRoomController {
 	}
 	
 	@PostMapping("/Enter/{roomId}/{userName}")
-	public String enterRoom(@PathVariable String roomId, @PathVariable String userName, @RequestParam String roomPwd, RedirectAttributes reAttr) {
+	public String enterRoom(@PathVariable String roomId, @PathVariable String userName, @RequestParam String roomPwd, RedirectAttributes reAttr
+			,@RequestParam String cameraId
+			,@RequestParam String mikeId
+			,@RequestParam String speackerId) {
 		logger.info("/Enter/{}/{} >>",roomId, userName);
+		logger.info("cameraId: {}, mikeId: {}, speackerId: {} >>",cameraId, mikeId,speackerId);
 		Boolean pwCheck = meetRoomService.equalsRoomPassword(roomId, roomPwd);
 		if(pwCheck) {
 			MeetRoom mRoom = meetRoomService.findRoomByRoomId(roomId);
@@ -72,6 +83,11 @@ public class MeetRoomController {
 			reAttr.addFlashAttribute("isRoomId",roomId);
 			reAttr.addFlashAttribute("isAdmin",false);
 			reAttr.addFlashAttribute("isActive",true);
+			
+			reAttr.addFlashAttribute("isCameraId",cameraId);
+			reAttr.addFlashAttribute("isMikeId",mikeId);
+			reAttr.addFlashAttribute("isSpeackerId",speackerId);
+			
 			return "redirect:/Meet/MeetRoom";
 		}else {
 			//reAttr.addFlashAttribute("room",mtRoom.get());
@@ -81,8 +97,12 @@ public class MeetRoomController {
 	}
 	
 	@PostMapping("/Create/{roomName}/{userName}")
-	public String CreateRoom(@PathVariable String roomName, @PathVariable String userName, @RequestParam String roomPwd, RedirectAttributes reAttr) {
+	public String CreateRoom(@PathVariable String roomName, @PathVariable String userName, @RequestParam String roomPwd, RedirectAttributes reAttr
+			,@RequestParam String cameraId
+			,@RequestParam String mikeId
+			,@RequestParam String speackerId) {
 		logger.info("/Create/{}/{} >> RoomPassword {}",roomName, userName, roomPwd);
+		logger.info("cameraId: {}, mikeId: {}, speackerId: {} >>",cameraId, mikeId,speackerId);
 		//String roomId = UUID.randomUUID().toString();
 		String roomId =randomId();
 		LocalDateTime currentDate = LocalDateTime.now(); 
@@ -108,6 +128,10 @@ public class MeetRoomController {
 		reAttr.addFlashAttribute("isAdmin",true);
 		reAttr.addFlashAttribute("isActive",true);
 		
+		reAttr.addFlashAttribute("isCameraId",cameraId);
+		reAttr.addFlashAttribute("isMikeId",mikeId);
+		reAttr.addFlashAttribute("isSpeackerId",speackerId);
+		
 		return "redirect:/Meet/MeetRoom";
 	}
 	
@@ -116,13 +140,6 @@ public class MeetRoomController {
 		 model.addAttribute("Model", "Model");
 		 Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
 		logger.info("/Meet/MeetRoom >> GET {}", flashMap);
-		return "MeetRoom";
-	}
-	
-	@PostMapping("/MeetRoom")
-	public String inMeetRoom(Model model, @RequestBody Map<String, String> Map) {
-		 model.addAttribute("Model", "Model");
-		logger.info("/Meet/MeetRoom >> POST {}", Map);
 		return "MeetRoom";
 	}
 	

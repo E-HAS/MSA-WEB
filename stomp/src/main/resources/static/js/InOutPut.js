@@ -18,16 +18,6 @@ selectAudioOutput = document.getElementById('selectAudioOutput');
 
  async function settinginOutPut() {
   try {
-  navigator.mediaDevices.enumerateDevices().then((devices) => {
-    devices.forEach((device) => {
-		console.log('device : '+device);
-		console.log('device deviceId :'+device.deviceId);
-		console.log('device groupId :'+device.groupId);
-		console.log('device kind :'+device.kind);
-		console.log('device label :'+device.label);
-    });
-  });
-  
   
     const devices = await navigator.mediaDevices.enumerateDevices();
     
@@ -98,23 +88,62 @@ function playCamera(videoId, selectId, imgId){
 	}
 }
 
+meterAudioInput
+function changeSizeInputMike(vol) {
+	var meter = document.querySelector('#meterAudioInput');
+	meter.value = Math.round(vol);
+}
+
+function checkMikeVolume(stream){
+	const audioContext = new AudioContext();
+    const analyser = audioContext.createAnalyser();
+    const microphone = audioContext.createMediaStreamSource(stream);
+    const scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
+
+    analyser.smoothingTimeConstant = 0.8;
+    analyser.fftSize = 1024;
+
+    microphone.connect(analyser);
+    analyser.connect(scriptProcessor);
+    scriptProcessor.connect(audioContext.destination);
+    scriptProcessor.onaudioprocess = function() {
+      const array = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(array);
+      const arraySum = array.reduce((a, value) => a + value, 0);
+      const average = arraySum / array.length;
+      var sizeInputMike = Math.round(average);
+      changeSizeInputMike(sizeInputMike);
+    };
+}
+
+function settingMikeVolume(stream){
+  // We assume only one audio track per stream
+  const audioTrack = stream.getAudioTracks()[0]
+  var ctx = new AudioContext()
+  var src = ctx.createMediaStreamSource(new MediaStream([audioTrack]))
+  var dst = ctx.createMediaStreamDestination()
+  var gainNode = ctx.createGain()
+  gainNode.gain.value = 1;
+  // Attach src -> gain -> dst
+  ;[src, gainNode, dst].reduce((a, b) => a && a.connect(b))
+  stream.removeTrack(audioTrack)
+  stream.addTrack(dst.stream.getAudioTracks()[0])
+}
 var playMikeOff=true;
 var playStream;
 function playMike(){
-	 tagImg = document.querySelector('#imgPlay');
+	 var tagImg = document.querySelector('#imgPlay');
 	 
-	 tagVideo= document.querySelector('#localVideo');
-	 
-	 selectVideo = document.querySelector('#selectCamera');
-	 checkVideo = selectVideo.value ?  {
+	 var tagVideo= document.querySelector('#localVideo');
+	 var selectVideo = document.querySelector('#selectCamera');
+	 var checkVideo = selectVideo.value ?  {
 										    width: { min: 1280 },
 										    height: { min: 720 },
 								            frameRate: 60, // 최대 프레임
 								            deviceId : {exact: tagVideo.value}
 							    	} : false ;
-	 setVideo=checkVideo;
-	 selectMike = document.querySelector('#selectAudioInput');
-	 selectSpeacker = document.querySelector('#selectAudioOutput');
+	 var selectMike = document.querySelector('#selectAudioInput');
+	 var selectSpeacker = document.querySelector('#selectAudioOutput');
 	 
 	 if(playMikeOff){	 				
 								tagVideo.play();			
@@ -132,6 +161,9 @@ function playMike(){
 								 playStream=stream
 								 tagVideo.srcObject = playStream 
 								 tagVideo.setSinkId(selectSpeacker.value)
+								 
+								checkMikeVolume(stream);
+    							settingMikeVolume(stream);
 								 })
 								.catch( (e) => { console.log("error : "+e)})
 								
