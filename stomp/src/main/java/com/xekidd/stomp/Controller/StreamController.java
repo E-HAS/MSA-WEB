@@ -1,11 +1,15 @@
 package com.xekidd.stomp.Controller;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -16,13 +20,16 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.xekidd.stomp.Entity.StomeRoomMessageEntity;
 import com.xekidd.stomp.Entity.StompMessage;
 import com.xekidd.stomp.Redis.Entity.MeetRoom;
 import com.xekidd.stomp.Redis.Entity.MeetRoomUser;
+import com.xekidd.stomp.Repository.RoomMessageJpaRepository;
 import com.xekidd.stomp.Service.MeetRoomService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,6 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 public class StreamController {
 	private final SimpMessagingTemplate simpMessagingTemplate;
 	private final MeetRoomService meetRoomService;
+	
+	private final RoomMessageJpaRepository roomMessageJpaRepository;
 	// @Payload @Header
 	
     @MessageMapping("/Send/{RoomId}/Join")
@@ -91,12 +100,25 @@ public class StreamController {
     }
     
     
+    @Transactional
     @MessageMapping("/Send/{RoomId}/Msg")
     public void sendMsgMsg( @RequestBody StompMessage data
-    					,@DestinationVariable String RoomId){  
+    					,@DestinationVariable String RoomId
+    					){  
+    	
+    	LocalDateTime dt = LocalDateTime.now();
+    	//String userAddress = request.getRemoteAddr();
+    	
+    	StomeRoomMessageEntity entity = StomeRoomMessageEntity.builder()
+    														.reqDt(dt)
+    														.roomId(RoomId)
+    														.userName(data.getFrom())
+    														//.userAddress(userAddress)
+    														.roomMessage(data.getRoomMessage())
+    														.build();
+    	roomMessageJpaRepository.save(entity);
     	
     	StompMessage msg =  data;
-    	
         simpMessagingTemplate.convertAndSend("/topic/Stream/Receive/"+RoomId+"/Msg",msg);
     }
 }

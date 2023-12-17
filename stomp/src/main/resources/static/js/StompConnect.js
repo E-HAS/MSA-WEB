@@ -4,23 +4,19 @@ const isRoomName =  document.querySelector('#hidRoomName').value;
 const isUserName =  document.querySelector('#hidIsUserName').value;
 
 
-const isCameraId =  document.querySelector('#hisCameraId').value ?  {
+let isCameraId =  document.querySelector('#hisCameraId').value ?  {
 										    width: { min: 1280 },
 										    height: { min: 720 },
 								            frameRate: 60, // 최대 프레임
 								            deviceId : {exact: document.querySelector('#hisCameraId').value}
 							    	} : false ;
 							    	
-const isMikeId =  document.querySelector('#hisMikeId').value? {
+let isMikeId =  document.querySelector('#hisMikeId').value? {
 							            deviceId : {
 											exact: document.querySelector('#hisMikeId').value
 										}
 							    	}: false;
-const isSpeackerId =  document.querySelector('#hisSpeackerId').value;
-
-window.onload = function () {
-	connect();
-}
+let isSpeackerId =  document.querySelector('#hisSpeackerId').value;
 
 
 let InMeetRoom ={
@@ -48,10 +44,6 @@ let stompClient;
 let stompSendUrl = '/app/Stream/Send/'+isRoomId;
 
  function connect() {
-	 	console.log(isCameraId);
-	 	console.log(isMikeId);
-	 	console.log(isSpeackerId);
-	 
         var socket = new SockJS("https://"+window.location.host+"/Stomp");
 
         stompClient = Stomp.over(socket);
@@ -60,9 +52,7 @@ let stompSendUrl = '/app/Stream/Send/'+isRoomId;
         stompClient.connect({State:'Connect', Type : 0 , UserId : isUserName}, async function () {
 	
 	            createUser(isUserName);
-                await navigator.mediaDevices
-			    .getUserMedia(mediaConstraints)
-			    .then(getUserMediaSuccess).catch(mediaConstraints);
+                await funcSetMediaDevices();
 			    
                 // subscribe(subscribe url, function)
                 stompClient.subscribe('/topic/Stream/Receive/'+isRoomId+'/Join/'+isUserName, function ( receive ) {
@@ -97,6 +87,8 @@ let stompSendUrl = '/app/Stream/Send/'+isRoomId;
                 
                 stompClient.subscribe('/topic/Stream/Receive/'+isRoomId+'/Msg', function ( receive ) {
 					msg = JSON.parse(receive.body)
+					console.log(msg);
+					sendMessageRoomByUser(msg.roomMessage);
                 });
 			    
                 var data ={
@@ -122,10 +114,24 @@ let stompSendUrl = '/app/Stream/Send/'+isRoomId;
     
 let selfMediaStream
 let localVideo
+
+async function funcSetMediaDevices(){
+	funcSetMediaConstraints();
+	console.log(isCameraId);
+	console.log(isMikeId);
+	console.log(isSpeackerId);
+	
+	navigator.mediaDevices
+	.getUserMedia(mediaConstraints)
+	.then(getUserMediaSuccess).catch(mediaConstraints);
+}
+
 function getUserMediaSuccess(mediaStream){
 	  selfMediaStream=mediaStream;
 	  localVideo = mediaStream;
 	  InMeetRoom.users[isUserName].localvideo.srcObject = selfMediaStream;
+	  checkMikeVolume(mediaStream);
+      settingMikeVolume(selfMediaStream,1);
 }
 
 function getUserMediaError(error){
@@ -280,5 +286,39 @@ function PeerConnectionOffer(isName){
 }
 
 
+function funcSetMediaConstraints(){
+	isCameraId =  document.querySelector('#hisCameraId').value ?  {
+										    width: { min: 1280 },
+										    height: { min: 720 },
+								            frameRate: 60, // 최대 프레임
+								            deviceId : {exact: document.querySelector('#hisCameraId').value}
+							    		} : false ;
+							    	
+	isMikeId =  document.querySelector('#hisMikeId').value? {
+							            deviceId : {
+											exact: document.querySelector('#hisMikeId').value
+											}
+							    		}: false;
+	isSpeackerId =  document.querySelector('#hisSpeackerId').value;
+}
+
+let divRoomMessage =  document.querySelector('#divRoomMessage');
+function sendMessageRoomByUser(message){
+	console.log(message);
+	var div = document.createElement('div');
+	div.setAttribute('class', 'card-body');
+	div.innerText = message;
+	console.log(div);
+	divRoomMessage.appendChild(div);
+}
+function clickSendMessage (){
+	var sendMessage = document.querySelector('#inputSendMessage').value;
+
+			sendServer(stompSendUrl+'/Msg',{},{
+			from: isUserName,
+			type: 'message',
+			roomMessage : sendMessage
+			});
+}
 
 

@@ -18,6 +18,8 @@ public class StompMessage {
 	
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private Object data;
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	private String roomMessage;
 	 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Object candidate;

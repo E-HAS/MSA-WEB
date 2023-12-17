@@ -160,10 +160,10 @@
 		 		var selectSpeacker = document.querySelector('#selectAudioOutput').value ? document.querySelector('#selectAudioOutput').value : '';
 						
 				form.action = "/Meet/Create/" + roomName.value + "/" + userName.value 
-								+ '?roomPwd="' + roomPassword.value
-								+ '"&cameraId="' + selectVideo
-								+ '"&mikeId="' + selectMike
-								+ '"&speackerId="' + selectSpeacker+'"';
+								+ '?roomPwd=' + roomPassword.value
+								+ '&cameraId=' + selectVideo
+								+ '&mikeId=' + selectMike
+								+ '&speackerId=' + selectSpeacker+'';
 										
 				form.mothod = "Post";
 				form.submit();
@@ -181,10 +181,10 @@
 		 		var selectSpeacker = document.querySelector('#selectAudioOutput').value ? document.querySelector('#selectAudioOutput').value : '';
 		
 				form.action = "/Meet/Enter/" + enterCode.value + "/" + userName.value 
-								+ '?roomPwd="' + roomPassword.value
-								+ '"&cameraId="' + selectVideo
-								+ '"&mikeId="' + selectMike
-								+ '"&speackerId="' + selectSpeacker+'"';
+								+ '?roomPwd=' + roomPassword.value
+								+ '&cameraId=' + selectVideo
+								+ '&mikeId=' + selectMike
+								+ '&speackerId=' + selectSpeacker+'';
 				form.mothod = "Post";
 				form.submit();
 			});
@@ -280,7 +280,7 @@
 								  	</div>
 							  		<select id="selectAudioInput" class=" form-select-sm w-100"> </select>
 							  		<meter min="0" max="100" value="0" class="w-100" id="meterAudioInput"></meter>
-							  		<input type="range" class="form-range" id="rangeMike" min="0" max="1" step="0.001" value="1">
+							  		<input type="range" class="form-range" id="rangeMike" min="0" max="10" step="0.001" value="1">
 							  </div>
 							 
 					      </div>

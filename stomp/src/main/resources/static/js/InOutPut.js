@@ -88,10 +88,21 @@ function playCamera(videoId, selectId, imgId){
 	}
 }
 
-meterAudioInput
-function changeSizeInputMike(vol) {
-	var meter = document.querySelector('#meterAudioInput');
-	meter.value = Math.round(vol);
+let elMeterAudioInput = document.querySelector('#meterAudioInput');
+let elRangeMike  = document.querySelector('#rangeMike');
+function settingMikeVolume(stream,value){
+  // We assume only one audio track per stream
+  const audioTrack = stream.getAudioTracks()[0]
+  var ctx = new AudioContext()
+  var src = ctx.createMediaStreamSource(new MediaStream([audioTrack]))
+  var dst = ctx.createMediaStreamDestination()
+  var gainNode = ctx.createGain()
+  //gainNode.gain.value = value; // mike sound
+  gainNode.gain.value = 1; // 일시적으로 유지    n * n * ... 현상이있음
+  // Attach src -> gain -> dst
+  [src, gainNode, dst].reduce( function(a, b) { return a && a.connect(b) });  
+  stream.removeTrack(audioTrack)
+  stream.addTrack(dst.stream.getAudioTracks()[0])
 }
 
 function checkMikeVolume(stream){
@@ -112,23 +123,11 @@ function checkMikeVolume(stream){
       const arraySum = array.reduce((a, value) => a + value, 0);
       const average = arraySum / array.length;
       var sizeInputMike = Math.round(average);
-      changeSizeInputMike(sizeInputMike);
+      elMeterAudioInput.value = Math.round(sizeInputMike);
     };
 }
 
-function settingMikeVolume(stream){
-  // We assume only one audio track per stream
-  const audioTrack = stream.getAudioTracks()[0]
-  var ctx = new AudioContext()
-  var src = ctx.createMediaStreamSource(new MediaStream([audioTrack]))
-  var dst = ctx.createMediaStreamDestination()
-  var gainNode = ctx.createGain()
-  gainNode.gain.value = 1;
-  // Attach src -> gain -> dst
-  ;[src, gainNode, dst].reduce((a, b) => a && a.connect(b))
-  stream.removeTrack(audioTrack)
-  stream.addTrack(dst.stream.getAudioTracks()[0])
-}
+
 var playMikeOff=true;
 var playStream;
 function playMike(){
@@ -163,7 +162,7 @@ function playMike(){
 								 tagVideo.setSinkId(selectSpeacker.value)
 								 
 								checkMikeVolume(stream);
-    							settingMikeVolume(stream);
+    							settingMikeVolume(stream,1);
 								 })
 								.catch( (e) => { console.log("error : "+e)})
 								
@@ -177,3 +176,25 @@ function playMike(){
 		playMikeOff=true;
 	}
 }
+
+let intervalSettingOption;
+function funcClickSettingOption(){
+	var elCollapse = document.querySelector('#collapseSettingIO');
+	
+	var className = elCollapse.getAttribute('class');
+	
+	if(className=='collapse'){
+		clearInterval(intervalSettingOption);
+	}else{
+		intervalSettingOption= setInterval(function() {
+		console.log(selfMediaStream.getAudioTracks());
+		console.log(elRangeMike.value);
+		settingMikeVolume(selfMediaStream,elRangeMike.value);
+		console.log(selfMediaStream);
+		}, 1000);
+	}
+	
+}
+
+
+
