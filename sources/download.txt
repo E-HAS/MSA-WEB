@@ -1,0 +1,12 @@
+https://github.com/ojdkbuild/ojdkbuild?tab=readme-ov-file
+-openjdk 17
+
+https://jdk.java.net/java-se-ri/17
+C:\Program Files\Java\openjdk-11.0.2
+
+
+https://velog.io/@korea3611/Spring-BootSpring-Cloud-Netflix-Eureka-%EC%84%9C%EB%B2%84-%EB%A7%8C%EB%93%A4%EA%B8%B0-MSA1
+https://velog.io/@korea3611/Spring-Boot-Spring-Cloud-Gateway-Eureka-%EC%97%B0%EB%8F%99%ED%95%98%EA%B8%B0-MSA4
+
+https://dlibs.tistory.com/20
+https://velog.io/@sodliersung/Eureka-Server-Eureka-Client
