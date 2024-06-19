@@ -29,11 +29,11 @@ dependencies {
 	//annotationProcessor 'org.projectlombok:lombok'
 	//testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 	/*
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 	implementation "com.github.jasync-sql:jasync-r2dbc-mysql:2.0.8"
-	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
 	testImplementation 'io.projectreactor:reactor-test'

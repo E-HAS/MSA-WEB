@@ -10,3 +10,8 @@ https://velog.io/@korea3611/Spring-Boot-Spring-Cloud-Gateway-Eureka-%EC%97%B0%EB
 
 https://dlibs.tistory.com/20
 https://velog.io/@sodliersung/Eureka-Server-Eureka-Client
+https://assu10.github.io/dev/2020/12/05/spring-cloud-eureka-configuration/
+
+https://github.com/joneconsulting/msa_with_spring_cloud.git
+https://authentication.tistory.com/24
+https://wellbell.tistory.com/230
