@@ -1,13 +1,14 @@
-package com.ehas.center;
+package com.ehas.centerGateway.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-
-
+/*
+@Configuration
 @EnableWebSecurity
-public class CenterWebConfig{
+public class GatewayConfig{
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -15,7 +16,6 @@ public class CenterWebConfig{
     	 .csrf()
          .disable()
          .authorizeRequests()
-         .antMatchers("/eureka/**").permitAll()
          .antMatchers("/apps/**").permitAll()
          .anyRequest().authenticated()
          .and()
@@ -24,3 +24,4 @@ public class CenterWebConfig{
      return httpSecurity.build();
     }
 }
+*/

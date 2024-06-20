@@ -15,3 +15,5 @@ https://assu10.github.io/dev/2020/12/05/spring-cloud-eureka-configuration/
 https://github.com/joneconsulting/msa_with_spring_cloud.git
 https://authentication.tistory.com/24
 https://wellbell.tistory.com/230
+
+https://develop-yyg.tistory.com/5
