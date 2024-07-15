@@ -24,3 +24,4 @@ public class CenterWebConfig{
      return httpSecurity.build();
     }
 }
+

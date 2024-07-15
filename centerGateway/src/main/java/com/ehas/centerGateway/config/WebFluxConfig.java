@@ -1,6 +1,5 @@
-package com.ehas.center;
+package com.ehas.centerGateway.config;
 
-/*
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -9,6 +8,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 
+/*
 @Configuration
 @EnableWebFlux
 @EnableWebFluxSecurity
