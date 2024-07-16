@@ -1,0 +1,35 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: AUTH-SERVICE
+  main:
+    web-application-type: reactive
+  datasource:
+    url: jdbc:mariadb://127.0.0.1:3307/SPRING_DB?characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: QWas!@34
+    driver-class-name: org.mariadb.jdbc.Driver
+  r2dbc:
+    url: r2dbc:pool:mariadb://127.0.0.1:3307/SPRING_DB
+    username: root
+    password: QWas!@34
+  security:
+    user:
+      name: root
+      password: QWas1234
+
+
+eureka:
+  instance:
+    instance-id: ${spring.application.instance_id:${random.value}}:${server.port}
+    lease-renewal-interval-in-seconds: 3
+    lease-expiration-duration-in-seconds: 10
+  client:
+    register-with-eureka: true
+    fetch-registry:       true
+    disable-delta:        true
+    registry-fetch-interval-seconds: 5
+    service-url.defaultZone:         http://root:QWas1234@localhost:8761/eureka
+
