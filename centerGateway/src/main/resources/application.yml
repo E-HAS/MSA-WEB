@@ -20,13 +20,13 @@ spring:
             preLogger   : true
             postLogger  : true
       routes:
-        - id : CMS-SERVICE
-          #url : lb://CMS-SERVICE
-          uri : http://root:QWas1234@127.0.0.1:8761/
+        - id : AUTH-SERVICE
+          url : lb://AUTH-SERVICE
+          #uri : http://root:QWas1234@127.0.0.1:8761/
           predicates : 
-            - Path=/cms/**
+            - Path=/auth/**
           filters:
-            - RewritePath=/cms/(?<segment>.*), /$\{segment}
+            - RewritePath=/auth/(?<segment>.*), /$\{segment}
             - CustomFilter
 
 

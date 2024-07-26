@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name ="User")
 @JsonIgnoreProperties({"uid","userType","userId","userName","userPassword","roles"})
-public class User implements UserDetails{
+public class UserEntity implements UserDetails{
     @Id
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private String uid;

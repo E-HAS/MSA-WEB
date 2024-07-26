@@ -10,6 +10,7 @@ import com.ehas.auth.reactive.ReactiveUserRepository;
 
 import lombok.RequiredArgsConstructor;
 
+/*
 @RequiredArgsConstructor
 @Service
 @Primary
@@ -22,4 +23,4 @@ public class CustomUserDetailService implements UserDetailsService {
         return userRepositoryRx.findByUserId(username)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
     }
-}
+}*/

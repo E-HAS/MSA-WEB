@@ -20,16 +20,23 @@ spring:
       name: root
       password: QWas1234
 
-
+#https://subji.github.io/posts/2020/08/11/springcloudeurekaregistry#google_vignette
 eureka:
   instance:
     instance-id: ${spring.application.instance_id:${random.value}}:${server.port}
     lease-renewal-interval-in-seconds: 3
     lease-expiration-duration-in-seconds: 10
+    enable-self-preservation: true
   client:
     register-with-eureka: true
     fetch-registry:       true
     disable-delta:        true
     registry-fetch-interval-seconds: 5
     service-url.defaultZone:         http://root:QWas1234@localhost:8761/eureka
+    
+    
+jwt:
+  header : X-AUTH-TOKEN
+  secretkey : secretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkey
+  expiration : 600000  
 
