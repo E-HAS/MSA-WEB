@@ -19,6 +19,6 @@ public class UserServiceImpt {
 	}
 	
 	public UserEntity findByRxUserId(String id){
-		return UserRepoRx.findByRxUserId(id);
+		return UserRepoRx.findByUserId(id);
 	}
 }

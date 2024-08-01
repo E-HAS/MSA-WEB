@@ -6,14 +6,20 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import com.ehas.auth.service.CustomReactiveUserDetailsService;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
@@ -25,8 +31,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
+	private final CustomReactiveUserDetailsService customReactiveUserDetailsService;
     private static final String AUTHORITIES_KEY = "permissions";
 
     @Value("${jwt.secretkey}")
@@ -69,13 +77,18 @@ public class JwtTokenProvider {
         Claims claims = Jwts.parserBuilder().setSigningKey(this.secretKey).build().parseClaimsJws(token).getBody();
 
         Object authoritiesClaim = claims.get(AUTHORITIES_KEY);
+        System.out.println(">>>> getAuthoritiesClaim :"+authoritiesClaim);
 
         Collection<? extends GrantedAuthority> authorities = authoritiesClaim == null ? AuthorityUtils.NO_AUTHORITIES
                 : AuthorityUtils.commaSeparatedStringToAuthorityList(authoritiesClaim.toString());
 
-        User principal = new User(claims.getSubject(), "", authorities);
+        System.out.println(">>>> getSubject :"+claims.getSubject());
+        System.out.println(">>>> getAuthorities :"+authorities);
+        
+        //User principal = new User(claims.getSubject(), "", authorities);
+        Mono<UserDetails> ud = customReactiveUserDetailsService.findByUsername(claims.getSubject());
 
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        return new UsernamePasswordAuthenticationToken(ud, token, authorities);
     }
 
     public boolean validateToken(String token) {

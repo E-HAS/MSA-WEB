@@ -6,11 +6,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,6 +28,9 @@ public class JwtTokenAuthenticationFilter implements WebFilter  {
         if(StringUtils.hasText(token) && this.jwtTokenProvider.validateToken(token)) {
             Authentication authentication = this.jwtTokenProvider.getAuthentication(token);
             System.out.println(">>>> filter ing " + authentication.toString());
+            Context c = ReactiveSecurityContextHolder.withAuthentication(authentication);
+            System.out.println(">>>> filter ing " + c.toString());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
             return chain.filter(exchange)
                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
         }

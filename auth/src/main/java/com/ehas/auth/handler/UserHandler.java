@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 public class UserHandler {
 
     //@PreAuthorize("hasPermission('UserHandler:getUser', '')")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('USER')")
     public Mono<ServerResponse> getUser(ServerRequest request) {
     	System.out.println(">>>> getUser before");
     	log.debug(">>>> getUser before");

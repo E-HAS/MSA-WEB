@@ -49,8 +49,11 @@ public class UserEntity implements UserDetails{
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+    	System.out.println(">>>> getAuthorities1");
     	List<String> lists = new ArrayList<String>();
     	this.roles.forEach(v -> { lists.add(v.getUserRole());});
+    	
+    	//return List.of(new SimpleGantedAuthority(role.name()));
     	
         return  lists
         		.stream()

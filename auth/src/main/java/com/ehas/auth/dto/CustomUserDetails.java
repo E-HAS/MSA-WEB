@@ -62,6 +62,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+    	System.out.println(">>>> getAuthorities2");
         List<GrantedAuthority> authorities = new ArrayList<>();
         permissions.stream().forEach(permission -> {
             authorities.add(new SimpleGrantedAuthority(permission));
