@@ -18,8 +18,8 @@ public interface ReactiveUserRepository extends R2dbcRepository<UserEntity, Stri
 	@Query("SELECT * FROM USER WHERE userId = :userId")
 	Optional<UserEntity> findByOpUserId(String userId);
 	
-	@Query("SELECT * FROM USER WHERE userId = :userId")
-	Mono<UserEntity> findByRxUserId(String userId);
+	@Query("SELECT * FROM USER WHERE user_id = :user_id")
+	Mono<UserEntity> findByRxUserId(String user_id);
 	
 	@Query("SELECT * FROM USER WHERE userId = :userId")
 	UserEntity findByUserId(String userId);

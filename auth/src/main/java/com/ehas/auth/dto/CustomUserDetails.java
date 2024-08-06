@@ -3,6 +3,7 @@ package com.ehas.auth.dto;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -62,12 +63,14 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-    	System.out.println(">>>> getAuthorities2");
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        permissions.stream().forEach(permission -> {
-            authorities.add(new SimpleGrantedAuthority(permission));
-        });
-        return authorities;
+    	System.out.println(">>>> Custom GetAuthorities");
+    	List<String> lists = new ArrayList<String>();
+    	this.permissions.forEach(v -> { lists.add(v);});
+    	
+        return  lists
+        		.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 
     @Override

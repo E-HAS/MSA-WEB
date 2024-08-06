@@ -11,15 +11,15 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import com.ehas.auth.service.CustomReactiveUserDetailsService;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-	private final CustomReactiveUserDetailsService customReactiveUserDetailsService;
+	private final ReactiveUserDetailsService reactiveUserDetailsService;
     private static final String AUTHORITIES_KEY = "permissions";
 
     @Value("${jwt.secretkey}")
@@ -86,7 +86,8 @@ public class JwtTokenProvider {
         System.out.println(">>>> getAuthorities :"+authorities);
         
         //User principal = new User(claims.getSubject(), "", authorities);
-        Mono<UserDetails> ud = customReactiveUserDetailsService.findByUsername(claims.getSubject());
+        Mono<UserDetails> ud = reactiveUserDetailsService.findByUsername(claims.getSubject());
+        System.out.println(">>>> UserDetails :"+ud);
 
         return new UsernamePasswordAuthenticationToken(ud, token, authorities);
     }
