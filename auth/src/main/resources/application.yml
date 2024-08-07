@@ -20,6 +20,10 @@ spring:
       name: root
       password: QWas1234
 
+logging:
+  level:
+    org.springframework.r2dbc.core: debug
+    
 #https://subji.github.io/posts/2020/08/11/springcloudeurekaregistry#google_vignette
 eureka:
   instance:

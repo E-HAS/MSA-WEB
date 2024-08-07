@@ -7,7 +7,11 @@ import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -35,13 +39,13 @@ public class UserEntity implements UserDetails{
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private String uid;
 
-    @Column(length = 30, nullable = false)
+    @Column(name="user_type",length = 30, nullable = false)
     private Integer userType;
-    @Column(length = 30, nullable = false, unique = true)
+    @Column(name="user_id",length = 30, nullable = false, unique = true)
     private String userId;
-    @Column(length = 30, nullable = false, unique = true)
+    @Column(name="nick_name",length = 30, nullable = false, unique = true)
     private String nickName;
-    @Column(length = 60, nullable = false)
+    @Column(name="user_password",length = 60, nullable = false)
     private String userPassword;
     
     @Transient

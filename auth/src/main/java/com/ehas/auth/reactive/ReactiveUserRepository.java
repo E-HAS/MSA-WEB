@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import com.ehas.auth.entity.UserEntity;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -23,4 +24,5 @@ public interface ReactiveUserRepository extends R2dbcRepository<UserEntity, Stri
 	
 	@Query("SELECT * FROM USER WHERE userId = :userId")
 	UserEntity findByUserId(String userId);
+	
 }

@@ -9,11 +9,20 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.ehas.auth.entity.UserEntity;
+import com.ehas.auth.entity.UserRole;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CustomUserDetails implements UserDetails {
 
     private String username;
@@ -24,9 +33,6 @@ public class CustomUserDetails implements UserDetails {
     private boolean enabled;
 
     private List<String> permissions = new ArrayList<>();
-
-    public CustomUserDetails() {
-    }
 
     public CustomUserDetails(String username) {
         this.username = username;

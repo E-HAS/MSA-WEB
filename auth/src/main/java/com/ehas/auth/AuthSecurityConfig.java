@@ -1,6 +1,7 @@
 package com.ehas.auth;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationContext;
@@ -29,10 +30,12 @@ import com.ehas.auth.entity.UserEntity;
 import com.ehas.auth.jwt.JwtTokenAuthenticationFilter;
 import com.ehas.auth.jwt.JwtTokenProvider;
 import com.ehas.auth.reactive.ReactiveUserRepository;
+import com.ehas.auth.service.UserServiceImpt;
 
 import antlr.collections.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -88,14 +91,20 @@ public class AuthSecurityConfig {
         return new BCryptPasswordEncoder();
     }
     @Bean
-    public ReactiveUserDetailsService reactiveUserDetailsService(ReactiveUserRepository rxUserRepository) {
+    public ReactiveUserDetailsService reactiveUserDetailsService(UserServiceImpt userServiceImpt) {
         return username -> {
-        	System.out.println(">>>> ReactiveUserDetailsService Before Username :"+username);
-            return 		rxUserRepository.findByRxUserId(username)
+        	System.out.println(">>>> ReactiveUserDetailsService ing Username :"+username);
+        	
+        	ArrayList<String> roleList = new ArrayList<String>();
+        	userServiceImpt.findByUserRoleRx(username).map(v->v.getUserRole()) .collectList().subscribe(roleList::addAll);
+        	System.out.println(">>>> ReactiveUserDetailsService ing roleList :"+roleList);
+            return 		userServiceImpt.findByRxUserId(username)
        			 		 .map(user -> org.springframework.security.core.userdetails.User
                          .withUsername(user.getUsername())
                          .password(user.getPassword())
-                         .roles("USER")
+                         .roles(roleList.toArray(String[]::new)
+                        		 //user.getRoles().stream().map(v->v.getUserRole()).toArray(String[]::new)
+                        		 )
                          .build());
         };
     }

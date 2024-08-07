@@ -6,6 +6,8 @@ import java.util.Map;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +29,15 @@ public class UserRestController {
 	private final UserServiceImpt userServiceImpt;
 	
 	private final ReactiveAuthenticationManager reactiveAuthenticationManager;
+	private final ReactiveUserDetailsService reactiveUserDetailsService;
 	private final JwtTokenProvider jwtTokenProvider;
+	
+	
+	@GetMapping("/test")
+	public Mono<UserEntity> test(){
+		//return userServiceImpt.findByIdRxTest("60055614d9df4e1bb7a1cebd9f5a101d").log();
+		return userServiceImpt.findByIdRx("60055614d9df4e1bb7a1cebd9f5a101d").log();
+	}
 	
 	@GetMapping("/create/{id}")
 	public Mono<String> create(@PathVariable String id){
@@ -39,6 +49,10 @@ public class UserRestController {
 		Mono<String> token = reactiveAuthenticationManager.authenticate(authentication)
                 	   .map(jwtTokenProvider::createToken);
 		return token;
+	}
+	@GetMapping("/info/{id}")
+	public Mono<UserDetails> getInfo(@PathVariable String id){
+		return reactiveUserDetailsService.findByUsername(id);
 	}
 	
 	@GetMapping("/user")
