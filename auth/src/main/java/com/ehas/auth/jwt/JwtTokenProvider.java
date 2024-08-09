@@ -71,6 +71,30 @@ public class JwtTokenProvider {
                 .signWith(secretKey)
                 .compact();
     }
+    
+    public Mono<String> createTokenRx(Mono<Authentication> authentication) {
+    	return authentication.flatMap(v->{ 
+    	        String username = v.getName();
+    	        Collection<? extends GrantedAuthority> authorities = v.getAuthorities();
+    	        
+    	        Claims claims = Jwts.claims().setSubject(username);
+    	        if (authorities != null) {
+    	            claims.put(AUTHORITIES_KEY
+    	                    , authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
+    	        }
+    	        Long expirationTimeLong = Long.parseLong(expirationTime);
+    	        final Date createdDate = new Date();
+    	        final Date expirationDate = new Date(createdDate.getTime() + expirationTimeLong);
+    	        
+    	        return Mono.just(Jwts.builder()
+		                .setClaims(claims)
+		                .setSubject(username)
+		                .setIssuedAt(createdDate)
+		                .setExpiration(expirationDate)
+		                .signWith(secretKey)
+		                .compact());
+    	});
+    }
 
 
     public Authentication getAuthentication(String token) {

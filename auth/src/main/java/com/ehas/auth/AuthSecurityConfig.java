@@ -2,7 +2,6 @@ package com.ehas.auth;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.PermissionEvaluator;
-import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
@@ -19,23 +17,17 @@ import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 
-import com.ehas.auth.dto.CustomUserDetails;
-import com.ehas.auth.entity.UserEntity;
 import com.ehas.auth.jwt.JwtTokenAuthenticationFilter;
 import com.ehas.auth.jwt.JwtTokenProvider;
-import com.ehas.auth.reactive.ReactiveUserRepository;
 import com.ehas.auth.service.UserServiceImpt;
 
-import antlr.collections.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -52,8 +44,10 @@ public class AuthSecurityConfig {
     public SecurityWebFilterChain filterChain(ServerHttpSecurity httpSecurity
     										 ,ReactiveAuthenticationManager reactiveAuthenticationManager
     										 ,JwtTokenProvider jwtTokenProvider) throws Exception {
-    	//DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-    	//expressionHandler.setPermissionEvaluator(myPermissionEvaluator());
+    	 //DefaultMethodSecurityExpressionHandler defaultWebSecurityExpressionHandler = this.applicationContext.getBean(DefaultMethodSecurityExpressionHandler.class);
+    	 //defaultWebSecurityExpressionHandler.setPermissionEvaluator(myPermissionEvaluator());
+    	 //DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+    	 //expressionHandler.setPermissionEvaluator(myPermissionEvaluator());
         
     	 httpSecurity
     	 .exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec
@@ -96,8 +90,11 @@ public class AuthSecurityConfig {
         	System.out.println(">>>> ReactiveUserDetailsService ing Username :"+username);
         	
         	ArrayList<String> roleList = new ArrayList<String>();
-        	userServiceImpt.findByUserRoleRx(username).map(v->v.getUserRole()) .collectList().subscribe(roleList::addAll);
+        	userServiceImpt.findByUserRoleRx(username).map(v->v.getUserRole())
+        													.collectList().log()
+        													.subscribe(roleList::addAll);      	
         	System.out.println(">>>> ReactiveUserDetailsService ing roleList :"+roleList);
+        	
             return 		userServiceImpt.findByRxUserId(username)
        			 		 .map(user -> org.springframework.security.core.userdetails.User
                          .withUsername(user.getUsername())
@@ -108,41 +105,6 @@ public class AuthSecurityConfig {
                          .build());
         };
     }
-    /*
-    @Bean
-    public ReactiveUserDetailsService reactiveUserDetailsService(ReactiveUserRepository rxUserRepository) {
-    	return new ReactiveUserDetailsService() {
-    		@Override
-    		public Mono<UserDetails> findByUsername(String username) {
-    			System.out.println(">>>> ReactiveUserDetailsService Before Username :"+username);
-    			Mono<UserEntity> userEntity = rxUserRepository.findByRxUserId(username).log();
-    			if(userEntity == null)
-    			{
-    				return Mono.empty();
-    			}    
-    	    	CustomUserDetails userDetails = new CustomUserDetails();
-    			
-    	    	userEntity.subscribe(
-    	    	v->{
-    	    		userDetails.setUsername(v.getUsername());
-    	    		userDetails.setPassword(v.getPassword());
-    	    		userDetails.setPermissions(v.getRoles().stream().map(i->i.getUserRole()).collect(Collectors.toList()));
-    	    		
-    	    		System.out.println(">>>> ReactiveUserDetailsService Ing Username :"+v.getUsername());
-    	    		System.out.println(">>>> ReactiveUserDetailsService Ing getPassword :"+v.getPassword());
-    	    		}
-    	    	);
-    	    	System.out.println(">>>> ReactiveUserDetailsService Username :"+userDetails.getUsername());
-    	    	System.out.println(">>>> ReactiveUserDetailsService Password :"+userDetails.getPassword());
-    	    	System.out.println(">>>> ReactiveUserDetailsService Permissions :"+userDetails.getPermissions());
-    	        return Mono.just(userDetails);
-    		}
-    	};
-    	// return username ->  rxUserRepository.findByRxUserId(username).orElseThrow(()-> new UsernameNotFoundException("USER NOT FOUND"));
-    }
-    */
-    
-    
     
     @Bean
     public ReactiveAuthenticationManager reactiveAuthenticationManager(ReactiveUserDetailsService userDetailsService,
