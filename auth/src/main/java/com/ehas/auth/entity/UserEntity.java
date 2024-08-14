@@ -18,7 +18,7 @@ import javax.persistence.Transient;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -50,6 +50,8 @@ public class UserEntity implements UserDetails{
     
     @Transient
     private List<UserRole> roles = new ArrayList<UserRole>();
+    @Transient
+    private String state; // Y : 정상 회원 , L : 잠긴 계정, P : 패스워드 만료, A : 계정 만료
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -75,24 +77,38 @@ public class UserEntity implements UserDetails{
 		return this.userPassword;
 	}
 
+	// 계정 만료
     @Override
     public boolean isAccountNonExpired() {
+        if(StringUtils.startsWithIgnoreCase(state, "A")){
+            return false;
+        }
         return true;
     }
 
+    // 잠긴 계정
     @Override
     public boolean isAccountNonLocked() {
+        if(StringUtils.startsWithIgnoreCase(state, "L")){
+            return false;
+        }
         return true;
     }
 
+    // 패스워드 만료
     @Override
     public boolean isCredentialsNonExpired() {
+        if(StringUtils.startsWithIgnoreCase(state, "P")){
+            return false;
+        }
         return true;
     }
-
     @Override
     public boolean isEnabled() {
-        return true;
+        if(isCredentialsNonExpired() && isAccountNonExpired() && isAccountNonLocked()){
+            return true;
+        }
+        return false;
     }
 
 }

@@ -2,10 +2,13 @@ package com.ehas.auth.jwt;
 
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -35,7 +38,7 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
 
 	private final ReactiveUserDetailsService reactiveUserDetailsService;
-    private static final String AUTHORITIES_KEY = "permissions";
+    private static final String PERMISSIONS_KEY = "permissions";
 
     @Value("${jwt.secretkey}")
     private String secret;
@@ -56,7 +59,7 @@ public class JwtTokenProvider {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Claims claims = Jwts.claims().setSubject(username);
         if (authorities != null) {
-            claims.put(AUTHORITIES_KEY
+            claims.put(PERMISSIONS_KEY
                     , authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
         }
 
@@ -71,36 +74,11 @@ public class JwtTokenProvider {
                 .signWith(secretKey)
                 .compact();
     }
-    
-    public Mono<String> createTokenRx(Mono<Authentication> authentication) {
-    	return authentication.flatMap(v->{ 
-    	        String username = v.getName();
-    	        Collection<? extends GrantedAuthority> authorities = v.getAuthorities();
-    	        
-    	        Claims claims = Jwts.claims().setSubject(username);
-    	        if (authorities != null) {
-    	            claims.put(AUTHORITIES_KEY
-    	                    , authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
-    	        }
-    	        Long expirationTimeLong = Long.parseLong(expirationTime);
-    	        final Date createdDate = new Date();
-    	        final Date expirationDate = new Date(createdDate.getTime() + expirationTimeLong);
-    	        
-    	        return Mono.just(Jwts.builder()
-		                .setClaims(claims)
-		                .setSubject(username)
-		                .setIssuedAt(createdDate)
-		                .setExpiration(expirationDate)
-		                .signWith(secretKey)
-		                .compact());
-    	});
-    }
-
 
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parserBuilder().setSigningKey(this.secretKey).build().parseClaimsJws(token).getBody();
 
-        Object authoritiesClaim = claims.get(AUTHORITIES_KEY);
+        Object authoritiesClaim = claims.get(PERMISSIONS_KEY);
         System.out.println(">>>> getAuthoritiesClaim :"+authoritiesClaim);
 
         Collection<? extends GrantedAuthority> authorities = authoritiesClaim == null ? AuthorityUtils.NO_AUTHORITIES
@@ -116,18 +94,28 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(ud, token, authorities);
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token) throws Exception {
         try {
             Jws<Claims> claims = Jwts
                     .parserBuilder().setSigningKey(this.secretKey).build()
                     .parseClaimsJws(token);
-            //  parseClaimsJws will check expiration date. No need do here.
             log.info("expiration date: {}", claims.getBody().getExpiration());
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            log.info("Invalid JWT token: {}", e.getMessage());
-            log.trace("Invalid JWT token trace.", e);
+        } catch (SignatureException e) {
+            log.error("Invalid JWT signature: {}", e.getMessage());
+            throw new Exception("Invalid JWT signature: "+e.getMessage());
+        } catch (ExpiredJwtException e) {
+            log.error("JWT token is expired: {}", e.getMessage());
+            throw new Exception("JWT token is expired: "+e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.error("JWT token is unsupported: {}", e.getMessage());
+            throw new Exception("JWT token is unsupported: "+e.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.error("JWT claims string is empty: {}", e.getMessage());
+            throw new Exception("JWT claims string is empty: "+e.getMessage());
+        }catch (JwtException e){
+            log.error("Invalid JWT token: {}", e.getMessage());
+            throw new Exception("Invalid JWT token: "+e.getMessage());
         }
-        return false;
     }
 }

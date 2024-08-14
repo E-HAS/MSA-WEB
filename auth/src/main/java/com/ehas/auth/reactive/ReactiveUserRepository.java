@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface ReactiveUserRepository extends R2dbcRepository<UserEntity, String>{
 	@Query("SELECT * FROM USER WHERE uid = :uid")
-	Mono<UserEntity> findByIdRx(String uid);
+	Mono<UserEntity> findByUidRx(String uid);
 	
 	@Query("SELECT * FROM USER WHERE userId = :userId")
 	Optional<UserEntity> findByOpUserId(String userId);

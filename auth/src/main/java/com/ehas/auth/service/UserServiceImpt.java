@@ -18,8 +18,8 @@ public class UserServiceImpt {
 	private final ReactiveUserRepository UserRepoRx;
 	private final ReactiveUserRoleRepository UserRoleRepoRx;
 	
-	public Mono<UserEntity> findByIdRx(String uid){
-		return UserRepoRx.findByIdRx(uid);
+	public Mono<UserEntity> findByUidRx(String uid){
+		return UserRepoRx.findByUidRx(uid);
 	}
 	
 	public Mono<UserEntity> findByRxUserId(String id){

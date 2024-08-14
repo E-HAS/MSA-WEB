@@ -75,7 +75,7 @@ public class AuthSecurityConfig {
                  .pathMatchers("/cms/**").hasRole("ADMIN")
                  .anyExchange().authenticated()
          )
-         .addFilterAt(new JwtTokenAuthenticationFilter(jwtTokenProvider), SecurityWebFiltersOrder.HTTP_BASIC);
+         .addFilterAt(new JwtTokenAuthenticationFilter(jwtTokenProvider), SecurityWebFiltersOrder.AUTHENTICATION);
          
      return httpSecurity.build();
     }

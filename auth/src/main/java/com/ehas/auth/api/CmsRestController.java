@@ -21,7 +21,7 @@ public class CmsRestController {
 	@GetMapping("/user")
 	public Mono<UserEntity> getUser(){
 		String uid = "60055614d9df4e1bb7a1cebd9f5a101d";
-		Mono<UserEntity> user = userServiceImpt.findByIdRx(uid);
+		Mono<UserEntity> user = userServiceImpt.findByUidRx(uid);
 		return user;
 	}
 

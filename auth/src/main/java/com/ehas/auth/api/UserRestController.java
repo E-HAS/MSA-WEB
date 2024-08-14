@@ -1,6 +1,10 @@
 package com.ehas.auth.api;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,14 +15,19 @@ import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ehas.auth.dto.RequestResponseDto;
+import com.ehas.auth.dto.UserDto;
 import com.ehas.auth.entity.UserEntity;
 import com.ehas.auth.handler.UserHandler;
 import com.ehas.auth.jwt.JwtTokenProvider;
 import com.ehas.auth.service.UserServiceImpt;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -36,60 +45,31 @@ public class UserRestController {
 	
 	private final UserHandler userHandler;
 	
-	@GetMapping("/test")
+	@GetMapping("/test") //, produces = "text/event-stream;charset=UTF-8" / MediaType.TEXT_EVENT_STREAM_VALUE  / SseEmitter  단방향
 	//@PreAuthorize("@UserHandler.getTest()")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public Mono<UserEntity> test(){
-		userHandler.getTest();
+		//userHandler.getTest();
 		//return userServiceImpt.findByIdRxTest("60055614d9df4e1bb7a1cebd9f5a101d").log();
-		return userServiceImpt.findByIdRx("60055614d9df4e1bb7a1cebd9f5a101d").log();
+		return userServiceImpt.findByUidRx("60055614d9df4e1bb7a1cebd9f5a101d").log();
 	}
 	
-	@GetMapping("/create/{id}")
-	public Mono<String> create(@PathVariable String id){
-		Mono<String> token =  userServiceImpt.findByIdRx(id)
-												.map(v->{
-													System.out.println(">>>> create ing :"+v.getUsername()+", "+v.getUserPassword());
-													Authentication authentication = new UsernamePasswordAuthenticationToken(v.getUsername(), v.getUserPassword());
-													Authentication auth = (Authentication) reactiveAuthenticationManager.authenticate(authentication).subscribe();
-													return jwtTokenProvider.createToken(auth);
-												}).log();
-		System.out.println(">>>> create ing :"+token.log());
-		return token;
-		
-		/*
-		Mono<UserEntity> entity = userServiceImpt.findByIdRx(id).log();
-		Authentication authentication = new UsernamePasswordAuthenticationToken(entity.subscribe(v->v.getUsername()), entity.subscribe(v->v.getUserPassword()));
-		Mono<String> token = reactiveAuthenticationManager.authenticate(authentication)
-													.map(jwtTokenProvider::createToken);
-		
-		retur`n token;
-		*/
-		
-		/*
-		return userServiceImpt.findByIdRx(id)
-																.map(v-> new UsernamePasswordAuthenticationToken(v.getUsername(), v.getUserPassword()))
-																.map(reactiveAuthenticationManager::authenticate)
-																.map(jwtTokenProvider::createTokenRx)
-																.flatMap(v -> v)
-																.doOnNext(System.out::println).log();
-																//.subscribe(v-> v.subscribe(this::print));*/
-		//Mono<UserEntity> entity = userServiceImpt.findByIdRx(id).log();
-        //Authentication authentication = new UsernamePasswordAuthenticationToken(entity.subscribe(v->v.getUsername()), entity.subscribe(v->v.getUserPassword()));
-        //System.out.println(">>>> find Authentication : "+authentication);
-		//Mono<String> token = reactiveAuthenticationManager.authenticate(authentication)
-        //        	   .map(jwtTokenProvider::createToken);
+	@PostMapping("/create")
+	public Mono<RequestResponseDto> create(@RequestBody UserDto user){
+		System.out.println(">>>> create ing :"+user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUserId(), user.getUserPassword());
+	    return reactiveAuthenticationManager.authenticate(authentication)
+                	   .map(jwtTokenProvider::createToken)
+                	   .map(token-> RequestResponseDto.builder()
+								.status("200")
+								.message("Success")
+								.data( Arrays.asList( Map.of("token",token) ))
+								.build())
+                	   .onErrorReturn(
+                		   RequestResponseDto.builder()
+							.status("400")
+							.message("Bad Request")
+							.build())
+                	   .log();
 	}
-	@GetMapping("/info/{id}")
-	public Mono<UserDetails> getInfo(@PathVariable String id){
-		return reactiveUserDetailsService.findByUsername(id);
-	}
-	
-	@GetMapping("/user")
-	public Mono<UserEntity> getUser(){
-		String uid = "60055614d9df4e1bb7a1cebd9f5a101d";
-		Mono<UserEntity> user = userServiceImpt.findByIdRx(uid).delayElement(Duration.ofSeconds(1)).log();
-		return user;
-	}
-
 }
