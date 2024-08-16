@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,7 +32,9 @@ import com.ehas.auth.service.UserServiceImpt;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 @Slf4j
 @RestController
@@ -40,10 +44,11 @@ public class UserRestController {
 	private final UserServiceImpt userServiceImpt;
 	
 	private final ReactiveAuthenticationManager reactiveAuthenticationManager;
-	private final ReactiveUserDetailsService reactiveUserDetailsService;
 	private final JwtTokenProvider jwtTokenProvider;
 	
 	private final UserHandler userHandler;
+	
+	private final Sinks.Many<UserDto> userSink = Sinks.many().multicast().onBackpressureBuffer();
 	
 	@GetMapping("/test") //, produces = "text/event-stream;charset=UTF-8" / MediaType.TEXT_EVENT_STREAM_VALUE  / SseEmitter  단방향
 	//@PreAuthorize("@UserHandler.getTest()")
@@ -52,6 +57,18 @@ public class UserRestController {
 		//userHandler.getTest();
 		//return userServiceImpt.findByIdRxTest("60055614d9df4e1bb7a1cebd9f5a101d").log();
 		return userServiceImpt.findByUidRx("60055614d9df4e1bb7a1cebd9f5a101d").log();
+	}
+	
+	@GetMapping(path = "/users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+	public Flux<ServerSentEvent<UserDto>> getUsers(){
+		return userSink.asFlux().map(u -> ServerSentEvent.builder(u).build()).doOnCancel(()->{
+			userSink.asFlux().blockLast();
+		});
+	}
+	
+	@PostMapping("/users")
+	public Mono<UserDto> postUsers() {
+		return Mono.just(UserDto.builder().userName("name").userPassword("password").build()).doOnNext(u -> userSink.tryEmitNext(u));
 	}
 	
 	@PostMapping("/create")
