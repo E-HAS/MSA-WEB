@@ -3,7 +3,9 @@ package com.ehas.auth.jwt;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -37,7 +39,10 @@ public class JwtTokenAuthenticationFilter implements WebFilter  {
 			    
 			}
 		} catch (Exception e) {
-			return chain.filter(exchange);
+			ServerHttpResponse response = exchange.getResponse();
+			response.setStatusCode(HttpStatus.UNAUTHORIZED);
+			
+			return response.setComplete();
 		}
         return chain.filter(exchange);
     }

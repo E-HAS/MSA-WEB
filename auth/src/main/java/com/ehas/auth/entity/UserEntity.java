@@ -1,5 +1,5 @@
 package com.ehas.auth.entity;
-
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -7,20 +7,16 @@ import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,7 +29,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Table(name ="User")
-@JsonIgnoreProperties({"uid","userType","userId","userName","userPassword","roles"})
 public class UserEntity implements UserDetails{
     @Id
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,10 +43,24 @@ public class UserEntity implements UserDetails{
     @Column(name="user_password",length = 60, nullable = false)
     private String userPassword;
     
+    @Column(name="user_state",length = 1 , nullable = false)
+    private String userState; // Y : 정상 회원 , L : 잠긴 계정, P : 패스워드 만료, A : 계정 만료
+    
+    @Column(name="registered_date")
+    @CreatedDate
+    private LocalDateTime registeredDate;
+    
+    @Column(name="updated_date")
+    @LastModifiedDate
+    private LocalDateTime updatedDate;
+    
+    @Column(name="deleted_date")
+    private LocalDateTime deletedDate;
+    @Column(name="password_updated_date")
+    private LocalDateTime passwordUpdatedDate;
+    
     @Transient
     private List<UserRole> roles = new ArrayList<UserRole>();
-    @Transient
-    private String state; // Y : 정상 회원 , L : 잠긴 계정, P : 패스워드 만료, A : 계정 만료
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -80,7 +89,7 @@ public class UserEntity implements UserDetails{
 	// 계정 만료
     @Override
     public boolean isAccountNonExpired() {
-        if(StringUtils.startsWithIgnoreCase(state, "A")){
+        if(StringUtils.startsWithIgnoreCase(userState, "A")){
             return false;
         }
         return true;
@@ -89,7 +98,7 @@ public class UserEntity implements UserDetails{
     // 잠긴 계정
     @Override
     public boolean isAccountNonLocked() {
-        if(StringUtils.startsWithIgnoreCase(state, "L")){
+        if(StringUtils.startsWithIgnoreCase(userState, "L")){
             return false;
         }
         return true;
@@ -98,7 +107,7 @@ public class UserEntity implements UserDetails{
     // 패스워드 만료
     @Override
     public boolean isCredentialsNonExpired() {
-        if(StringUtils.startsWithIgnoreCase(state, "P")){
+        if(StringUtils.startsWithIgnoreCase(userState, "P")){
             return false;
         }
         return true;
