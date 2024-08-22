@@ -31,7 +31,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+	//implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	
 	/* JWT */
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

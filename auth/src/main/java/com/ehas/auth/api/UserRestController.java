@@ -59,19 +59,32 @@ public class UserRestController {
 		return userServiceImpt.findByUidRx("60055614d9df4e1bb7a1cebd9f5a101d").log();
 	}
 	
-	@GetMapping(path = "/users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-	public Flux<ServerSentEvent<UserDto>> getUsers(){
+	@GetMapping(path = "/sink/users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+	public Flux<ServerSentEvent<UserDto>> getSinkUsers(){
 		return userSink.asFlux().map(u -> ServerSentEvent.builder(u).build()).doOnCancel(()->{
 			userSink.asFlux().blockLast();
 		});
 	}
 	
-	@PostMapping("/users")
-	public Mono<UserDto> postUsers() {
+	@PostMapping("/sink/users")
+	public Mono<UserDto> postSinkUsers() {
 		return Mono.just(UserDto.builder().userName("name").userPassword("password").build()).doOnNext(u -> userSink.tryEmitNext(u));
 	}
 	
-	@PostMapping("/create")
+	@PostMapping(path="/user")
+	public Mono<RequestResponseDto> getUsers(@RequestBody UserDto user){
+		System.out.println(">>>> getUserInfo ing :"+user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUserId(), user.getUserPassword());
+        return reactiveAuthenticationManager.authenticate(authentication)
+        		.map(v -> RequestResponseDto.builder()
+						.status("200")
+						.message("Success")
+						.data( Arrays.asList( Map.of("user",v) ))
+						.build());
+	}
+	
+	
+	@PostMapping("/token/create")
 	public Mono<RequestResponseDto> create(@RequestBody UserDto user){
 		System.out.println(">>>> create ing :"+user);
         Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUserId(), user.getUserPassword());

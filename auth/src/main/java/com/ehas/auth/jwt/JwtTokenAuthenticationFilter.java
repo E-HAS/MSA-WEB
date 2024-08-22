@@ -2,6 +2,11 @@ package com.ehas.auth.jwt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
+
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -14,6 +19,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
 
@@ -40,7 +48,7 @@ public class JwtTokenAuthenticationFilter implements WebFilter  {
 			}
 		} catch (Exception e) {
 			ServerHttpResponse response = exchange.getResponse();
-			response.setStatusCode(HttpStatus.UNAUTHORIZED);
+			response.setStatusCode(HttpStatus.BAD_REQUEST);
 			
 			return response.setComplete();
 		}

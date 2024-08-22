@@ -5,14 +5,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +22,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,29 +32,29 @@ public class UserEntity implements UserDetails{
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private String uid;
 
-    @Column(name="user_type",length = 30, nullable = false)
+    @Column(value="user_type")
     private Integer userType;
-    @Column(name="user_id",length = 30, nullable = false, unique = true)
+    @Column(value="user_id")
     private String userId;
-    @Column(name="nick_name",length = 30, nullable = false, unique = true)
+    @Column(value="nick_name")
     private String nickName;
-    @Column(name="user_password",length = 60, nullable = false)
+    @Column(value="user_password")
     private String userPassword;
     
-    @Column(name="user_state",length = 1 , nullable = false)
+    @Column(value="user_state")
     private String userState; // Y : 정상 회원 , L : 잠긴 계정, P : 패스워드 만료, A : 계정 만료
     
-    @Column(name="registered_date")
+    @Column(value="registered_date")
     @CreatedDate
     private LocalDateTime registeredDate;
     
-    @Column(name="updated_date")
+    @Column(value="updated_date")
     @LastModifiedDate
     private LocalDateTime updatedDate;
     
-    @Column(name="deleted_date")
+    @Column(value="deleted_date")
     private LocalDateTime deletedDate;
-    @Column(name="password_updated_date")
+    @Column(value="password_updated_date")
     private LocalDateTime passwordUpdatedDate;
     
     @Transient

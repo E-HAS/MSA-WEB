@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
@@ -54,7 +57,7 @@ public class AuthSecurityConfig {
                  .authenticationEntryPoint((exchange, ex) -> {
                  	System.out.println(">>>> UNAUTHORIZED before");
                      return Mono.fromRunnable(() -> {
-                         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            			exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                      });
                  })
                  .accessDeniedHandler((exchange, denied) -> {
