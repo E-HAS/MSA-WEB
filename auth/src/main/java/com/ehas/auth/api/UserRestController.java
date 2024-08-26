@@ -27,6 +27,7 @@ import com.ehas.auth.dto.UserDto;
 import com.ehas.auth.entity.UserEntity;
 import com.ehas.auth.handler.UserHandler;
 import com.ehas.auth.jwt.JwtTokenProvider;
+import com.ehas.auth.service.KafkaProducerService;
 import com.ehas.auth.service.UserServiceImpt;
 
 import lombok.Data;
@@ -45,6 +46,8 @@ public class UserRestController {
 	
 	private final ReactiveAuthenticationManager reactiveAuthenticationManager;
 	private final JwtTokenProvider jwtTokenProvider;
+	
+	private final KafkaProducerService kafkaProducerService;
 	
 	private final UserHandler userHandler;
 	
@@ -101,5 +104,12 @@ public class UserRestController {
 							.message("Bad Request")
 							.build())
                 	   .log();
+	}
+	
+	
+	@PostMapping("/kafka/{value}")
+	public Mono<Map<String, String>> postValueByKafka(@PathVariable("value") String value){
+		kafkaProducerService.sendMessage(value);
+		return Mono.just(Map.of("send",value));
 	}
 }
