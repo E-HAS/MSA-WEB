@@ -27,13 +27,14 @@ spring:
       name: root
       password: QWas1234
   kafka:
-    bootstrap-servers: 192.168.1.128:9092
+    bootstrap-servers: 175.198.90.224:9092
+      # 192.168.254.16:9092
       #- 192.168.1.128:9092
       #- 172.29.236.188:9092
     consumer:
-      bootstrap-servers: 172.29.236.188:9092
+      #bootstrap-servers: 192.168.254.16:9092
       # bootstrap-servers: 192.168.0.4:9092 #consumer bootstrap servers가 따로 존재하면 설정
-      group-id: testgroup
+      group-id: TestGroup
       # Kafka 서버에 초기 offset이 없거나, 서버에 현재 offset이 더 이상 존재하지 않을 경우 수행할 작업을 설정
       # latest: 가장 최근에 생산된 메시지로 offeset reset
       # earliest: 가장 오래된 메시지로 offeset reset
@@ -44,7 +45,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
-      bootstrap-servers: 172.29.236.188:9092
+      #bootstrap-servers: 192.168.254.16:9092
       # bootstrap-servers: 3.34.97.97:9092 # producer bootstrap servers가 따로 존재하면 설정
       # 데이터를 보낼 때, key/value를 직렬화
       # JSON 데이터를 보낼 것이라면 JsonDeserializer
@@ -76,6 +77,6 @@ jwt:
 
 message:
   topic:
-    name: ProducerTopic
+    name: TestTopic
 
  
