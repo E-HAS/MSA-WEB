@@ -1,14 +1,17 @@
-package com.ehas.auth.service;
+package com.ehas.consumerServer.API;
 
 import java.io.IOException;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Service
-public class KafkaConsumerService {
-    @KafkaListener(topics = "${message.topic.name}", groupId = ConsumerConfig.GROUP_ID_CONFIG)
+public class kafkaConsumerApi {
+    @KafkaListener(
+    		topics = "${message.kafka.consumer.topic.name}"
+    		, groupId = "${message.kafka.consumer.group-id}"
+    		, containerFactory = "kafkaListenerContainerFactory"
+    )
     public void consume(String message) throws IOException {
         System.out.println(String.format("Consumed message : %s", message));
     }

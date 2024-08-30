@@ -1,0 +1,44 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: CONSUMER-SERVICE
+  main:
+    web-application-type: reactive
+  datasource:
+    url: jdbc:mariadb://127.0.0.1:3307/SPRING_DB?characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: QWas!@34
+    driver-class-name: org.mariadb.jdbc.Driver
+  r2dbc:
+    url: r2dbc:pool:mariadb://127.0.0.1:3307/SPRING_DB
+    username: root
+    password: QWas!@34
+  jpa:
+    properties:
+      hibernate:
+        ddl-auto: create
+        show_sql: true         #모든 SQL문을 콘솔로 출력
+        format_sql: true       #JPA 실행쿼리 가독성있게 표현
+        use_sql_comments: true #SQL문 이외에 추가적인 정보 출력
+  security:
+    user:
+      name: root
+      password: QWas1234
+logging:
+  level:
+    org.springframework.r2dbc.core: debug
+
+message:
+  kafka:
+    consumer:
+      bootstrap-servers: 175.198.90.224:9092
+      group-id: consumerGroup
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      topic:
+        name: TestTopic
+
+ 
