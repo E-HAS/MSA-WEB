@@ -2,18 +2,18 @@ package com.ehas.auth;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -23,6 +23,7 @@ import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 
 import com.ehas.auth.jwt.JwtTokenAuthenticationFilter;
@@ -42,6 +43,9 @@ import reactor.core.publisher.Mono;
 @EnableReactiveMethodSecurity
 public class AuthSecurityConfig {
 	private final ApplicationContext applicationContext;
+	
+	@Value("${message.security.allow-ip-list}")
+	private List<String> allowIpList;
 	
     @Bean
     public SecurityWebFilterChain filterChain(ServerHttpSecurity httpSecurity
@@ -74,6 +78,7 @@ public class AuthSecurityConfig {
          .securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) // stateless 설정
          .authorizeExchange(exchange -> exchange
                  .pathMatchers(HttpMethod.OPTIONS).permitAll()
+                 .pathMatchers("/auth/**").access(this::checkAllowIp)
                  .pathMatchers("/public/**").permitAll()
                  .pathMatchers("/cms/**").hasRole("ADMIN")
                  .anyExchange().authenticated()
@@ -81,6 +86,18 @@ public class AuthSecurityConfig {
          .addFilterAt(new JwtTokenAuthenticationFilter(jwtTokenProvider), SecurityWebFiltersOrder.AUTHENTICATION);
          
      return httpSecurity.build();
+    }
+    
+    private Mono<AuthorizationDecision> checkAllowIp(Mono<Authentication> authentication, AuthorizationContext context) {
+        String accessIp = context.getExchange().getRequest().getRemoteAddress().getAddress().toString().replace("/", "");
+        return Mono.just(new AuthorizationDecision(
+                (allowIpList.contains(accessIp)) ? true : false));
+        /*
+        return authentication.map((v) -> new AuthorizationDecision(v.isAuthenticated()))
+                .defaultIfEmpty(new AuthorizationDecision(
+                        (allowIpList.contains(accessIp)) ? true : false
+                )).log();
+        */
     }
     
     @Bean

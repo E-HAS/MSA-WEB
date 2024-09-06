@@ -79,17 +79,12 @@ public class JwtTokenProvider {
         Claims claims = Jwts.parserBuilder().setSigningKey(this.secretKey).build().parseClaimsJws(token).getBody();
 
         Object authoritiesClaim = claims.get(PERMISSIONS_KEY);
-        System.out.println(">>>> getAuthoritiesClaim :"+authoritiesClaim);
 
         Collection<? extends GrantedAuthority> authorities = authoritiesClaim == null ? AuthorityUtils.NO_AUTHORITIES
                 : AuthorityUtils.commaSeparatedStringToAuthorityList(authoritiesClaim.toString());
-
-        System.out.println(">>>> getSubject :"+claims.getSubject());
-        System.out.println(">>>> getAuthorities :"+authorities);
         
         //User principal = new User(claims.getSubject(), "", authorities);
         Mono<UserDetails> ud = reactiveUserDetailsService.findByUsername(claims.getSubject());
-        System.out.println(">>>> UserDetails :"+ud);
 
         return new UsernamePasswordAuthenticationToken(ud, token, authorities);
     }
