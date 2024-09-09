@@ -2,6 +2,7 @@ package com.ehas.center.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,5 +32,6 @@ public class AppsController {
 		instances.forEach(it -> log.info("FIND INSTANCE EACH : id={}, port={}", it.getServiceId(), it.getPort()));  
 		
 		return instances;  
-	}  
+	}
+	
 }
