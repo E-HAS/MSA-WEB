@@ -10,8 +10,13 @@ spring:
       server:
         native:
           search-locations: file:///E:/Serivce-Config-Repo/Service-Config-Repo
+          
 management:
   endpoints:
     web:
       exposure:
-        include: refresh, health, beans
+        #include: refresh, health, beans
+        include: '*'
+  web: #HTTP 요청의 처리 시간을 자동으로 측정하여 Metric으로 수집하도록 지정
+    server:
+      auto-time-requests: true

@@ -15,8 +15,9 @@ public class CenterWebConfig{
     	 .csrf()
          .disable()
          .authorizeRequests()
-         .antMatchers("/eureka/**").permitAll()
-         .antMatchers("/apps/**").permitAll()
+         .antMatchers("/eureka/**").authenticated()
+         .antMatchers("/api/**").permitAll()
+         .antMatchers("/actuator/**").permitAll()
          .anyRequest().authenticated()
          .and()
          .httpBasic();

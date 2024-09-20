@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/apps/api")
+@RequestMapping("/api/app/")
 @RequiredArgsConstructor
 public class AppsController {
 	private DiscoveryClient discoveryClient;  
