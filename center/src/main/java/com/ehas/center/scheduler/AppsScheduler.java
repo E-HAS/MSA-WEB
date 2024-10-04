@@ -25,8 +25,8 @@ public class AppsScheduler {
 	
 	@Scheduled(cron = "0/1 * * * * ?")
     public void insertPerformanceMonitoring() {
-		log.info("START >>>> PerformanceMonitoring");
-		requestPerformanceMonitoring("http://127.0.0.1:8761/actuator/metrics/system.cpu.usage");
+		//log.info("START >>>> PerformanceMonitoring");
+		//requestPerformanceMonitoring("http://127.0.0.1:8761/actuator/metrics/system.cpu.usage");
 		/*
 		List<String> services = this.discoveryClient.getServices();
 		
@@ -72,7 +72,7 @@ public class AppsScheduler {
 			List<Map<String,Object>> measurements = (List<Map<String, Object>>) body.get("measurements");
 			String value = measurements.get(0).get("value").toString();
 			
-			log.info("ing >>>> Service Body : "+body.get("measurements"));
+			log.debug("ing >>>> Service Body : "+body.get("measurements"));
 		}
     }
 }

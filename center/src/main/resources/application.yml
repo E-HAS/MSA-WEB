@@ -1,0 +1,35 @@
+server:
+  port: 8761
+spring:
+  application:
+    name: discovery-server
+  profiles:
+    active: native
+  security:
+    user:
+      name: root
+      password: QWas1234
+    
+#  cloud:
+#    config:
+#      server:
+#        native:
+#          search-locations: file:///E:/Serivce-Config-Repo/Service-Config-Repo
+    
+eureka:
+  server:
+    response-cache-update-interval-ms: 5000
+    eviction-interval-timer-in-ms: 10000
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+          
+management:
+  endpoints:
+    web:
+      exposure:
+        #include: refresh, health, beans
+        include: '*'
+  web: #HTTP 요청의 처리 시간을 자동으로 측정하여 Metric으로 수집하도록 지정
+    server:
+      auto-time-requests: true
