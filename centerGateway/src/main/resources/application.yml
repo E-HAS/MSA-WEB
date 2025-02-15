@@ -1,53 +1,7 @@
-server:
-  port: 0
-
-#r2dbc
 spring:
+  profiles:
+    active: default
   application:
-    name: GATEWAY-SERVICE
+    name: gatewayservice
   config:
-    name: GATEWAY-SERVICE
-    import: optional:configserver:http://root:QWas1234@127.0.0.1:8761/
-  main:
-    web-application-type: reactive
-  r2dbc:
-    url: r2dbc:pool:mariadb://127.0.0.1:3307/SPRING_DB
-    username: root
-    password: QWas1234
-  cloud:
-    gateway:
-      default-filters:
-        - name : GlobalFilter
-          args :
-            baseMessage : Spring Cloud Gateway Global Filter
-            preLogger   : true
-            postLogger  : true
-      routes:
-        - id : AUTH-SERVICE
-          uri : lb://AUTH-SERVICE
-          #uri : http://root:QWas1234@127.0.0.1:8761/
-          predicates : 
-            - Path=/auth/**
-          filters:
-            - RewritePath=/auth/(?<segment>.*), /$\{segment}
-            - CustomFilter
-
-
-eureka:
-  instance:
-    instance-id: ${spring.application.instance_id:${random.value}}:${server.port}
-    lease-renewal-interval-in-seconds: 3
-    lease-expiration-duration-in-seconds: 10
-  client:
-    register-with-eureka: true
-    fetch-registry:       true
-    disable-delta:        true
-    registry-fetch-interval-seconds: 5
-    service-url.defaultZone:         http://root:QWas1234@localhost:8761/eureka
-
-#eureka.instance.instance-id=${spring.application.name}:${spring.application.instance_id:${random.value}}
-management:
-  endpoints:
-    web:
-      exposure:
-        include: refresh, health, beans
+    import: optional:configserver:http://127.0.0.1:8000

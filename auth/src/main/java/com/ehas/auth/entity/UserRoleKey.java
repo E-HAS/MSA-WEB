@@ -2,6 +2,8 @@ package com.ehas.auth.entity;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,11 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserRoleKey implements Serializable{
 
     private Integer userType;
     
-    private String userId;
+    private Integer userUid;
     
     private String userRole;
 }

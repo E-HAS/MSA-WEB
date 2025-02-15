@@ -10,7 +10,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.ehas.auth.entity.UserEntity;
-import com.ehas.auth.entity.UserRole;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

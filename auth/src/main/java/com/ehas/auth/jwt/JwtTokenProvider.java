@@ -83,7 +83,6 @@ public class JwtTokenProvider {
         Collection<? extends GrantedAuthority> authorities = authoritiesClaim == null ? AuthorityUtils.NO_AUTHORITIES
                 : AuthorityUtils.commaSeparatedStringToAuthorityList(authoritiesClaim.toString());
         
-        //User principal = new User(claims.getSubject(), "", authorities);
         Mono<UserDetails> ud = reactiveUserDetailsService.findByUsername(claims.getSubject());
 
         return new UsernamePasswordAuthenticationToken(ud, token, authorities);
@@ -94,7 +93,6 @@ public class JwtTokenProvider {
             Jws<Claims> claims = Jwts
                     .parserBuilder().setSigningKey(this.secretKey).build()
                     .parseClaimsJws(token);
-            log.info("expiration date: {}", claims.getBody().getExpiration());
             return true;
         } catch (SignatureException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());

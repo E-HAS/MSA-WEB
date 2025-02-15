@@ -9,14 +9,26 @@ spring:
     config:
       server:
         native:
-          search-locations: file:///E:/Serivce-Config-Repo/Service-Config-Repo
-          
+          search-locations: file:///D:/Serivce-Config-Repo/Service-Config-Repo/
+ 
+eureka:
+  instance:
+    instance-id: ${spring.application.instance_id:${random.value}}:${server.port}
+    lease-renewal-interval-in-seconds: 3
+    lease-expiration-duration-in-seconds: 10
+  client:
+    register-with-eureka: true
+    fetch-registry:       true
+    disable-delta:        true
+    registry-fetch-interval-seconds: 5
+    service-url.defaultZone:         http://root:QWas1234@localhost:8761/eureka
+    
 management:
   endpoints:
     web:
       exposure:
         #include: refresh, health, beans
         include: '*'
-  web: #HTTP 요청의 처리 시간을 자동으로 측정하여 Metric으로 수집하도록 지정
+  web:
     server:
       auto-time-requests: true

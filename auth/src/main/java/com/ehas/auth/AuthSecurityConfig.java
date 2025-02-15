@@ -2,6 +2,7 @@ package com.ehas.auth;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -35,8 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Slf4j
-//@EnableWebFlux
-@EnableWebFluxSecurity // 필터 체인 관리 시작 어노테이션
+@EnableWebFluxSecurity
 //@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @RequiredArgsConstructor
 @Configuration
@@ -51,11 +51,6 @@ public class AuthSecurityConfig {
     public SecurityWebFilterChain filterChain(ServerHttpSecurity httpSecurity
     										 ,ReactiveAuthenticationManager reactiveAuthenticationManager
     										 ,JwtTokenProvider jwtTokenProvider) throws Exception {
-    	 //DefaultMethodSecurityExpressionHandler defaultWebSecurityExpressionHandler = this.applicationContext.getBean(DefaultMethodSecurityExpressionHandler.class);
-    	 //defaultWebSecurityExpressionHandler.setPermissionEvaluator(myPermissionEvaluator());
-    	 //DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-    	 //expressionHandler.setPermissionEvaluator(myPermissionEvaluator());
-        
     	 httpSecurity
     	 .exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec
                  .authenticationEntryPoint((exchange, ex) -> {
@@ -71,16 +66,16 @@ public class AuthSecurityConfig {
                      });
                  }))
     	 
-         .csrf().disable()
-         .formLogin().disable()
-         .httpBasic().disable() // request header <- Authorization: Basic dXNlcjoxMTEx 값은 방식으로 formLogin 같은걸 해제
+         .csrf(ServerHttpSecurity.CsrfSpec::disable)
+         .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+         .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
          .authenticationManager(reactiveAuthenticationManager)
-         .securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) // stateless 설정
+         .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
          .authorizeExchange(exchange -> exchange
                  .pathMatchers(HttpMethod.OPTIONS).permitAll()
                  .pathMatchers("/auth/**").access(this::checkAllowIp)
                  .pathMatchers("/public/**").permitAll()
-                 .pathMatchers("/cms/**").hasRole("ADMIN")
+                 .pathMatchers("/cms/**").hasAnyRole("CMS_ADMIN","CMS_USER")
                  .anyExchange().authenticated()
          )
          .addFilterAt(new JwtTokenAuthenticationFilter(jwtTokenProvider), SecurityWebFiltersOrder.AUTHENTICATION);
@@ -92,36 +87,35 @@ public class AuthSecurityConfig {
         String accessIp = context.getExchange().getRequest().getRemoteAddress().getAddress().toString().replace("/", "");
         return Mono.just(new AuthorizationDecision(
                 (allowIpList.contains(accessIp)) ? true : false));
-        /*
-        return authentication.map((v) -> new AuthorizationDecision(v.isAuthenticated()))
-                .defaultIfEmpty(new AuthorizationDecision(
-                        (allowIpList.contains(accessIp)) ? true : false
-                )).log();
-        */
     }
     
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+    
     @Bean
     public ReactiveUserDetailsService reactiveUserDetailsService(UserServiceImpt userServiceImpt) {
         return username -> {
         	System.out.println(">>>> ReactiveUserDetailsService ing Username :"+username);
         	
+        	/*
         	ArrayList<String> roleList = new ArrayList<String>();
-        	userServiceImpt.findByUserRoleRx(username).map(v->v.getUserRole())
+        	userServiceImpt.findUserRoleByRxUserId(username).map(v->v.getUserRole())
         													.collectList().log()
-        													.subscribe(roleList::addAll);      	
+        													.subscribe(roleList::addAll);     	
         	System.out.println(">>>> ReactiveUserDetailsService ing roleList :"+roleList);
-        	
+        	*/
             return 		userServiceImpt.findByRxUserId(username)
        			 		 .map(user -> org.springframework.security.core.userdetails.User
                          .withUsername(user.getUsername())
                          .password(user.getPassword())
-                         .roles(roleList.toArray(String[]::new)
-                        		 //user.getRoles().stream().map(v->v.getUserRole()).toArray(String[]::new)
-                        		 )
+                         .roles(
+                        		 userServiceImpt.findUserRoleByRxUid(user.getUid()).map(v->v.getUserRole())
+                        		 .collectList().map(v-> v.toArray(String[]::new)).block()
+                         //roleList.toArray(String[]::new)
+                         //user.getRoles().stream().map(v->v.getUserRole()).toArray(String[]::new)
+                        		)
                          .build());
         };
     }

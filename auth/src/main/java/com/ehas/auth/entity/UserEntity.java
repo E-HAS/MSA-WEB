@@ -1,17 +1,18 @@
 package com.ehas.auth.entity;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+//import org.springframework.data.annotation.Id;
+//import org.springframework.data.relational.core.mapping.Column;
+//import org.springframework.data.relational.core.mapping.Table;
+import javax.persistence.*;
 
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,52 +22,51 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Table(name ="User")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserEntity implements UserDetails{
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer uid;
 
-    @Column(value="user_type")
+    @Column(name="user_type")
     private Integer userType;
-    @Column(value="user_id")
+    @Column(name="user_id")
     private String userId;
-    @Column(value="nick_name")
-    private String nickName;
-    @Column(value="user_password")
+    @Column(name="user_password")
     private String userPassword;
     
-    @Column(value="user_state")
+    @Column(name="nick_name")
+    private String nickName;
+    
+    @Column(name="user_state")
     private String userState; // Y : 정상 회원 , L : 잠긴 계정, P : 패스워드 만료, A : 계정 만료
     
-    @Column(value="registered_date")
+    @Column(name="registered_date")
     @CreatedDate
     private LocalDateTime registeredDate;
     
-    @Column(value="updated_date")
+    @Column(name="updated_date")
     @LastModifiedDate
     private LocalDateTime updatedDate;
     
-    @Column(value="deleted_date")
+    @Column(name="deleted_date")
     private LocalDateTime deletedDate;
-    @Column(value="password_updated_date")
+    @Column(name="password_updated_date")
     private LocalDateTime passwordUpdatedDate;
     
     @Transient
-    private List<UserRole> roles = new ArrayList<UserRole>();
+    private List<UserRoleEntity> roles = new ArrayList<UserRoleEntity>();
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-    	System.out.println(">>>> getAuthorities1");
     	List<String> lists = new ArrayList<String>();
     	this.roles.forEach(v -> { lists.add(v.getUserRole());});
-    	
-    	//return List.of(new SimpleGantedAuthority(role.name()));
     	
         return  lists
         		.stream()
