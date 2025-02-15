@@ -30,7 +30,6 @@ selectAudioOutput = document.getElementById('selectAudioOutput');
   
   
     const devices = await navigator.mediaDevices.enumerateDevices();
-    
     const cameras = devices.filter((device) => device.kind === "videoinput");
     const audeoinputs = devices.filter((device) => device.kind === "audioinput");
     const audeooutputs = devices.filter((device) => device.kind === "audiooutput");

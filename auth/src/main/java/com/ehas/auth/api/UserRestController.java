@@ -56,7 +56,7 @@ public class UserRestController {
 	
 	private final UserHandler userHandler;
 	
-	private final Sinks.Many<UserDto> userSink = Sinks.many().multicast().onBackpressureBuffer();
+	private final Sinks.Many<Map<String,Object>> userSink = Sinks.many().multicast().onBackpressureBuffer();
 	
 	/*
 	@GetMapping("/test") //, produces = "text/event-stream;charset=UTF-8" / MediaType.TEXT_EVENT_STREAM_VALUE  / SseEmitter  단방향
@@ -100,15 +100,15 @@ public class UserRestController {
 	}
 	
 	@GetMapping(path = "/sink/users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-	public Flux<ServerSentEvent<UserDto>> getSinkUsers(){
+	public Flux<ServerSentEvent<Map<String,Object>>> getSinkUsers(){
 		return userSink.asFlux().map(u -> ServerSentEvent.builder(u).build()).doOnCancel(()->{
 			userSink.asFlux().blockLast();
 		});
 	}
 	
 	@PostMapping("/sink/users")
-	public Mono<UserDto> postSinkUsers() {
-		return Mono.just(UserDto.builder().userName("name").userPassword("password").build()).doOnNext(u -> userSink.tryEmitNext(u));
+	public Mono<Map<String,Object>> postSinkUsers(@RequestBody Map<String,Object> message) {
+		return Mono.just(message).doOnNext(u -> userSink.tryEmitNext(u));
 	}
 	
 	@PostMapping("/kafka/{value}")

@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -26,33 +27,21 @@ public class WebSecurityConfig {
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-    	 				httpSecurity
-    	 				.csrf().disable() // token를 사용하는 방식으로 csrf를 Disable
-    	 				
-    	 				/*
-    	 				.exceptionHandling()
-    	 				.authenticationEntryPoint(null)
-    	 				.accessDeniedHandler(null)
-    	 				*/
-    	 				
-    	 				.sessionManagement()
-    	 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 토큰 기반 인증으로 세션 사용하지 않기
-    	 
-    	 				.and()
-    	 				.authorizeHttpRequests()
-    	 				.antMatchers("/Meet/**"
-    	 							,"/Stomp/**"
-    	 							,"/css/**"
-    	 							, "/img/**"
-    	 							, "/js/**").permitAll()
-    	 				.anyRequest().authenticated();
-    	 				
-    	 				/*
-    	 				.and()
-    	 				.addFilterBefore(new JwtAuthenticationFilter(jwtServiceImpt)
-    	 						, UsernamePasswordAuthenticationFilter.class);
-    	 				*/
-    	
+    	httpSecurity
+        .csrf(csrf -> csrf.disable()) // 토큰 기반 인증을 사용할 때 CSRF 비활성화
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션을 사용하지 않도록 설정
+        )
+        .authorizeHttpRequests(authz -> authz
+            .antMatchers("/meet/**").permitAll() // /Meet/** 경로에 대해 모든 요청 허용
+            .antMatchers("/Stomp/**").permitAll() // /Stomp/** 경로에 대해 모든 요청 허용
+            .antMatchers("/css/**").permitAll() // /css/** 경로에 대해 모든 요청 허용
+            .antMatchers("/img/**").permitAll() // /img/** 경로에 대해 모든 요청 허용
+            .antMatchers("/js/**").permitAll() // /js/** 경로에 대해 모든 요청 허용
+            .anyRequest().permitAll() // 나머지 모든 요청에 대해 허용
+        );
+        // JWT 필터를 사용한다면 아래와 같이 필터를 추가할 수 있습니다:
+        // .addFilterBefore(new JwtAuthenticationFilter(jwtServiceImpt), UsernamePasswordAuthenticationFilter.class);	
      return httpSecurity.build();
     }
 }
