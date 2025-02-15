@@ -1,7 +1,11 @@
 package com.ehas.auth.entity;
 
 
-import javax.persistence.*;
+import javax.persistence.IdClass;
+import javax.persistence.EmbeddedId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,16 +17,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @AllArgsConstructor
 @Builder
 @Table(name ="userrole")
-@IdClass(UserRoleEntityKey.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserRoleEntity {
-	@Id
-    @Column(name="user_type",length = 30, nullable = false)
+public class UserRole {
+	@EmbeddedId
+	private UserRoleEntityKey id;
+	
+    @Column("user_type")
     private Integer userType;
-    @Id
-    @Column(name="user_uid",length = 30, nullable = false)
+
+    @Column("user_uid")
     private Integer userUid;
-    @Id
-    @Column(name="user_role",length = 30, nullable = false)
+
+    @Column("user_role")
     private String userRole;
 }

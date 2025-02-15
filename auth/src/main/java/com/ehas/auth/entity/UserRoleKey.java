@@ -1,24 +1,30 @@
 package com.ehas.auth.entity;
 
-import java.io.Serializable;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import javax.persistence.IdClass;
+import javax.persistence.Embeddable;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Embeddable
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserRoleKey implements Serializable{
-
+public class UserRoleKey {
+    @Column("user_type")
     private Integer userType;
-    
+
+    @Column("user_uid")
     private Integer userUid;
-    
+
+    @Column("user_role")
     private String userRole;
 }

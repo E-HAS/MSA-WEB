@@ -54,6 +54,7 @@ public class AuthSecurityConfig {
     	 httpSecurity
     	 .exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec
                  .authenticationEntryPoint((exchange, ex) -> {
+                	 
                  	System.out.println(">>>> UNAUTHORIZED before");
                      return Mono.fromRunnable(() -> {
             			exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -74,6 +75,7 @@ public class AuthSecurityConfig {
          .authorizeExchange(exchange -> exchange
                  .pathMatchers(HttpMethod.OPTIONS).permitAll()
                  .pathMatchers("/auth/**").access(this::checkAllowIp)
+                 .pathMatchers("/actuator/**").access(this::checkAllowIp)
                  .pathMatchers("/public/**").permitAll()
                  .pathMatchers("/cms/**").hasAnyRole("CMS_ADMIN","CMS_USER")
                  .anyExchange().authenticated()
@@ -96,29 +98,23 @@ public class AuthSecurityConfig {
     
     @Bean
     public ReactiveUserDetailsService reactiveUserDetailsService(UserServiceImpt userServiceImpt) {
-        return username -> {
-        	System.out.println(">>>> ReactiveUserDetailsService ing Username :"+username);
-        	
-        	/*
-        	ArrayList<String> roleList = new ArrayList<String>();
-        	userServiceImpt.findUserRoleByRxUserId(username).map(v->v.getUserRole())
-        													.collectList().log()
-        													.subscribe(roleList::addAll);     	
-        	System.out.println(">>>> ReactiveUserDetailsService ing roleList :"+roleList);
-        	*/
-            return 		userServiceImpt.findByRxUserId(username)
-       			 		 .map(user -> org.springframework.security.core.userdetails.User
-                         .withUsername(user.getUsername())
-                         .password(user.getPassword())
-                         .roles(
-                        		 userServiceImpt.findUserRoleByRxUid(user.getUid()).map(v->v.getUserRole())
-                        		 .collectList().map(v-> v.toArray(String[]::new)).block()
-                         //roleList.toArray(String[]::new)
-                         //user.getRoles().stream().map(v->v.getUserRole()).toArray(String[]::new)
-                        		)
-                         .build());
-        };
-    }
+        return username -> 
+            userServiceImpt.findByRxUserId(username)  // 사용자 정보 조회
+                .flatMap(user -> 
+                    userServiceImpt.findUserRoleByRxUid(user.getUid())  // 역할 정보 조회
+                        .collectList()  // Flux<UserRoleEntity> -> List<UserRoleEntity>로 변환
+                        .map(userRoles -> 
+                            org.springframework.security.core.userdetails.User
+                                .withUsername(user.getUsername())
+                                .password(user.getPassword())
+                                .roles(userRoles.stream()
+                                    .map(v -> v.getUserRole())  // UserRoleEntity에서 userRole을 추출
+                                    .toArray(String[]::new))  // String[]로 변환
+                                .build()
+                        )
+                );
+    };
+
     
     @Bean
     public ReactiveAuthenticationManager reactiveAuthenticationManager(ReactiveUserDetailsService userDetailsService,

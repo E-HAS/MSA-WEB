@@ -4,11 +4,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ehas.auth.dto.UserDto;
+import com.ehas.auth.entity.User;
 import com.ehas.auth.entity.UserEntity;
+import com.ehas.auth.entity.UserRole;
 import com.ehas.auth.entity.UserRoleEntity;
-import com.ehas.auth.entity.UserRoleKey;
-import com.ehas.auth.reactive.ReactiveUserEntityRepository;
-import com.ehas.auth.reactive.ReactiveUserRoleEntityRepository;
+import com.ehas.auth.entity.UserRoleEntityKey;
+import com.ehas.auth.reactive.ReactiveUserRepository;
+import com.ehas.auth.reactive.ReactiveUserRoleRepository;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -18,12 +20,12 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UserServiceImpt {
 
-	private final ReactiveUserEntityRepository UserRepoRx;
-	private final ReactiveUserRoleEntityRepository UserRoleRepoRx;
+	private final ReactiveUserRepository UserRepoRx;
+	private final ReactiveUserRoleRepository UserRoleRepoRx;
 	
 	//@Transactional(rollbackFor = { Exception.class })  
 	public Mono<Boolean> saveByUserEntity(UserDto user){
-		UserRepoRx.save(UserEntity.builder()
+		UserRepoRx.save(User.builder()
 				                  .userType(user.getUserType())
 				                  .userId(user.getUserId())
 				                  .userPassword(user.getUserPassword())
@@ -32,11 +34,12 @@ public class UserServiceImpt {
 				                  .build()
 		)
 		.flatMap(userEntity -> {
-			UserRoleEntity userRole = UserRoleEntity.builder()
+			UserRole userRole = UserRole.builder()
 		            .userType(userEntity.getUserType())
 		            .userUid(userEntity.getUid())
 		            .userRole("USER")
 		            .build();
+		    
 		    return UserRoleRepoRx.save(userRole);
 		}).subscribe(
 				result -> System.out.println("작업 성공: " + result), 
