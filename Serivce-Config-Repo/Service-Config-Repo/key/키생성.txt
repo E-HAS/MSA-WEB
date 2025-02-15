@@ -1,0 +1,2 @@
+ssh-keygen -t rsa -b 2048 -f servicekey
+type servicekey.pub

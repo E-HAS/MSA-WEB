@@ -1,0 +1,52 @@
+server:
+  port: 8001
+#r2dbc
+spring:
+  main:
+    web-application-type: reactive
+  r2dbc:
+    url: r2dbc:pool:mariadb://127.0.0.1:3306/SPRING_DB
+    username: root
+    password: QWas1234
+  cloud:
+    gateway:
+      default-filters:
+        - name : GlobalFilter
+          args :
+            baseMessage : Spring Cloud Gateway Global Filter
+            preLogger   : true
+            postLogger  : true
+      routes:
+        - id : authservice
+          uri : lb://authservice
+          predicates : 
+            - Path=/auth/**
+          filters:
+            - RewritePath=/auth/(?<segment>.*), /$\{segment}
+            - CustomFilter
+
+
+eureka:
+  instance:
+    instance-id: ${spring.application.instance_id:${random.value}}:${server.port}
+    lease-renewal-interval-in-seconds: 3
+    lease-expiration-duration-in-seconds: 10
+  client:
+    register-with-eureka: true
+    fetch-registry:       true
+    disable-delta:        true
+    registry-fetch-interval-seconds: 5
+    service-url.defaultZone:         http://root:QWas1234@localhost:8761/eureka
+
+logging:
+  level:
+    com:
+      netflix:
+        discovery:
+          DiscoveryClient: ERROR
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
