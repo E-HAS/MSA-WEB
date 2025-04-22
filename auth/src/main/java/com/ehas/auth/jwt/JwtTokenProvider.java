@@ -8,6 +8,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -21,7 +22,6 @@ import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -47,7 +47,7 @@ public class JwtTokenProvider {
 
     @PostConstruct
     public void init() {
-        var secret = Base64.getEncoder().encodeToString(this.secret.getBytes());
+        //var secret = Base64.getEncoder().encodeToString(this.secret.getBytes());
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -55,21 +55,25 @@ public class JwtTokenProvider {
         String username = authentication.getName();
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
-        Claims claims = Jwts.claims().setSubject(username).build();
+        String permissions = "";
         if (authorities != null) {
-            claims.put(PERMISSIONS_KEY
-                    , authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
+            permissions = authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.joining(","));
         }
-
-        Long expirationTimeLong = Long.parseLong(expirationTime);
-        final Date createdDate = new Date();
-        final Date expirationDate = new Date(createdDate.getTime() + expirationTimeLong);
+        Claims claims = Jwts.claims()
+        		.subject(username)
+        		.add(PERMISSIONS_KEY, permissions)
+        		.build();
+        
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + Long.parseLong(expirationTime));
+        
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(username)
-                .setIssuedAt(createdDate)
-                .setExpiration(expirationDate)
-                .signWith(secretKey) //.signWith(SignatureAlgorithm.HS256,secretKey)
+                .claims(claims)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(secretKey)
                 .compact();
     }
 
@@ -77,10 +81,8 @@ public class JwtTokenProvider {
         Claims claims = Jwts.parser()
                 .verifyWith(this.secretKey).build()
                 .parseSignedClaims(token).getPayload();
-        //Claims claims = Jwts.parser().setSigningKey(this.secretKey).build().parseClaimsJws(token).getBody();
 
         Object authoritiesClaim = claims.get(PERMISSIONS_KEY);
-
         Collection<? extends GrantedAuthority> authorities = authoritiesClaim == null ? AuthorityUtils.NO_AUTHORITIES
                 : AuthorityUtils.commaSeparatedStringToAuthorityList(authoritiesClaim.toString());
         
@@ -94,8 +96,6 @@ public class JwtTokenProvider {
             Jws<Claims> claims = Jwts.parser()
             		.verifyWith(secretKey).build()
             		.parseSignedClaims(token);
-                    //.setSigningKey(this.secretKey).build()
-                    //.parseClaimsJws(token);
             return true;
         } catch (SignatureException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());

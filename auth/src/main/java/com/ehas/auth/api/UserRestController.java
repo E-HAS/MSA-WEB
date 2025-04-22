@@ -95,8 +95,7 @@ public class UserRestController {
                 		   RequestResponseDto.builder()
 							.status("400")
 							.message("Bad Request")
-							.build())
-                	   .log();
+							.build());
 	}
 	
 	@GetMapping(path = "/sink/users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
