@@ -10,15 +10,17 @@ import org.springframework.security.web.SecurityFilterChain;
 public class ConfigWebConfig{
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        		httpSecurity
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authz -> authz
-                                .antMatchers("/api/**").permitAll()
-                                .antMatchers("/actuator/**").permitAll()
-                                .anyRequest().permitAll()
-                )
-                .httpBasic(httpBasic -> httpBasic.disable());
-     return httpSecurity.build();
+    	httpSecurity
+        // CSRF 보호 기능 비활성화 (API 서버일 경우 주로 비활성화함)
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(authz -> authz
+            .requestMatchers("/api/**").permitAll()
+            .requestMatchers("/actuator/**").permitAll()
+            .anyRequest().permitAll()
+        )
+        // HTTP Basic 인증 비활성화
+        .httpBasic(httpBasic -> httpBasic.disable());
+    	return httpSecurity.build();
     }
 }
 

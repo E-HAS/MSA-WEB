@@ -17,6 +17,8 @@ public class CenterGatewayApplication {
 	
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity security) {
-        return security.csrf().disable().build();
+    	return security
+    		    .csrf(csrf -> csrf.disable())
+    		    .build();
     }
 }

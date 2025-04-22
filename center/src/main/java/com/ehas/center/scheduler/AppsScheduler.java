@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/*
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -27,7 +28,7 @@ public class AppsScheduler {
     public void insertPerformanceMonitoring() {
 		//log.info("START >>>> PerformanceMonitoring");
 		//requestPerformanceMonitoring("http://127.0.0.1:8761/actuator/metrics/system.cpu.usage");
-		/*
+
 		List<String> services = this.discoveryClient.getServices();
 		
 		if(services.size() > 0) {
@@ -54,7 +55,6 @@ public class AppsScheduler {
 			}
 			
 		}
-		*/
     }
     
     private void requestPerformanceMonitoring(String url) {
@@ -76,3 +76,4 @@ public class AppsScheduler {
 		}
     }
 }
+*/

@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  center-server:
+    image: center-server
+    container_name: center-server-container
+    ports:
+      - "8761:8761"
+    networks:
+      - msa-network
+
+  config-server:
+    image: config-server
+    container_name: config-server-container
+    ports:
+      - "8000:8000"
+    networks:
+      - msa-network
+    depends_on:
+      center-server:
+        condition: service_started
+
+  gateway-server:
+    image: gateway-server
+    container_name: gateway-server-container
+    ports:
+      - "8001:8001"
+    networks:
+      - msa-network
+    depends_on:
+      config-server:
+        condition: service_started
+      center-server:
+        condition: service_started
+    volumes:
+      - 'E:/XEKIDD_WEB/Serivce-Config-Repo/Service-Config-Repo:/config-repo'
+
+networks:
+  msa-network:
+    driver: bridge

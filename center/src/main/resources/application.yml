@@ -6,14 +6,16 @@ spring:
   profiles:
     active: native
   security:
+    basic:
+      enabled: true
     user:
       name: root
       password: QWas1234
     
 eureka:
   server:
-    response-cache-update-interval-ms: 5000
-    eviction-interval-timer-in-ms: 10000
+    #response-cache-update-interval-ms: 5000
+    #eviction-interval-timer-in-ms: 10000
   client:
     register-with-eureka: false
     fetch-registry: false
