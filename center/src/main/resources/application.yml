@@ -11,15 +11,21 @@ spring:
     user:
       name: root
       password: QWas1234
+  cloud:
+    config:
+      server:
+        native:
+          #search-locations: file:/config-repo/
+          search-locations: file:///D:/Serivce-Config-Repo/Service-Config-Repo/
     
 eureka:
   server:
-    #response-cache-update-interval-ms: 5000
-    #eviction-interval-timer-in-ms: 10000
+    response-cache-update-interval-ms: 5000
+    eviction-interval-timer-in-ms: 10000
   client:
     register-with-eureka: false
     fetch-registry: false
-          
+         
 management:
   endpoints:
     web:

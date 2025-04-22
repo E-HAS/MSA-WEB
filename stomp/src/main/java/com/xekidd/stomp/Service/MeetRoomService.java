@@ -80,9 +80,10 @@ public class MeetRoomService {
 		String mRoomPassword = mRoom.getRoomPassword();
 		logger.info("mRoomPassword {} param {} ",mRoomPassword, _roomPassword);
 		 if (!passwordEncoder.matches(_roomPassword, mRoomPassword)) {
+			 logger.info("false");
 			 return false;
 	     }
-		
+		 logger.info("true");
 		return true;
 	}
 	

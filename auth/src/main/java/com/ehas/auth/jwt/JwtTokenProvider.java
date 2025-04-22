@@ -1,6 +1,5 @@
 package com.ehas.auth.jwt;
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -14,13 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -57,7 +54,8 @@ public class JwtTokenProvider {
     public String createToken(Authentication authentication) {
         String username = authentication.getName();
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        Claims claims = Jwts.claims().setSubject(username);
+
+        Claims claims = Jwts.claims().setSubject(username).build();
         if (authorities != null) {
             claims.put(PERMISSIONS_KEY
                     , authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")));
@@ -71,12 +69,15 @@ public class JwtTokenProvider {
                 .setSubject(username)
                 .setIssuedAt(createdDate)
                 .setExpiration(expirationDate)
-                .signWith(secretKey)
+                .signWith(secretKey) //.signWith(SignatureAlgorithm.HS256,secretKey)
                 .compact();
     }
 
     public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(this.secretKey).build().parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser()
+                .verifyWith(this.secretKey).build()
+                .parseSignedClaims(token).getPayload();
+        //Claims claims = Jwts.parser().setSigningKey(this.secretKey).build().parseClaimsJws(token).getBody();
 
         Object authoritiesClaim = claims.get(PERMISSIONS_KEY);
 
@@ -90,9 +91,11 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) throws Exception {
         try {
-            Jws<Claims> claims = Jwts
-                    .parserBuilder().setSigningKey(this.secretKey).build()
-                    .parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parser()
+            		.verifyWith(secretKey).build()
+            		.parseSignedClaims(token);
+                    //.setSigningKey(this.secretKey).build()
+                    //.parseClaimsJws(token);
             return true;
         } catch (SignatureException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());

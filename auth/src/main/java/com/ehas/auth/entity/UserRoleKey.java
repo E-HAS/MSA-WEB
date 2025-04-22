@@ -1,8 +1,6 @@
 package com.ehas.auth.entity;
 
 
-import javax.persistence.IdClass;
-import javax.persistence.Embeddable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -12,6 +10,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import jakarta.persistence.Embeddable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

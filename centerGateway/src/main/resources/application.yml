@@ -4,4 +4,4 @@ spring:
   application:
     name: gatewayservice
   config:
-    import: optional:configserver:http://127.0.0.1:8000
+    import: optional:configserver:http://127.0.0.1:8761
