@@ -8,7 +8,13 @@ services:
     networks:
       - msa-network
     volumes:
-      - 'E:/XEKIDD_WEB/Serivce-Config-Repo/Service-Config-Repo:/config-repo'
+      - 'D:/server-yml:/server-yml/'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://root:QWas1234@192.168.1.101:8761/eureka/apps"]
+      interval: 30s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
 
   gateway-server:
     image: gateway-server
@@ -18,10 +24,8 @@ services:
     networks:
       - msa-network
     depends_on:
-      config-server:
-        condition: service_started
       center-server:
-        condition: service_started
+        condition: service_healthy
 
 networks:
   msa-network:

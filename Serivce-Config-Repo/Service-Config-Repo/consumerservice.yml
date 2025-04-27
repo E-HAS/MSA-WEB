@@ -5,12 +5,12 @@ spring:
   main:
     web-application-type: reactive
   #datasource:
-    #url: jdbc:mariadb://127.0.0.1:3306/SPRING_DB?characterEncoding=UTF-8&serverTimezone=UTC
+    #url: jdbc:mariadb://127.0.0.1:3306/project?characterEncoding=UTF-8&serverTimezone=UTC
     #username: root
     #password: QWas!@34
     #driver-class-name: org.mariadb.jdbc.Driver
   r2dbc:
-    url: r2dbc:pool:mariadb://127.0.0.1:3306/SPRING_DB
+    url: r2dbc:pool:mariadb://127.0.0.1:3306/project
     username: root
     password: QWas!@34
   jpa:

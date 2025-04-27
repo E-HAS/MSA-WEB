@@ -55,7 +55,7 @@ public class UserRestController {
 	
 	private final KafkaLogProducerService kafkaProducerService;
 	
-	private final Sinks.Many<Map<String,Object>> userSink = Sinks.many().multicast().onBackpressureBuffer();
+	//private final Sinks.Many<Map<String,Object>> userSink = Sinks.many().multicast().onBackpressureBuffer();
 	
 	@PostMapping(path="/{contentId}/users/{userId}")
 	public Mono<ResponseEntity<ResponseDto>> getUserByContentId(@RequestBody UserDto user
@@ -101,6 +101,7 @@ public class UserRestController {
 								}).log();
 	}
 	
+	/*
 	@GetMapping(path = "/sink/users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<ServerSentEvent<Map<String,Object>>> getSinkUsers(){
 		return userSink.asFlux().map(u -> ServerSentEvent.builder(u).build()).doOnCancel(()->{
@@ -108,6 +109,7 @@ public class UserRestController {
 		});
 	}
 	
+	/*
 	@PostMapping("/sink/users")
 	public Mono<Map<String,Object>> postSinkUsers(@RequestBody Map<String,Object> message) {
 		return Mono.just(message).doOnNext(u -> userSink.tryEmitNext(u));
@@ -118,4 +120,5 @@ public class UserRestController {
 		kafkaProducerService.sendMessage(value);
 		return Mono.just(Map.of("send",value));
 	}
+	*/
 }
