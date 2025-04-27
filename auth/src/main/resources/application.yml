@@ -4,4 +4,5 @@ spring:
   application:
     name: authservice
   config:
-    import: optional:configserver:http://127.0.0.1:8761
+    #import: optional:configserver:http://127.0.0.1:8761
+    import: optional:configserver:http://192.168.1.101:8761

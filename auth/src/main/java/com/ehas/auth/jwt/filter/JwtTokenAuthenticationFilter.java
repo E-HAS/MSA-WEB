@@ -1,4 +1,4 @@
-package com.ehas.auth.jwt;
+package com.ehas.auth.jwt.filter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +18,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
+
+import com.ehas.auth.jwt.service.JwtTokenProvider;
 
 import reactor.core.publisher.Mono;
 

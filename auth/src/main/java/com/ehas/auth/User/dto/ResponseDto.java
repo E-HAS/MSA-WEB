@@ -1,4 +1,4 @@
-package com.ehas.auth.dto;
+package com.ehas.auth.User.dto;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RequestResponseDto {
+public class ResponseDto {
 	private String status;
 	private String message;
 	private List<?> data;

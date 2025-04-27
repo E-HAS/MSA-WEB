@@ -1,4 +1,4 @@
-package com.ehas.auth.service;
+package com.ehas.auth.kafka.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public class KafkaProducerService {
+public class KafkaLogProducerService {
 
 	@Value("${message.kafka.producer.topic.name}")
     private String topicName;
@@ -15,7 +15,7 @@ public class KafkaProducerService {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
-    public KafkaProducerService(KafkaTemplate kafkaTemplate) {
+    public KafkaLogProducerService(KafkaTemplate kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 

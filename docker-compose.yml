@@ -7,17 +7,8 @@ services:
       - "8761:8761"
     networks:
       - msa-network
-
-  config-server:
-    image: config-server
-    container_name: config-server-container
-    ports:
-      - "8000:8000"
-    networks:
-      - msa-network
-    depends_on:
-      center-server:
-        condition: service_started
+    volumes:
+      - 'E:/XEKIDD_WEB/Serivce-Config-Repo/Service-Config-Repo:/config-repo'
 
   gateway-server:
     image: gateway-server
@@ -31,8 +22,6 @@ services:
         condition: service_started
       center-server:
         condition: service_started
-    volumes:
-      - 'E:/XEKIDD_WEB/Serivce-Config-Repo/Service-Config-Repo:/config-repo'
 
 networks:
   msa-network:

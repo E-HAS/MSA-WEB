@@ -1,4 +1,4 @@
-package com.ehas.auth.dto;
+package com.ehas.auth.User.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,9 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UserDto {
-	private int uid;
-	private int userType;
-	private String userName;
-	private String userId;
-	private String userPassword;
+	private Integer seq;
+	private String id;
+	private String name;
+	private String password;
+	
+	private Integer roleSeq;
 }

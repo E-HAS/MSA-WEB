@@ -1,4 +1,4 @@
-package com.ehas.auth.jwt;
+package com.ehas.auth.jwt.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

@@ -27,9 +27,9 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 
-import com.ehas.auth.jwt.JwtTokenAuthenticationFilter;
-import com.ehas.auth.jwt.JwtTokenProvider;
-import com.ehas.auth.service.UserServiceImpt;
+import com.ehas.auth.User.service.UserServiceImpt;
+import com.ehas.auth.jwt.filter.JwtTokenAuthenticationFilter;
+import com.ehas.auth.jwt.service.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,11 +38,11 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @EnableWebFluxSecurity
 //@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @Configuration
 @EnableReactiveMethodSecurity
 public class AuthSecurityConfig {
-	private final ApplicationContext applicationContext;
+	//private final ApplicationContext applicationContext;
 	
 	@Value("${message.security.allow-ip-list}")
 	private List<String> allowIpList;
@@ -74,10 +74,8 @@ public class AuthSecurityConfig {
          .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
          .authorizeExchange(exchange -> exchange
                  .pathMatchers(HttpMethod.OPTIONS).permitAll()
-                 .pathMatchers("/auth/**").access(this::checkAllowIp)
                  .pathMatchers("/actuator/**").access(this::checkAllowIp)
-                 .pathMatchers("/public/**").permitAll()
-                 .pathMatchers("/cms/**").hasAnyRole("CMS_ADMIN","CMS_USER")
+                 .pathMatchers("/content/**").permitAll() //.access(this::checkAllowIp)//.hasAnyRole("CMS_ADMIN","CMS_USER")
                  .anyExchange().authenticated()
          )
          .addFilterAt(new JwtTokenAuthenticationFilter(jwtTokenProvider), SecurityWebFiltersOrder.AUTHENTICATION);
@@ -99,27 +97,26 @@ public class AuthSecurityConfig {
     @Bean
     public ReactiveUserDetailsService reactiveUserDetailsService(UserServiceImpt userServiceImpt) {
         return username -> 
-            userServiceImpt.findByRxUserId(username)  // 사용자 정보 조회
-                .flatMap(user -> 
-                    userServiceImpt.findUserRoleByRxUid(user.getUid())  // 역할 정보 조회
-                        .collectList()  // Flux<UserRoleEntity> -> List<UserRoleEntity>로 변환
-                        .map(userRoles -> 
-                            org.springframework.security.core.userdetails.User
-                                .withUsername(user.getUsername())
-                                .password(user.getPassword())
-                                .roles(userRoles.stream()
-                                    .map(v -> v.getUserRole())  // UserRoleEntity에서 userRole을 추출
-                                    .toArray(String[]::new))  // String[]로 변환
-                                .build()
-                        )
-                );
+            	userServiceImpt.findByUserId(username)  // 사용자 정보 조회
+                .flatMap(user -> userServiceImpt.findRoleByUserSeq(user.getSeq())
+                				.collectList()
+                				.flatMap(roles -> {
+                                    String[] roleNames = roles.stream()
+			                                            .map(role -> role.getRoleName()) 
+			                                            .toArray(String[]::new); 
+                                    
+                					return Mono.just(org.springframework.security.core.userdetails.User
+                									.withUsername(user.getUsername())
+                									.password(user.getPassword())
+                									.roles(roleNames)
+                									.build()).log();
+                				}));
     };
 
     
     @Bean
     public ReactiveAuthenticationManager reactiveAuthenticationManager(ReactiveUserDetailsService userDetailsService,
                                                                        PasswordEncoder passwordEncoder) {
-    	System.out.println(">>>> ReactiveAuthenticationManager before");
         var authenticationManager = new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService);
         authenticationManager.setPasswordEncoder(passwordEncoder);
         return authenticationManager;
