@@ -44,7 +44,6 @@ import reactor.core.publisher.Sinks;
 
 @Slf4j
 @RestController
-@RequestMapping("/content")
 @RequiredArgsConstructor
 public class UserRestController {
 	private final UserServiceImpt userServiceImpt;
@@ -57,9 +56,8 @@ public class UserRestController {
 	
 	//private final Sinks.Many<Map<String,Object>> userSink = Sinks.many().multicast().onBackpressureBuffer();
 	
-	@PostMapping(path="/{contentId}/users/{userId}")
-	public Mono<ResponseEntity<ResponseDto>> getUserByContentId(@RequestBody UserDto user
-											, @PathVariable ("contentId") Integer contentId
+	@PostMapping(path="/users/{userId}")
+	public Mono<ResponseEntity<ResponseDto>> getJWTTokenByUser(@RequestBody UserDto user
 											, @PathVariable ("userId") String userId){
 		// 인증을 위한 authentication 객체 생성
         Authentication authentication = new UsernamePasswordAuthenticationToken(userId, user.getPassword());
@@ -83,13 +81,12 @@ public class UserRestController {
                        ).log();
 	}
 	
-	@PostMapping(path="/{contentId}/users")
-	public Mono<ResponseEntity<ResponseDto>> registerUserByContentId(@RequestBody UserDto user
-											, @PathVariable ("contentId") Integer contentId){
+	@PostMapping(path="/users")
+	public Mono<ResponseEntity<ResponseDto>> registerUser(@RequestBody UserDto user){
 		
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		
-		return userServiceImpt.saveByUserEntity(user, contentId, user.getRoleSeq())
+		return userServiceImpt.saveByUserEntity(user, 0, user.getRoleSeq())
 								.map(result ->{ return result ? ResponseEntity.ok(ResponseDto.builder()
 																								.status("200")
 																								.message("Sccuess")

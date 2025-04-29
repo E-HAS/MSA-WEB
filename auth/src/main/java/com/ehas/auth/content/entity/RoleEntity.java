@@ -1,4 +1,4 @@
-package com.ehas.auth.User.entity;
+package com.ehas.auth.content.entity;
 
 import org.springframework.data.relational.core.mapping.Table;
 import jakarta.persistence.Id;

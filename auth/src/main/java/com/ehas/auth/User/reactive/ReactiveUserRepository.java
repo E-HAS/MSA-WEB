@@ -16,4 +16,10 @@ public interface ReactiveUserRepository extends R2dbcRepository<UserEntity, Inte
 	@Query("SELECT * FROM USER WHERE id = :id")
 	Mono<UserEntity> findById(String id);
 	
+	@Query(   " SELECT * "
+			+ " FROM USER "
+			+ " WHERE status = :status "
+			+ " AND id = :id")
+	Flux<UserEntity> findByStatusAndId(String status, String id);
+	
 }

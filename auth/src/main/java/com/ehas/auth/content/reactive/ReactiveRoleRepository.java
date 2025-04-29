@@ -1,9 +1,9 @@
-package com.ehas.auth.User.reactive;
+package com.ehas.auth.content.reactive;
 
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 
-import com.ehas.auth.User.entity.RoleEntity;
+import com.ehas.auth.content.entity.RoleEntity;
 
 import reactor.core.publisher.Flux;
 

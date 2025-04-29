@@ -12,4 +12,7 @@ import reactor.core.publisher.Mono;
 public interface ReactiveUserRoleRepository extends R2dbcRepository<UserRoleEntity, UserRoleEntityKey>{
 	@Query("SELECT * FROM userrole WHERE user_seq = :seq")
 	Flux<UserRoleEntity> findBySeq(Integer seq);
+	
+	@Query("SELECT * FROM userrole WHERE user_seq = :userSeq AND content_seq = : contentSeq")
+	Flux<UserRoleEntity> findByUserSeqAndContentSeq(Integer userSeq, Integer contentSeq);
 }

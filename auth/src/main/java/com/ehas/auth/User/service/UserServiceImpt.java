@@ -4,14 +4,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ehas.auth.User.dto.UserDto;
-import com.ehas.auth.User.entity.RoleEntity;
 import com.ehas.auth.User.entity.UserEntity;
 import com.ehas.auth.User.entity.UserRoleEntity;
 import com.ehas.auth.User.entity.UserRoleEntityKey;
-import com.ehas.auth.User.reactive.ReactiveRoleRepository;
 import com.ehas.auth.User.reactive.ReactiveUserRepository;
 import com.ehas.auth.User.reactive.ReactiveUserRoleRepository;
 import com.ehas.auth.User.userstatus.UserStatus;
+import com.ehas.auth.content.entity.RoleEntity;
+import com.ehas.auth.content.reactive.ReactiveRoleRepository;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
