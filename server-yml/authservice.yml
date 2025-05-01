@@ -26,12 +26,13 @@ spring:
       
 logging:
   level:
-    org.springframework.r2dbc.core: debug
-    org.springframework.data.r2dbc.core.DefaultDatabaseClient: DEBUG
-    com:
-      netflix:
-        discovery:
-          DiscoveryClient: ERROR
+      root: info
+      org.springframework.r2dbc.core: debug
+      org.springframework.data.r2dbc.core.DefaultDatabaseClient: DEBUG
+      com:
+        netflix:
+          discovery:
+            DiscoveryClient: ERROR
 
 eureka:
   instance:

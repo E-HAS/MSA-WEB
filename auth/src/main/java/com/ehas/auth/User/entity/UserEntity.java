@@ -49,6 +49,8 @@ public class UserEntity implements UserDetails{
     //@Convert(converter = UserStatusConverter.class)
     //@Column(name = "status", nullable = false)
     private UserStatus status;
+    
+    private Integer addressSeq;
 
     //@Column(name = "password_updated_date", columnDefinition = "DATETIME(3)")
     private LocalDateTime passwordUpdatedDate;

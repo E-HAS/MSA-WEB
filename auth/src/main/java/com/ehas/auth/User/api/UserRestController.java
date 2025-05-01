@@ -20,9 +20,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +46,7 @@ import reactor.core.publisher.Sinks;
 
 @Slf4j
 @RestController
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserRestController {
 	private final UserServiceImpt userServiceImpt;
@@ -52,70 +55,116 @@ public class UserRestController {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final PasswordEncoder passwordEncoder;
 	
-	private final KafkaLogProducerService kafkaProducerService;
-	
-	//private final Sinks.Many<Map<String,Object>> userSink = Sinks.many().multicast().onBackpressureBuffer();
-	
-	@PostMapping(path="/users/{userId}")
-	public Mono<ResponseEntity<ResponseDto>> getJWTTokenByUser(@RequestBody UserDto user
-											, @PathVariable ("userId") String userId){
+	@PostMapping(path="/{userId}/token")
+	public Mono<ResponseEntity<ResponseDto>> getToken( @PathVariable ("userId") String userId
+													 , @RequestBody UserDto userDto
+													 ){
 		// 인증을 위한 authentication 객체 생성
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userId, user.getPassword());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userId, userDto.getPassword());
         
 	    return reactiveAuthenticationManager.authenticate(authentication) // 인증 후 토큰 생성
                 	   .map(jwtTokenProvider::createToken)
-                       .map(token -> ResponseEntity.ok().body(
-                               ResponseDto.builder()
-                                       .status("200")
-                                       .message("Success")
-                                       .data(List.of(Map.of("token", token)))  // 데이터는 리스트로 감싸서 반환
-                                       .build()
+                       .map(token -> ResponseEntity.status(HttpStatus.CREATED)
+                    		   			.body(ResponseDto.builder()
+				                                       .status(HttpStatus.CREATED.value())
+				                                       .message(HttpStatus.CREATED.getReasonPhrase())
+				                                       .data(Map.of("token", token))
+				                                       .build()
                        ))
                        .onErrorReturn(
-                               ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                               ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                                        .body(ResponseDto.builder()
-                                               .status("400")
-                                               .message("Bad Request")
+                                               .status(HttpStatus.UNAUTHORIZED.value())
+                                               .message(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                                                .build()
                                        )
-                       ).log();
+                       );
 	}
 	
-	@PostMapping(path="/users")
-	public Mono<ResponseEntity<ResponseDto>> registerUser(@RequestBody UserDto user){
+	@PostMapping
+	public Mono<ResponseEntity<ResponseDto>> registerUser(@RequestBody UserDto userDto){
 		
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
 		
-		return userServiceImpt.saveByUserEntity(user, 0, user.getRoleSeq())
-								.map(result ->{ return result ? ResponseEntity.ok(ResponseDto.builder()
-																								.status("200")
-																								.message("Sccuess")
+		return userServiceImpt.saveByUser(userDto)
+								.map(result ->{ return result ? ResponseEntity.status(HttpStatus.CREATED)
+																								.body(ResponseDto.builder()
+																								.status(HttpStatus.CREATED.value())
+																								.message(HttpStatus.CREATED.getReasonPhrase())
 																								.build())
-															  : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseDto.builder()
-																	  															.status("400")
-																	  															.message("Bad Request")
-																	  															.build());
-								}).log();
+															  : ResponseEntity.status(HttpStatus.BAD_REQUEST)
+															  									.body(ResponseDto.builder()
+																	  							.status(HttpStatus.BAD_REQUEST.value())
+																	  							.message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+																	  							.build());
+								});
 	}
 	
-	/*
-	@GetMapping(path = "/sink/users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-	public Flux<ServerSentEvent<Map<String,Object>>> getSinkUsers(){
-		return userSink.asFlux().map(u -> ServerSentEvent.builder(u).build()).doOnCancel(()->{
-			userSink.asFlux().blockLast();
-		});
+	@PostMapping(path="/{userId}")
+	public Mono<ResponseEntity<ResponseDto>> getUser(@PathVariable ("userId") String userId){
+		return userServiceImpt.findByUserId(userId)
+					.map(findEntity ->{ return findEntity != null ? ResponseEntity.status(HttpStatus.OK)
+																					.body(ResponseDto.builder()
+																					.status(HttpStatus.OK.value())
+																					.message(HttpStatus.OK.getReasonPhrase())
+																					.data(Map.of("user", findEntity))
+																					.build())
+																	: ResponseEntity.status(HttpStatus.BAD_REQUEST)
+																						.body(ResponseDto.builder()
+																						.status(HttpStatus.BAD_REQUEST.value())
+																						.message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+																						.build());
+					});
 	}
 	
-	/*
-	@PostMapping("/sink/users")
-	public Mono<Map<String,Object>> postSinkUsers(@RequestBody Map<String,Object> message) {
-		return Mono.just(message).doOnNext(u -> userSink.tryEmitNext(u));
+	@PutMapping(path="/{userId}")
+	public Mono<ResponseEntity<ResponseDto>> updateUser(@PathVariable ("userId") String userId
+													   ,@RequestBody UserDto userDto
+													 	){
+		
+		if(!userServiceImpt.isStringNullOrEmpty(userDto.getPassword())) {
+			userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+		}
+		
+		return userServiceImpt.updateByUser(userDto)
+					.map(result ->{ return result ? ResponseEntity.status(HttpStatus.OK)
+																					.body(ResponseDto.builder()
+																					.status(HttpStatus.OK.value())
+																					.message(HttpStatus.OK.getReasonPhrase())
+																					//.data(Map.of("user", updateEntity))
+																					.build())
+																	: ResponseEntity.status(HttpStatus.BAD_REQUEST)
+																						.body(ResponseDto.builder()
+																						.status(HttpStatus.BAD_REQUEST.value())
+																						.message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+																						.build());
+					})
+					.onErrorReturn(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+												 .body(ResponseDto.builder()
+												 .status(HttpStatus.BAD_REQUEST.value())
+												 .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+												 .build()));
 	}
 	
-	@PostMapping("/kafka/{value}")
-	public Mono<Map<String, String>> postValueByKafka(@PathVariable("value") String value){
-		kafkaProducerService.sendMessage(value);
-		return Mono.just(Map.of("send",value));
+	@DeleteMapping(path="/{userId}")
+	public Mono<ResponseEntity<ResponseDto>> deleteUser(@PathVariable ("userId") String userId
+													 	){
+		return userServiceImpt.deleteByUser(userId)
+					.map(result ->{ return result ? ResponseEntity.status(HttpStatus.NO_CONTENT)
+																					.body(ResponseDto.builder()
+																					.status(HttpStatus.NO_CONTENT.value())
+																					.message(HttpStatus.NO_CONTENT.getReasonPhrase())
+																					.build())
+																	: ResponseEntity.status(HttpStatus.BAD_REQUEST)
+																						.body(ResponseDto.builder()
+																						.status(HttpStatus.BAD_REQUEST.value())
+																						.message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+																						.build());
+					})
+					.onErrorReturn(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+												 .body(ResponseDto.builder()
+												 .status(HttpStatus.BAD_REQUEST.value())
+												 .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+												 .build()));
 	}
-	*/
 }

@@ -1,6 +1,6 @@
 package com.ehas.auth.User.dto;
 
-import java.util.List;
+import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ResponseDto {
-	private String status;
+	private Integer status;
 	private String message;
-	private List<?> data;
+	private Map<String,?> data;
 }
