@@ -1,6 +1,7 @@
 package com.ehas.auth.User.dto;
 
-import com.ehas.auth.User.userstatus.UserStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UserDto {
+	//@JsonProperty("")
 	private Integer seq;
 	private String id;
 	private String name;
@@ -20,4 +23,12 @@ public class UserDto {
 	
 	private Integer addressSeq;
 	private Integer roleSeq;
+	
+	public interface UserData {
+	    String getSeq();
+	    String getId();
+	    String getStatus();
+	    String getAddressSeq();
+	    String getroleSeq();
+	}
 }

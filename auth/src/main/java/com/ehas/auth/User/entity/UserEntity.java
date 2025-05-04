@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,14 +19,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import com.ehas.auth.User.userstatus.UserStatus;
-import com.ehas.auth.content.entity.RoleEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

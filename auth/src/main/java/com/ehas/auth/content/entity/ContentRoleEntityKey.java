@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

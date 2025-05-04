@@ -75,7 +75,8 @@ public class AuthSecurityConfig {
          .authorizeExchange(exchange -> exchange
                  .pathMatchers(HttpMethod.OPTIONS).permitAll()
                  .pathMatchers("/actuator/**").access(this::checkAllowIp)
-                 .pathMatchers("/users/**").permitAll()
+                 .pathMatchers("/users").permitAll()
+                 .pathMatchers("/users/*/token").permitAll()
                  .pathMatchers("/content/**").permitAll() //.access(this::checkAllowIp)//.hasAnyRole("CMS_ADMIN","CMS_USER")
                  .anyExchange().authenticated()
          )

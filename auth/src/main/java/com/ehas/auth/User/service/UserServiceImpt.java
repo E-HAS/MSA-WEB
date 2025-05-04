@@ -7,14 +7,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ehas.auth.User.api.UserRestController;
 import com.ehas.auth.User.dto.UserDto;
+import com.ehas.auth.User.entity.RoleEntity;
 import com.ehas.auth.User.entity.UserEntity;
 import com.ehas.auth.User.entity.UserRoleEntity;
 import com.ehas.auth.User.entity.UserRoleEntityKey;
+import com.ehas.auth.User.reactive.ReactiveRoleRepository;
 import com.ehas.auth.User.reactive.ReactiveUserRepository;
 import com.ehas.auth.User.reactive.ReactiveUserRoleRepository;
 import com.ehas.auth.User.userstatus.UserStatus;
-import com.ehas.auth.content.entity.RoleEntity;
-import com.ehas.auth.content.reactive.ReactiveRoleRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,6 @@ public class UserServiceImpt {
 				.flatMap(saveEntity -> this.findByUserId(saveEntity.getId()))
 				.flatMap(userEntity -> ReactiveUserRoleRepo.save(UserRoleEntity
 																.builder()
-																.contentSeq(0)
 																.userSeq(userEntity.getSeq())
 																.roleSeq(user.getRoleSeq())
 																.build())
@@ -100,10 +99,6 @@ public class UserServiceImpt {
 	
 	public Mono<UserEntity> findByUserId(String id){
 		return ReactiveUserRepo.findById(id);
-	}
-	
-	public Flux<UserRoleEntity> findByUserRoleSeq(Integer seq){
-		return ReactiveUserRoleRepo.findBySeq(seq);
 	}
 	
 	public Flux<RoleEntity> findRoleByUserSeq(Integer seq){

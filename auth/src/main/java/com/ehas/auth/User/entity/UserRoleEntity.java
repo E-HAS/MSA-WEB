@@ -16,12 +16,10 @@ import jakarta.persistence.Id;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name ="userrole")
+@Table(name ="user_role")
 //@IdClass(UserRoleEntityKey.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserRoleEntity {
-    @Id
-	private Integer contentSeq;
     @Id
 	private Integer userSeq;
     @Id

@@ -6,7 +6,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import com.ehas.auth.User.userstatus.UserStatus;
 
-import jakarta.persistence.Id;
+import org.springframework.data.annotation.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name ="content_users")
-public class ContentUsersEntity {
+@Table(name ="content_user")
+public class ContentUserEntity {
     @Id
     private Integer seq;
     private Integer contentSeq;

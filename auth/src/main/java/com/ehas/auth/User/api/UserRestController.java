@@ -60,7 +60,7 @@ public class UserRestController {
 													 , @RequestBody UserDto userDto
 													 ){
 		// 인증을 위한 authentication 객체 생성
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userId, userDto.getPassword());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDto.getId(), userDto.getPassword());
         
 	    return reactiveAuthenticationManager.authenticate(authentication) // 인증 후 토큰 생성
                 	   .map(jwtTokenProvider::createToken)
@@ -114,7 +114,12 @@ public class UserRestController {
 																						.status(HttpStatus.BAD_REQUEST.value())
 																						.message(HttpStatus.BAD_REQUEST.getReasonPhrase())
 																						.build());
-					});
+					})
+					.onErrorReturn(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+							 .body(ResponseDto.builder()
+							 .status(HttpStatus.BAD_REQUEST.value())
+							 .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+							 .build()));
 	}
 	
 	@PutMapping(path="/{userId}")
