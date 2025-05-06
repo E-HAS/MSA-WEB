@@ -1,10 +1,6 @@
-package com.ehas.auth.content.entity;
+package com.ehas.auth.content.dto;
 
 import java.time.LocalDateTime;
-
-import org.springframework.data.relational.core.mapping.Table;
-
-import org.springframework.data.annotation.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,11 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name ="content")
-public class ContentEntity {
-    @Id
+public class ContentDto {
     private Integer seq;
-
     private String contentName;
     private String contentDept;
     private Boolean used;

@@ -100,7 +100,7 @@ public class UserRestController {
 								});
 	}
 	
-	@PostMapping(path="/{userId}")
+	@GetMapping(path="/{userId}")
 	public Mono<ResponseEntity<ResponseDto>> getUser(@PathVariable ("userId") String userId){
 		return userServiceImpt.findByUserId(userId)
 					.map(findEntity ->{ return findEntity != null ? ResponseEntity.status(HttpStatus.OK)
@@ -136,7 +136,6 @@ public class UserRestController {
 																					.body(ResponseDto.builder()
 																					.status(HttpStatus.OK.value())
 																					.message(HttpStatus.OK.getReasonPhrase())
-																					//.data(Map.of("user", updateEntity))
 																					.build())
 																	: ResponseEntity.status(HttpStatus.BAD_REQUEST)
 																						.body(ResponseDto.builder()

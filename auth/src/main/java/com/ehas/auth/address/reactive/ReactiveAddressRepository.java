@@ -20,5 +20,5 @@ public interface ReactiveAddressRepository extends R2dbcRepository<AddressEntity
 			+ "And gugun_code = :gugun "
 			+ "And dong_code = :dong "
 			+ "And ri_code = :ri ")
-	Flux<AddressEntity> findBySidoAndGugunAndDongAndRi(Integer sido, Integer gugun, Integer dong, Integer ri);
+	Mono<AddressEntity> findBySidoAndGugunAndDongAndRi(Integer sido, Integer gugun, Integer dong, Integer ri);
 }

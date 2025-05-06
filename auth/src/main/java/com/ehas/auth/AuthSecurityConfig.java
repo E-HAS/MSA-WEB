@@ -77,7 +77,8 @@ public class AuthSecurityConfig {
                  .pathMatchers("/actuator/**").access(this::checkAllowIp)
                  .pathMatchers("/users").permitAll()
                  .pathMatchers("/users/*/token").permitAll()
-                 .pathMatchers("/content/**").permitAll() //.access(this::checkAllowIp)//.hasAnyRole("CMS_ADMIN","CMS_USER")
+                 .pathMatchers("/address/**").permitAll()
+                 .pathMatchers("/contents/**").permitAll() //.access(this::checkAllowIp)//.hasAnyRole("CMS_ADMIN","CMS_USER")
                  .anyExchange().authenticated()
          )
          .addFilterAt(new JwtTokenAuthenticationFilter(jwtTokenProvider), SecurityWebFiltersOrder.AUTHENTICATION);

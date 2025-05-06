@@ -1,0 +1,1086 @@
+{
+  "version": 6,
+  "entities": [
+    {
+      "entity": {
+        "type": "Project",
+        "id": "1531b6e4-5e5f-4ddb-ad6f-e65e8a81b28c",
+        "name": "test"
+      },
+      "children": [
+        {
+          "entity": {
+            "type": "Service",
+            "description": "",
+            "id": "21776dae-b24a-427e-b89a-385e8d42d7c5",
+            "name": "인증서버"
+          },
+          "children": [
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"addressSeq\":49862\n  ,\"roleSeq\":1\n  ,\"id\":\"testid\"\n  ,\"status\": 1\n  ,\"name\":\"testName\"\n  ,\"password\":\"QWas!@34\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/users"
+                },
+                "description": "",
+                "id": "e48000b6-bfd5-4d98-a2cb-bcf8d7971027",
+                "name": "1-1.인증서버 유저 회원가입",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": ""
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/users/testid"
+                },
+                "description": "",
+                "id": "360531b4-fa8f-411e-9910-53108a9dd320",
+                "name": "1-2.인증서버 유저 조회",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDYyNzA0MTUsImV4cCI6MTc0NjI3MTAxNX0.d-qDNeowTR1bYw65rMkGpjFA6LOkiKGLHPzw0NrC7DPshXYsWC-wPwB5tnGQkgfSCygII4jBa6ywnhyyOUf1wQ"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.4",
+                  "name": "PUT"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"addressSeq\":49861\n  ,\"roleSeq\":2\n  ,\"id\":\"testid\"\n  ,\"status\":2\n  ,\"name\":\"testName_1\"\n  ,\"password\":\"QWas!@34\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/users/testid"
+                },
+                "description": "",
+                "id": "16df5848-4ae6-4f1d-8428-396243b91961",
+                "name": "1-3.인증서버 유저 수정",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": ""
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.5",
+                  "name": "DELETE"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": ""
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/users/testid"
+                },
+                "description": "",
+                "id": "206e532b-5e9a-4147-bac4-0bc616bfe5f8",
+                "name": "1-4.인증서버 유저 삭제",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": ""
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n    \"id\":\"testid\"\n\t,\"password\":\"QWas!@34\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/users/testid/token"
+                },
+                "description": "",
+                "id": "850c60ca-96a2-4a59-a3f9-f3f03a4fc1eb",
+                "name": "1-5.인증서버 유저 토큰 발급",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": ""
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/users/testid/roles"
+                },
+                "description": "",
+                "id": "0cd08d42-97c9-4fc6-8a75-32967594c213",
+                "name": "2-1.인증서버 유저 권한 조회",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDYzMzM5MjEsImV4cCI6MTc0NjMzNDUyMX0.K-rBQgRF89WrRb8tXTtTnBQuap1Zm_q2dhMuuM6py45K9TW26ix7PD7uCCPY6iQt-xJZBVLYsmHajYhhq1DpLg"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"userSeq\":13\n  ,\"roleSeq\":2\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/users/testid/roles"
+                },
+                "description": "",
+                "id": "204fbdb0-088c-4559-8f10-7affb1dbd23b",
+                "name": "2-2.인증서버 유저 권한 추가",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDYzMzM5MjEsImV4cCI6MTc0NjMzNDUyMX0.K-rBQgRF89WrRb8tXTtTnBQuap1Zm_q2dhMuuM6py45K9TW26ix7PD7uCCPY6iQt-xJZBVLYsmHajYhhq1DpLg"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.5",
+                  "name": "DELETE"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"userSeq\":13\n  ,\"roleSeq\":2\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/users/testid/roles/2"
+                },
+                "description": "",
+                "id": "182def8c-5ed6-40ca-b2f4-6cbe208a701c",
+                "name": "2-3.인증서버 유저 권한 삭제",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4sUk9MRV9VU0VSIiwiaWF0IjoxNzQ2MzQ4MzU0LCJleHAiOjE3NDYzNDg5NTR9.DvGQIm0EblgnxjNVVRG83mzx09Mug8y3q2i0lMP46UCjNDmyDEazfeWLoWMGLEsenLD_s6FZessgR7h22OO-zQ"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": ""
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/roles"
+                },
+                "description": "",
+                "id": "04ce5795-1a12-4bc4-b5ba-f989e01eb061",
+                "name": "3-1.인증서버 권한 모두 조회",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4sUk9MRV9VU0VSIiwiaWF0IjoxNzQ2MzQ4MzU0LCJleHAiOjE3NDYzNDg5NTR9.DvGQIm0EblgnxjNVVRG83mzx09Mug8y3q2i0lMP46UCjNDmyDEazfeWLoWMGLEsenLD_s6FZessgR7h22OO-zQ"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n\"roleName\": \"TEST\"\n,\"roleDept\": \"테스트\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/roles"
+                },
+                "description": "",
+                "id": "d71b0863-7007-42fb-a757-faf997b0def9",
+                "name": "3-2.인증서버 권한 추가",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4sUk9MRV9VU0VSIiwiaWF0IjoxNzQ2MzQ4MzU0LCJleHAiOjE3NDYzNDg5NTR9.DvGQIm0EblgnxjNVVRG83mzx09Mug8y3q2i0lMP46UCjNDmyDEazfeWLoWMGLEsenLD_s6FZessgR7h22OO-zQ"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.4",
+                  "name": "PUT"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"seq\":3\n,\"roleName\": \"TEST_1\"\n,\"roleDept\": \"테스트_1\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/roles"
+                },
+                "description": "",
+                "id": "d93c4c20-8033-4e52-b43c-de5eb1f5a8c8",
+                "name": "3-3.인증서버 권한 수정",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4sUk9MRV9VU0VSIiwiaWF0IjoxNzQ2MzQ4MzU0LCJleHAiOjE3NDYzNDg5NTR9.DvGQIm0EblgnxjNVVRG83mzx09Mug8y3q2i0lMP46UCjNDmyDEazfeWLoWMGLEsenLD_s6FZessgR7h22OO-zQ"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.5",
+                  "name": "DELETE"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"seq\":3\n,\"roleName\": \"TEST_1\"\n,\"roleDept\": \"테스트_1\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/roles/3"
+                },
+                "description": "",
+                "id": "ccd60a7b-18b3-4f12-81c3-225a6b0065b1",
+                "name": "3-4.인증서버 권한 삭제",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDYzNTE5MTAsImV4cCI6MTc0NjM1MjUxMH0.bQ2PouEMwRxm4t8by71BXD1MuMrXHTpgbfa7RniasblKFHa1BmoCrPKLyQ461igrXVSarmgU1mR5MBYOAwCI2A"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": ""
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents/2"
+                },
+                "description": "",
+                "id": "1f162e29-f5da-4917-8d26-69e7b075ac1c",
+                "name": "4-1.인증서버 컨텐츠 조회",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1MzI3MTgsImV4cCI6MTc0NjUzMzMxOH0.S_W8nmhpsyCLe7L-SicpcqEUj1H7qQigqQSOVi7ywrkHO3wwKNcb27m5dRCXcsmcNJ8O6T8zMaVuF4jtJfAe2g"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n\"contentName\": \"TEST_CONTENT\"\n,\"contentDept\": \"테스트 컨텐츠\"\n  ,\"used\":true\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents"
+                },
+                "description": "",
+                "id": "fb5b566d-388b-4219-ad64-fb753b714c26",
+                "name": "4-2.인증서버 컨텐츠 추가",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1MzYzMDYsImV4cCI6MTc0NjUzNjkwNn0.SPH5JQYI3g94vl1qkMwao-r2AKxnTUm-AZopVyewK7B-Gtq1FSRo8FdcH3yZq0rLXGdpFWd2zsloEH_hCMM4Kw"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.4",
+                  "name": "PUT"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"seq\":2 \n,\"contentName\": \"TEST_CONTENT_1\"\n,\"contentDept\": \"테스트 컨텐츠_1\"\n  ,\"used\":true\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents/2"
+                },
+                "description": "",
+                "id": "f8752a52-cadb-4555-ab74-809d2c0c6e1b",
+                "name": "4-3.인증서버 컨텐츠 수정",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1MzMzNDQsImV4cCI6MTc0NjUzMzk0NH0.ZFwajCiOmdIkCnYhZX0vfCJCe8h2vqXEPWls3fzBWefxB4Y3WqemfdrewCtKkvFMLmRohUMZ7CUzaGDRSaiuLw"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.5",
+                  "name": "DELETE"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"seq\":2 \n,\"contentName\": \"TEST_CONTENT_1\"\n,\"contentDept\": \"테스트 컨텐츠_1\"\n  ,\"used\":true\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents/2"
+                },
+                "description": "",
+                "id": "43a4d169-f4f1-4f2c-8c11-fd5b5bb860ec",
+                "name": "4-4.인증서버 컨텐츠 삭제",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1MzMzNDQsImV4cCI6MTc0NjUzMzk0NH0.ZFwajCiOmdIkCnYhZX0vfCJCe8h2vqXEPWls3fzBWefxB4Y3WqemfdrewCtKkvFMLmRohUMZ7CUzaGDRSaiuLw"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": ""
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents/2/roles"
+                },
+                "description": "",
+                "id": "9b70f5e7-9584-4861-96ca-d0c060f6a872",
+                "name": "5-1.인증서버 컨텐츠 권한 조회",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1MzI3MTgsImV4cCI6MTc0NjUzMzMxOH0.S_W8nmhpsyCLe7L-SicpcqEUj1H7qQigqQSOVi7ywrkHO3wwKNcb27m5dRCXcsmcNJ8O6T8zMaVuF4jtJfAe2g"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"contentSeq\":3\n  ,\"roleName\":\"Test\"\n  ,\"roleDept\":\"테스트\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents/3/roles"
+                },
+                "description": "",
+                "id": "83e8cf43-3b57-46e0-924a-d687a6f87bdb",
+                "name": "5-2.인증서버 컨텐츠 권한 추가",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1MzcxMjksImV4cCI6MTc0NjUzNzcyOX0.MHOUqcwSsUXyPOWf8K8qSnG0gWu_RnzbjQwsOqjsA3-o-N9e7qE7yWMtelEeOYooJCguoWtUKQRUkPAga4R_QA"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.4",
+                  "name": "PUT"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"seq\":1\n  ,\"contentSeq\":3\n  ,\"roleName\":\"Test_1\"\n  ,\"roleDept\":\"테스트_1\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents/3/roles/1"
+                },
+                "description": "",
+                "id": "81403ca6-46cb-48bc-8c55-52a53b8e3a0a",
+                "name": "5-3.인증서버 컨텐츠 권한 수정",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1MzYzMDYsImV4cCI6MTc0NjUzNjkwNn0.SPH5JQYI3g94vl1qkMwao-r2AKxnTUm-AZopVyewK7B-Gtq1FSRo8FdcH3yZq0rLXGdpFWd2zsloEH_hCMM4Kw"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.5",
+                  "name": "DELETE"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"seq\":1\n  ,\"contentSeq\":3\n  ,\"roleName\":\"Test\"\n  ,\"roleDept\":\"테스트\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents/3/roles/1"
+                },
+                "description": "",
+                "id": "832e3f5b-7589-404c-9b9f-402b5234ddfc",
+                "name": "5-4.인증서버 컨텐츠 권한 삭제",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1MzYzMDYsImV4cCI6MTc0NjUzNjkwNn0.SPH5JQYI3g94vl1qkMwao-r2AKxnTUm-AZopVyewK7B-Gtq1FSRo8FdcH3yZq0rLXGdpFWd2zsloEH_hCMM4Kw"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": ""
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents/3/users"
+                },
+                "description": "",
+                "id": "df801703-cb1e-47ea-9045-0d29b8e3bd1c",
+                "name": "6-1.인증서버 컨텐츠 유저 조회",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1MzcxMjksImV4cCI6MTc0NjUzNzcyOX0.MHOUqcwSsUXyPOWf8K8qSnG0gWu_RnzbjQwsOqjsA3-o-N9e7qE7yWMtelEeOYooJCguoWtUKQRUkPAga4R_QA"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"contentSeq\":3\n  ,\"userSeq\":13\n  ,\"userName\":\"Test_USER\"\n  ,\"userDept\":\"테스트 유저\"\n  ,\"status\":1\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents/3/users"
+                },
+                "description": "",
+                "id": "14df4246-a8ef-4d94-a04f-e5adbe9c8579",
+                "name": "6-2.인증서버 컨텐츠 유저 추가",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1MzcxMjksImV4cCI6MTc0NjUzNzcyOX0.MHOUqcwSsUXyPOWf8K8qSnG0gWu_RnzbjQwsOqjsA3-o-N9e7qE7yWMtelEeOYooJCguoWtUKQRUkPAga4R_QA"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.4",
+                  "name": "PUT"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"seq\":2\n  ,\"contentSeq\":3\n  ,\"userSeq\":13\n  ,\"userName\":\"Test_USER_1\"\n  ,\"userDept\":\"테스트 유저_1\"\n  ,\"status\":1\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents/3/users/2"
+                },
+                "description": "",
+                "id": "75c10d5c-7b65-4f70-90ee-66d7d78db3ba",
+                "name": "6-3.인증서버 컨텐츠 유저 수정",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1MzcxMjksImV4cCI6MTc0NjUzNzcyOX0.MHOUqcwSsUXyPOWf8K8qSnG0gWu_RnzbjQwsOqjsA3-o-N9e7qE7yWMtelEeOYooJCguoWtUKQRUkPAga4R_QA"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.5",
+                  "name": "DELETE"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\n  \"seq\":1\n  ,\"contentSeq\":3\n  ,\"roleName\":\"Test\"\n  ,\"roleDept\":\"테스트\"\n}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/contents/3/users/2"
+                },
+                "description": "",
+                "id": "2dfe911b-1d39-4599-ad36-0e0861ac2d22",
+                "name": "6-4.인증서버 컨텐츠 유저 삭제",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1Mzc1ODcsImV4cCI6MTc0NjUzODE4N30.0BmSLNBc8KGA5BgUDd3pYZ1xygQvUFrNTAXnays1jKx3UZCobiE3X7V7wuQkjlhNpfEDN4UjASw3lSWPmwK3DQ"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": ""
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "192.168.1.101:8001",
+                  "path": "/auth/address/99719"
+                },
+                "description": "",
+                "id": "2a03ce8a-a101-4164-90f2-2d8bc3657ba5",
+                "name": "7-1.인증서버 실제 주소 조회",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0aWQiLCJwZXJtaXNzaW9ucyI6IlJPTEVfQURNSU4iLCJpYXQiOjE3NDY1Mzg5OTMsImV4cCI6MTc0NjUzOTU5M30.dREDQA3aRdqDLMbch8stgCjvflrMKPL8ZaPiM8Aia11-jObttwXgnOw4wtakvObL_ua-qmPunllfeEW2gY-wAw"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

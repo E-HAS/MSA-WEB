@@ -1,4 +1,4 @@
-package com.ehas.auth.content.entity;
+package com.ehas.auth.content.dto;
 
 
 import lombok.AllArgsConstructor;
@@ -15,10 +15,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name ="content_role")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ContentRoleEntity {
-    @Id
+public class ContentRoleDto {
     private Integer seq;
     
 	private Integer contentSeq;

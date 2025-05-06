@@ -15,9 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ehas.auth.User.dto.ResponseDto;
-import com.ehas.auth.content.dto.ContentRoleDto;
-import com.ehas.auth.content.dto.ContentUserDto;
-import com.ehas.auth.content.service.ContentUserServiceImpt;
+import com.ehas.auth.content.dto.ContentDto;
+import com.ehas.auth.content.service.ContentServiceImpt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,18 +26,18 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/contents")
 @RequiredArgsConstructor
-public class ContentUserRestController {
-	private final ContentUserServiceImpt contentUsersServiceImpt;
+public class ContentRestController {
+	private final ContentServiceImpt contentServiceImpt;
 	
-	@GetMapping(path="/{contentSeq}/users")
-	public Mono<ResponseEntity<ResponseDto>> getContentRole(@PathVariable ("contentSeq") Integer contentSeq){
-		return contentUsersServiceImpt.findByContentSeq(contentSeq)
+	@GetMapping
+	public Mono<ResponseEntity<ResponseDto>> getContentAll(){
+		return contentServiceImpt.findAll()
 				.collectList()
 				.map(findEntity ->{ return findEntity != null ? ResponseEntity.status(HttpStatus.OK)
 																	.body(ResponseDto.builder()
 																	.status(HttpStatus.OK.value())
 																	.message(HttpStatus.OK.getReasonPhrase())
-																	.data(Map.of("user", findEntity))
+																	.data(Map.of("cotnent", findEntity))
 																	.build())
 																: ResponseEntity.status(HttpStatus.BAD_REQUEST)
 																					.body(ResponseDto.builder()
@@ -53,15 +52,14 @@ public class ContentUserRestController {
 									.build()));
 	}
 	
-	@GetMapping(path="/{contentSeq}/users/{contentUserSeq}")
-	public Mono<ResponseEntity<ResponseDto>> getContentRole(@PathVariable ("contentSeq") Integer contentSeq
-															,@PathVariable ("contentUserSeq") Integer contentUserSeq){
-		return contentUsersServiceImpt.findByContentSeqAndUserSeq(contentSeq, contentUserSeq)
+	@GetMapping(path="/{contentSeq}")
+	public Mono<ResponseEntity<ResponseDto>> getContent(@PathVariable ("contentSeq") Integer contentSeq){
+		return contentServiceImpt.findBySeq(contentSeq)
 				.map(findEntity ->{ return findEntity != null ? ResponseEntity.status(HttpStatus.OK)
 																	.body(ResponseDto.builder()
 																	.status(HttpStatus.OK.value())
 																	.message(HttpStatus.OK.getReasonPhrase())
-																	.data(Map.of("user", findEntity))
+																	.data(Map.of("cotnent", findEntity))
 																	.build())
 																: ResponseEntity.status(HttpStatus.BAD_REQUEST)
 																					.body(ResponseDto.builder()
@@ -76,9 +74,10 @@ public class ContentUserRestController {
 									.build()));
 	}
 	
-	@PostMapping(path="/{contentSeq}/users")
-	public Mono<ResponseEntity<ResponseDto>> addContentRole(@RequestBody ContentUserDto contentUserDto){
-		return contentUsersServiceImpt.addContentUser(contentUserDto)
+	
+	@PostMapping
+	public Mono<ResponseEntity<ResponseDto>> addContent(@RequestBody ContentDto contentDto){
+		return contentServiceImpt.addContent(contentDto)
 				.map(result ->{ return result ? ResponseEntity.status(HttpStatus.CREATED)
 																.body(ResponseDto.builder()
 																.status(HttpStatus.CREATED.value())
@@ -97,11 +96,10 @@ public class ContentUserRestController {
 								.build()));
 	}
 	
-	@PutMapping(path="/{contentSeq}/users/{contentUserSeq}")
+	@PutMapping(path="/{contentSeq}")
 	public Mono<ResponseEntity<ResponseDto>> updateContent(@PathVariable ("contentSeq") Integer contentSeq
-														,@PathVariable ("contentUserSeq") Integer contentUserSeq
-														,@RequestBody ContentUserDto contentUserDto){
-		return contentUsersServiceImpt.updateContentUser(contentUserDto)
+														,@RequestBody ContentDto contentDto){
+		return contentServiceImpt.updateContent(contentDto)
 				.map(result ->{ return result ? ResponseEntity.status(HttpStatus.OK)
 																.body(ResponseDto.builder()
 																.status(HttpStatus.OK.value())
@@ -120,10 +118,9 @@ public class ContentUserRestController {
 								.build()));
 	}
 	
-	@DeleteMapping(path="/{contentSeq}/users/{contentUserSeq}")
-	public Mono<ResponseEntity<ResponseDto>> deleteContent(@PathVariable ("contentSeq") Integer contentSeq
-															,@PathVariable ("contentUserSeq") Integer contentUserSeq){
-		return contentUsersServiceImpt.deleteBySeq(contentUserSeq)
+	@DeleteMapping(path="/{contentSeq}")
+	public Mono<ResponseEntity<ResponseDto>> deleteContent(@PathVariable ("contentSeq") Integer contentSeq){
+		return contentServiceImpt.deleteContent(contentSeq)
 				.map(result ->{ return result ? ResponseEntity.status(HttpStatus.NO_CONTENT)
 																.body(ResponseDto.builder()
 																.status(HttpStatus.NO_CONTENT.value())
