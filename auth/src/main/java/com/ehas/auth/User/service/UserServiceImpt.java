@@ -15,7 +15,10 @@ import com.ehas.auth.User.reactive.ReactiveRoleRepository;
 import com.ehas.auth.User.reactive.ReactiveUserRepository;
 import com.ehas.auth.User.reactive.ReactiveUserRoleRepository;
 import com.ehas.auth.User.userstatus.UserStatus;
+import com.ehas.auth.redis.dto.RedisUserDto;
+import com.ehas.auth.redis.service.UserDataRedisService;
 
+import io.jsonwebtoken.lang.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -29,6 +32,8 @@ public class UserServiceImpt {
 	private final ReactiveUserRepository ReactiveUserRepo;
 	private final ReactiveUserRoleRepository ReactiveUserRoleRepo;
 	private final ReactiveRoleRepository reactiveRoleRepository;
+	
+	private final UserDataRedisService userDataRedisService;
 	
 	//@Transactional(rollbackFor = { Exception.class })  
 	public Mono<Boolean> saveByUser(UserDto user){
@@ -99,6 +104,36 @@ public class UserServiceImpt {
 	
 	public Mono<UserEntity> findByUserId(String id){
 		return ReactiveUserRepo.findById(id);
+	}
+	
+	public Mono<UserDto> findByUserIdToRedis(String id){
+		return userDataRedisService.exists(id)
+							.flatMap(exit->{
+								if(Boolean.TRUE.equals(exit)) {
+									return userDataRedisService.get(id)
+														       .map(dto -> UserDto.builder()
+														    		   				 .seq(dto.getUserSeq())
+														    		   				 .addressSeq(dto.getAddressSeq())
+														    		   				 .build());
+								}else {
+									return ReactiveUserRepo.getUserById(id)
+															.flatMap(dto -> {
+																return userDataRedisService.getUserBySave(id
+																		, RedisUserDto.builder()
+																					  .userSeq(dto.getSeq())
+																					  .addressSeq(dto.getAddressSeq())
+																					  .name(dto.getName())
+																					  .build())
+											                            .flatMap(savedDto -> {
+											                            return  Mono.just(
+											                            		UserDto.builder()
+											                                    .seq(savedDto.getUserSeq())
+											                                    .addressSeq(savedDto.getAddressSeq())
+											                                    .build());
+											                             });
+															});
+								}
+							});
 	}
 	
 	public Flux<RoleEntity> findRoleByUserSeq(Integer seq){

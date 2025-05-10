@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UserDto {
-	//@JsonProperty("")
 	private Integer seq;
 	private String id;
 	private String name;

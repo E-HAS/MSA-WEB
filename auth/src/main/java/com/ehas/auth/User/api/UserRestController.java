@@ -102,7 +102,7 @@ public class UserRestController {
 	
 	@GetMapping(path="/{userId}")
 	public Mono<ResponseEntity<ResponseDto>> getUser(@PathVariable ("userId") String userId){
-		return userServiceImpt.findByUserId(userId)
+		return userServiceImpt.findByUserIdToRedis(userId)
 					.map(findEntity ->{ return findEntity != null ? ResponseEntity.status(HttpStatus.OK)
 																					.body(ResponseDto.builder()
 																					.status(HttpStatus.OK.value())

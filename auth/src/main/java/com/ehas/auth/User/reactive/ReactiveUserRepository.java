@@ -8,6 +8,7 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.ehas.auth.User.dto.UserDto;
 import com.ehas.auth.User.entity.UserEntity;
 import com.ehas.auth.User.userstatus.UserStatus;
 
@@ -20,6 +21,16 @@ public interface ReactiveUserRepository extends R2dbcRepository<UserEntity, Inte
 	
 	@Query("SELECT * FROM USER WHERE id = :id")
 	Mono<UserEntity> findById(String id);
+	
+	@Query("""
+			SELECT SEQ
+				  ,NAME
+				  ,STATUS
+				  ,ADDRESS_SEQ
+			 FROM USER 
+			WHERE id = :id
+			""")
+	Mono<UserDto> getUserById(String id);
 	
 	@Query(   " SELECT * "
 			+ " FROM USER "
