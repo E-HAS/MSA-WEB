@@ -75,6 +75,7 @@ public class AuthSecurityConfig {
          .authorizeExchange(exchange -> exchange
                  .pathMatchers(HttpMethod.OPTIONS).permitAll()
                  .pathMatchers("/actuator/**").access(this::checkAllowIp)
+                 .pathMatchers("/cache/**").permitAll()
                  .pathMatchers("/users").permitAll()
                  .pathMatchers("/users/*/token").permitAll()
                  .pathMatchers("/address/**").permitAll()

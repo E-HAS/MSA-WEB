@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+//@RedisHash("user_cache")
 public class RedisUserDto implements Serializable{
 	private Integer userSeq;
 	private Integer addressSeq;

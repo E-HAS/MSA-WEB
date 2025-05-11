@@ -1,6 +1,8 @@
 package com.ehas.auth.User.service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,8 @@ import com.ehas.auth.User.reactive.ReactiveUserRepository;
 import com.ehas.auth.User.reactive.ReactiveUserRoleRepository;
 import com.ehas.auth.User.userstatus.UserStatus;
 import com.ehas.auth.redis.dto.RedisUserDto;
+import com.ehas.auth.redis.service.CacheRedisHashService;
+import com.ehas.auth.redis.service.CacheRedisService;
 import com.ehas.auth.redis.service.UserDataRedisService;
 
 import io.jsonwebtoken.lang.Arrays;
@@ -34,6 +38,12 @@ public class UserServiceImpt {
 	private final ReactiveRoleRepository reactiveRoleRepository;
 	
 	private final UserDataRedisService userDataRedisService;
+	private final CacheRedisHashService cacheRedisHashService;
+	private final CacheRedisService cacheRedisService;
+	
+	public Mono<Boolean> addUserRefreshToken(String userId, String token){
+		return cacheRedisService.setValue("refresh:", userId, token, Duration.ofDays(1));
+	}
 	
 	//@Transactional(rollbackFor = { Exception.class })  
 	public Mono<Boolean> saveByUser(UserDto user){
@@ -106,34 +116,38 @@ public class UserServiceImpt {
 		return ReactiveUserRepo.findById(id);
 	}
 	
-	public Mono<UserDto> findByUserIdToRedis(String id){
-		return userDataRedisService.exists(id)
-							.flatMap(exit->{
-								if(Boolean.TRUE.equals(exit)) {
-									return userDataRedisService.get(id)
-														       .map(dto -> UserDto.builder()
-														    		   				 .seq(dto.getUserSeq())
-														    		   				 .addressSeq(dto.getAddressSeq())
-														    		   				 .build());
-								}else {
-									return ReactiveUserRepo.getUserById(id)
-															.flatMap(dto -> {
-																return userDataRedisService.getUserBySave(id
-																		, RedisUserDto.builder()
-																					  .userSeq(dto.getSeq())
-																					  .addressSeq(dto.getAddressSeq())
-																					  .name(dto.getName())
-																					  .build())
-											                            .flatMap(savedDto -> {
-											                            return  Mono.just(
-											                            		UserDto.builder()
-											                                    .seq(savedDto.getUserSeq())
-											                                    .addressSeq(savedDto.getAddressSeq())
-											                                    .build());
-											                             });
-															});
-								}
-							});
+	public Mono<RedisUserDto> findByUserIdToRedis(String id){
+		String userSeqFieldName = "userSeq";
+		String addressSeqFieldName = "addressSeq";
+		String nameFieldName = "name";
+		
+		return cacheRedisHashService.existsByKeyAndField(id, userSeqFieldName) // redis key 존재 여부
+		        .flatMap(exists -> {
+		            if (Boolean.TRUE.equals(exists)) {
+		                return cacheRedisHashService.findAllByKeyAndField(id)   // redis 캐시 데이터 가져오기
+		                    .flatMap(dto -> Mono.just(RedisUserDto.builder()
+		                        .userSeq(Integer.parseInt(dto.get(userSeqFieldName)))
+		                        .addressSeq(Integer.parseInt(dto.get(addressSeqFieldName)))
+		                        .name(dto.get(nameFieldName))
+		                        .build()));
+		            } else {
+		                return ReactiveUserRepo.getUserById(id)   // db 데이터 가져오기
+		                    .flatMap(dto -> {
+		                    	// redis 캐시 데이터 넣기
+		                    	return cacheRedisHashService.addAllByKeyAndMap(id
+		                    											, Map.of(userSeqFieldName, dto.getSeq().toString()
+		                    											,addressSeqFieldName, dto.getAddressSeq().toString()
+		                    											,nameFieldName, dto.getName().toString())
+		                    											, Duration.ofMinutes(60))
+		                    			.thenReturn(RedisUserDto.builder()
+			                                .userSeq(dto.getSeq())
+			                                .addressSeq(dto.getAddressSeq())
+			                                .name(dto.getName())
+			                                .build()
+			                             );
+		                    });
+		            }
+		        });
 	}
 	
 	public Flux<RoleEntity> findRoleByUserSeq(Integer seq){

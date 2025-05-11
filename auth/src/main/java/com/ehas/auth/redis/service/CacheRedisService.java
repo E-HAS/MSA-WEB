@@ -1,5 +1,6 @@
 package com.ehas.auth.redis.service;
 
+import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.ehas.auth.address.reactive.ReactiveAddressRepository;
 
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -18,31 +20,50 @@ public class CacheRedisService {
     public CacheRedisService(@Qualifier("cacheRedisTemplate")ReactiveRedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
-
-    // Map의 put: 필드-값 추가
-    public Mono<Boolean> putToMap(String mapKey, String field, String value) {
-        return redisTemplate.opsForHash().put(mapKey, field, value);
-    }
-
-    // Map의 get: 특정 필드 조회
-    public Mono<String> getFromMap(String mapKey, String field) {
-        return redisTemplate.opsForHash().get(mapKey, field)
-                .cast(String.class); // 리턴은 Object이므로 캐스팅
-    }
-
-    // Map 전체 가져오기 (필드-값 모두)
-    public Mono<Map<Object, Object>> getAllFromMap(String mapKey) {
-        return redisTemplate.opsForHash().entries(mapKey).collectMap(Map.Entry::getKey, Map.Entry::getValue);
-    }
-
-    // Map에서 특정 필드 삭제
-    public Mono<Long> deleteFromMap(String mapKey, String field) {
-        return redisTemplate.opsForHash().remove(mapKey, field);
-    }
     
-    // 특정 key 전체 삭제
-    public Mono<Boolean> deleteMapByKey(String key) {
-        return redisTemplate.delete(key)
-                .map(deletedCount -> deletedCount > 0); // 삭제된 키 개수가 0보다 크면 true
+ // 단일 키-값 저장 + TTL 설정
+    public Mono<Boolean> setValue(String prefix, String key, String value, Duration ttl) {
+        String fullKey = prefix + key;
+        return redisTemplate.opsForValue().set(fullKey, value)
+            .flatMap(success -> {
+                if (Boolean.TRUE.equals(success)) {
+                    return redisTemplate.expire(fullKey, ttl);
+                } else {
+                    return Mono.just(false);
+                }
+            });
+    }
+
+    // 여러 키-값 저장 + 각 항목 TTL 설정 (주의: opsForValue에는 putAll 없음)
+    public Mono<Boolean> setValues(String prefix, Map<String, String> values, Duration ttl) {
+        return Flux.fromIterable(values.entrySet())
+            .flatMap(entry -> {
+                String fullKey = prefix + entry.getKey();
+                return redisTemplate.opsForValue().set(fullKey, entry.getValue())
+                    .flatMap(success -> {
+                        if (Boolean.TRUE.equals(success)) {
+                            return redisTemplate.expire(fullKey, ttl);
+                        } else {
+                            return Mono.just(false);
+                        }
+                    });
+            })
+            .all(Boolean::booleanValue); // 모두 성공했는지 여부 반환
+    }
+
+    // 단일 키 조회
+    public Mono<String> getValue(String prefix, String key) {
+        return redisTemplate.opsForValue().get(prefix + key);
+    }
+
+    // 단일 키 삭제
+    public Mono<Boolean> deleteValue(String prefix, String key) {
+        return redisTemplate.delete(prefix + key)
+            .map(count -> count > 0);
+    }
+
+    // 키 존재 여부 확인
+    public Mono<Boolean> existsKey(String prefix, String key) {
+        return redisTemplate.hasKey(prefix + key);
     }
 }

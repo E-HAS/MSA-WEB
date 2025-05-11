@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ehas.auth.User.dto.ResponseDto;
 import com.ehas.auth.User.dto.UserDto;
+import com.ehas.auth.User.dto.UserTokenDto;
 import com.ehas.auth.User.service.UserServiceImpt;
 import com.ehas.auth.jwt.service.JwtTokenProvider;
 import com.ehas.auth.kafka.service.KafkaLogProducerService;
@@ -62,23 +63,42 @@ public class UserRestController {
 		// 인증을 위한 authentication 객체 생성
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDto.getId(), userDto.getPassword());
         
-	    return reactiveAuthenticationManager.authenticate(authentication) // 인증 후 토큰 생성
-                	   .map(jwtTokenProvider::createToken)
-                       .map(token -> ResponseEntity.status(HttpStatus.CREATED)
-                    		   			.body(ResponseDto.builder()
-				                                       .status(HttpStatus.CREATED.value())
-				                                       .message(HttpStatus.CREATED.getReasonPhrase())
-				                                       .data(Map.of("token", token))
-				                                       .build()
-                       ))
-                       .onErrorReturn(
-                               ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                       .body(ResponseDto.builder()
-                                               .status(HttpStatus.UNAUTHORIZED.value())
-                                               .message(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                                               .build()
-                                       )
-                       );
+        return reactiveAuthenticationManager.authenticate(authentication)
+                .flatMap(auth -> 
+                    jwtTokenProvider.createRefreshMonoToken(userId)
+                        .flatMap(refreshToken -> 
+                            jwtTokenProvider.createMonoToken(auth)
+                                .flatMap(accessToken -> {
+                                    // Redis에 토큰 저장
+                                    return userServiceImpt.addUserRefreshToken(userId, refreshToken)
+                                        .flatMap(success -> {
+                                            if (Boolean.TRUE.equals(success)) {
+                                                return Mono.just(UserTokenDto.builder()
+                                                    .refreshToken(refreshToken)
+                                                    .accessToken(accessToken)
+                                                    .build());
+                                            } else {
+                                                return Mono.error(new RuntimeException("Failed to store tokens in Redis"));
+                                            }
+                                        });
+                                })
+                        )
+                )
+                .map(token -> {
+                    return ResponseEntity.status(HttpStatus.CREATED)
+                        .body(ResponseDto.builder()
+                            .status(HttpStatus.CREATED.value())
+                            .message(HttpStatus.CREATED.getReasonPhrase())
+                            .data(Map.of("token", token))
+                            .build());
+                })
+                .onErrorResume(e -> {
+                    return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ResponseDto.builder()
+                            .status(HttpStatus.UNAUTHORIZED.value())
+                            .message(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                            .build()));
+                });
 	}
 	
 	@PostMapping
@@ -102,7 +122,7 @@ public class UserRestController {
 	
 	@GetMapping(path="/{userId}")
 	public Mono<ResponseEntity<ResponseDto>> getUser(@PathVariable ("userId") String userId){
-		return userServiceImpt.findByUserIdToRedis(userId)
+		return userServiceImpt.findByUserId(userId)
 					.map(findEntity ->{ return findEntity != null ? ResponseEntity.status(HttpStatus.OK)
 																					.body(ResponseDto.builder()
 																					.status(HttpStatus.OK.value())

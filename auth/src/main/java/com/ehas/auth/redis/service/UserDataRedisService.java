@@ -15,12 +15,12 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class UserDataRedisService {
-	private final String keyName;
+	private final String userSeqKey;
     private final ReactiveRedisTemplate<String, Object> redisTemplate;
 
     public UserDataRedisService(@Qualifier("dataRedisTemplate")ReactiveRedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.keyName = "User:";
+        this.userSeqKey = "userSeq:";
     }
     
     // 저장
@@ -30,11 +30,11 @@ public class UserDataRedisService {
     
     public Mono<RedisUserDto> getUserBySave(String key, RedisUserDto value) {
         return redisTemplate.opsForValue().set(key, value)
-        								  .map(result ->{ 
+        								  .flatMap(result ->{ 
         									  if(Boolean.TRUE.equals(result)) {
-        										  return value;
+        										  return Mono.just(value);
         									  }else {
-        										  return null;
+        										  return Mono.empty();
         									  }
         								  });
     }

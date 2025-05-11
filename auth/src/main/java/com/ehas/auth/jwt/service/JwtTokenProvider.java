@@ -42,6 +42,8 @@ public class JwtTokenProvider {
 
     @Value("${jwt.expiration}")
     private String expirationTime;
+    
+    private final long refreshTokenExpirationMillis = 7 * 24 * 60 * 60 * 1000L; // 7일
 
     private SecretKey secretKey;
 
@@ -53,14 +55,11 @@ public class JwtTokenProvider {
 
     public String createToken(Authentication authentication) {
         String username = authentication.getName();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-
-        String permissions = "";
-        if (authorities != null) {
-            permissions = authorities.stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.joining(","));
-        }
+        //Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        String permissions = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+        
         Claims claims = Jwts.claims()
         		.subject(username)
         		.add(PERMISSIONS_KEY, permissions)
@@ -75,6 +74,72 @@ public class JwtTokenProvider {
                 .expiration(expiryDate)
                 .signWith(secretKey)
                 .compact();
+    }
+    
+    public String createRefreshToken(String username) {
+        Claims claims = Jwts.claims().subject(username).build();
+
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + refreshTokenExpirationMillis);
+
+        return Jwts.builder()
+            .claims(claims)
+            .issuedAt(now)
+            .expiration(expiry)
+            .signWith(secretKey)
+            .compact();
+    }
+    
+    public Mono<String> createMonoToken(Authentication authentication) {
+        return Mono.defer(() -> {
+            try {
+                String username = authentication.getName();
+                String permissions = authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.joining(","));
+
+                Claims claims = Jwts.claims()
+                        .subject(username)
+                        .add(PERMISSIONS_KEY, permissions)
+                        .build();
+
+                Date now = new Date();
+                Date expiryDate = new Date(now.getTime() + Long.parseLong(expirationTime));
+
+                String token = Jwts.builder()
+                        .claims(claims)
+                        .issuedAt(now)
+                        .expiration(expiryDate)
+                        .signWith(secretKey)
+                        .compact();
+
+                return Mono.just(token);
+            } catch (Exception e) {
+                return Mono.error(e);
+            }
+        });
+    }
+
+    public Mono<String> createRefreshMonoToken(String username) {
+        return Mono.defer(() -> {
+            try {
+                Claims claims = Jwts.claims().subject(username).build();
+
+                Date now = new Date();
+                Date expiry = new Date(now.getTime() + refreshTokenExpirationMillis);
+
+                String token = Jwts.builder()
+                        .claims(claims)
+                        .issuedAt(now)
+                        .expiration(expiry)
+                        .signWith(secretKey)
+                        .compact();
+
+                return Mono.just(token);
+            } catch (Exception e) {
+                return Mono.error(e);
+            }
+        });
     }
 
     public Authentication getAuthentication(String token) {

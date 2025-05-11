@@ -10,8 +10,7 @@ import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableR2dbcAuditing
-//@EnableR2dbcRepositories(basePackages = "com.ehas.auth.reactive")
-@EnableR2dbcRepositories
+@EnableR2dbcRepositories //(basePackages = "com.ehas.auth.reactive")
 public class AuthApplication {
 
 	public static void main(String[] args) {
