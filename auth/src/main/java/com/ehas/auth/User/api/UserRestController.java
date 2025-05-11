@@ -64,26 +64,22 @@ public class UserRestController {
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDto.getId(), userDto.getPassword());
         
         return reactiveAuthenticationManager.authenticate(authentication)
-                .flatMap(auth -> 
-                    jwtTokenProvider.createRefreshMonoToken(userId)
-                        .flatMap(refreshToken -> 
-                            jwtTokenProvider.createMonoToken(auth)
-                                .flatMap(accessToken -> {
-                                    // Redis에 토큰 저장
-                                    return userServiceImpt.addUserRefreshToken(userId, refreshToken)
-                                        .flatMap(success -> {
-                                            if (Boolean.TRUE.equals(success)) {
-                                                return Mono.just(UserTokenDto.builder()
-                                                    .refreshToken(refreshToken)
-                                                    .accessToken(accessToken)
-                                                    .build());
-                                            } else {
-                                                return Mono.error(new RuntimeException("Failed to store tokens in Redis"));
-                                            }
-                                        });
-                                })
-                        )
-                )
+                .flatMap(auth -> {
+                    String refreshToken = jwtTokenProvider.createRefreshToken(userId); // refreshToken 발급
+                    String accessToken = jwtTokenProvider.createToken(auth); // accessToken 발급
+                    return userServiceImpt.addUserRefreshToken(userId, refreshToken)  // Redis에 refreshToken 발급
+                            .flatMap(success -> {
+                                if (Boolean.TRUE.equals(success)) {
+                                    UserTokenDto tokenDto = UserTokenDto.builder()
+                                            .refreshToken(refreshToken)
+                                            .accessToken(accessToken)
+                                            .build();
+                                    return Mono.just(tokenDto);
+                                } else {
+                                    return Mono.error(new RuntimeException("Failed to store tokens in Redis"));
+                                }
+                            });
+                })
                 .map(token -> {
                     return ResponseEntity.status(HttpStatus.CREATED)
                         .body(ResponseDto.builder()
@@ -99,6 +95,18 @@ public class UserRestController {
                             .message(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                             .build()));
                 });
+	}
+	
+	@PostMapping(path="/{userId}/token/refresh")
+	public Mono<ResponseEntity<ResponseDto>> getRefreshToken( @RequestHeader("Authorization") String header
+															, @PathVariable ("userId") String userId){
+		String refreshToken = header.replace("Bearer ", "");
+		
+        return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ResponseDto.builder()
+                    .status(HttpStatus.UNAUTHORIZED.value())
+                    .message(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                    .build()));
 	}
 	
 	@PostMapping

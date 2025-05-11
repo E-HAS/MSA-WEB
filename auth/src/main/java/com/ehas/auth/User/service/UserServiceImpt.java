@@ -42,7 +42,7 @@ public class UserServiceImpt {
 	private final CacheRedisService cacheRedisService;
 	
 	public Mono<Boolean> addUserRefreshToken(String userId, String token){
-		return cacheRedisService.setValue("refresh:", userId, token, Duration.ofDays(1));
+		return cacheRedisService.setValue("refreshToken:", userId, token, Duration.ofDays(7));
 	}
 	
 	//@Transactional(rollbackFor = { Exception.class })  
