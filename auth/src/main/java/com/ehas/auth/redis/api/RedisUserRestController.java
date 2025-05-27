@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class RedisUserRestController {
 	private final UserServiceImpt userServiceImpt;
-	
+	/*
 	@GetMapping(path="/{userId}")
 	public Mono<ResponseEntity<ResponseDto>> getUser(@PathVariable ("userId") String userId){
 		return userServiceImpt.findByUserIdToRedis(userId)
@@ -44,4 +44,5 @@ public class RedisUserRestController {
 							 .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
 							 .build()));
 	}
+	*/
 }

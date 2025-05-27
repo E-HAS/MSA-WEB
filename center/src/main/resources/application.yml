@@ -15,8 +15,8 @@ spring:
     config:
       server:
         native:
-          search-locations: file:/server-yml/
-          #search-locations: file:///D:/server-yml/
+          #search-locations: file:/server-yml/
+          search-locations: file:///D:/server-yml/
     
 eureka:
   server:

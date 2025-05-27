@@ -8,10 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -34,10 +38,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ehas.auth.User.dto.ResponseDto;
 import com.ehas.auth.User.dto.UserDto;
 import com.ehas.auth.User.dto.UserTokenDto;
+import com.ehas.auth.User.entity.UserEntity;
+import com.ehas.auth.User.redis.service.UserRedisSerivceImpt;
 import com.ehas.auth.User.service.UserServiceImpt;
-import com.ehas.auth.jwt.service.JwtTokenProvider;
+import com.ehas.auth.jwt.service.UserJwtTokenProvider;
 import com.ehas.auth.kafka.service.KafkaLogProducerService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,63 +58,11 @@ import reactor.core.publisher.Sinks;
 @RequiredArgsConstructor
 public class UserRestController {
 	private final UserServiceImpt userServiceImpt;
+	private final UserRedisSerivceImpt userRedisSerivceImpt;
 	
 	private final ReactiveAuthenticationManager reactiveAuthenticationManager;
-	private final JwtTokenProvider jwtTokenProvider;
+	private final UserJwtTokenProvider userJwtTokenProvider;
 	private final PasswordEncoder passwordEncoder;
-	
-	@PostMapping(path="/{userId}/token")
-	public Mono<ResponseEntity<ResponseDto>> getToken( @PathVariable ("userId") String userId
-													 , @RequestBody UserDto userDto
-													 ){
-		// 인증을 위한 authentication 객체 생성
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDto.getId(), userDto.getPassword());
-        
-        return reactiveAuthenticationManager.authenticate(authentication)
-                .flatMap(auth -> {
-                    String refreshToken = jwtTokenProvider.createRefreshToken(userId); // refreshToken 발급
-                    String accessToken = jwtTokenProvider.createToken(auth); // accessToken 발급
-                    return userServiceImpt.addUserRefreshToken(userId, refreshToken)  // Redis에 refreshToken 발급
-                            .flatMap(success -> {
-                                if (Boolean.TRUE.equals(success)) {
-                                    UserTokenDto tokenDto = UserTokenDto.builder()
-                                            .refreshToken(refreshToken)
-                                            .accessToken(accessToken)
-                                            .build();
-                                    return Mono.just(tokenDto);
-                                } else {
-                                    return Mono.error(new RuntimeException("Failed to store tokens in Redis"));
-                                }
-                            });
-                })
-                .map(token -> {
-                    return ResponseEntity.status(HttpStatus.CREATED)
-                        .body(ResponseDto.builder()
-                            .status(HttpStatus.CREATED.value())
-                            .message(HttpStatus.CREATED.getReasonPhrase())
-                            .data(Map.of("token", token))
-                            .build());
-                })
-                .onErrorResume(e -> {
-                    return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(ResponseDto.builder()
-                            .status(HttpStatus.UNAUTHORIZED.value())
-                            .message(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                            .build()));
-                });
-	}
-	
-	@PostMapping(path="/{userId}/token/refresh")
-	public Mono<ResponseEntity<ResponseDto>> getRefreshToken( @RequestHeader("Authorization") String header
-															, @PathVariable ("userId") String userId){
-		String refreshToken = header.replace("Bearer ", "");
-		
-        return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ResponseDto.builder()
-                    .status(HttpStatus.UNAUTHORIZED.value())
-                    .message(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                    .build()));
-	}
 	
 	@PostMapping
 	public Mono<ResponseEntity<ResponseDto>> registerUser(@RequestBody UserDto userDto){
@@ -148,6 +103,61 @@ public class UserRestController {
 							 .status(HttpStatus.BAD_REQUEST.value())
 							 .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
 							 .build()));
+	}
+	
+	@PostMapping(path="/{userId}")
+	public Mono<ResponseEntity<ResponseDto>> loginUser(@PathVariable ("userId") String userId
+														, @RequestBody UserDto userDto
+														, ServerHttpRequest request
+														, ServerHttpResponse response){
+		
+		// 인증을 위한 authentication 객체 생성
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDto.getId(), userDto.getPassword());
+        
+        return reactiveAuthenticationManager.authenticate(authentication)
+                .flatMap(auth -> {
+                    String refreshToken = userJwtTokenProvider.createRefreshToken(auth); // refreshToken 발급
+                    String accessToken = userJwtTokenProvider.createToken(auth); // accessToken 발급
+                    return userRedisSerivceImpt.addRefreshTokenToRedis(refreshToken, Map.of("ip",request.getRemoteAddress().toString() // Redis에 refreshToken 생성
+                    																		,"User-Agent: ",request.getHeaders().getFirst("User-Agent").toString()))
+                            .flatMap(success -> {
+                                if (Boolean.TRUE.equals(success)) {
+                                    UserTokenDto tokenDto = UserTokenDto.builder() // accessToken, refreshToken Dto
+                                            .refreshToken(refreshToken)
+                                            .accessToken(accessToken)
+                                            .build();
+                                    return Mono.just(tokenDto);
+                                } else {
+                                    return Mono.error(new RuntimeException("Failed to store tokens in Redis"));
+                                }
+                            });
+                }).log()
+                .map(token -> {
+                    // HttpOnly Secure 쿠키 추가
+                    ResponseCookie cookie = ResponseCookie.from("refreshToken", token.getRefreshToken())
+                            .httpOnly(true)
+                            .secure(true) // HTTPS 환경에서만 전송
+                            .path("/jwt/token/refresh")
+                            .maxAge(Duration.ofDays(7))
+                            .sameSite("Strict") // CSRF 방지 강화
+                            .build();
+                    response.addCookie(cookie);
+                    // AUTHORIZATION 헤더에 accessToken 추가
+                    response.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + token.getAccessToken());
+                    
+                    return ResponseEntity.status(HttpStatus.CREATED)
+                        .body(ResponseDto.builder()
+                            .status(HttpStatus.CREATED.value())
+                            .message(HttpStatus.CREATED.getReasonPhrase())
+                            .build());
+                })
+                .onErrorResume(e -> {
+                    return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ResponseDto.builder()
+                            .status(HttpStatus.UNAUTHORIZED.value())
+                            .message(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                            .build()));
+                });
 	}
 	
 	@PutMapping(path="/{userId}")

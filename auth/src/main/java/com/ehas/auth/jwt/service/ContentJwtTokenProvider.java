@@ -22,6 +22,9 @@ import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.ehas.auth.User.entity.UserEntity;
+import com.ehas.auth.jwt.dto.JwtUserDto;
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -32,7 +35,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class JwtTokenProvider {
+public class ContentJwtTokenProvider {
 
 	private final ReactiveUserDetailsService reactiveUserDetailsService;
     private static final String PERMISSIONS_KEY = "permissions";
@@ -60,9 +63,13 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
         
+        UserEntity userEntity = (UserEntity) authentication.getPrincipal();
         Claims claims = Jwts.claims()
         		.subject(username)
         		.add(PERMISSIONS_KEY, permissions)
+        		.add("id", userEntity.getId())
+        		.add("name", userEntity.getUsername())
+        		.add("address",userEntity.getAddressSeq())
         		.build();
         
         Date now = new Date();
@@ -76,8 +83,18 @@ public class JwtTokenProvider {
                 .compact();
     }
     
-    public String createRefreshToken(String username) {
-        Claims claims = Jwts.claims().subject(username).build();
+    public String createRefreshToken(Authentication authentication) {
+    	UserEntity userEntity = (UserEntity) authentication.getPrincipal();
+    	
+        Claims claims = Jwts.claims()
+        					.subject(userEntity.getId())
+        					.add("seq", userEntity.getSeq())
+        	        		.add("id", userEntity.getId())
+        	        		.add("password", userEntity.getPassword())
+        	        		.add("name", userEntity.getUsername())
+        	        		.add("address",userEntity.getAddressSeq())
+        	        		.add("rolse", userEntity.getRoles())
+        					.build();
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + refreshTokenExpirationMillis);
@@ -88,6 +105,18 @@ public class JwtTokenProvider {
             .expiration(expiry)
             .signWith(secretKey)
             .compact();
+    }
+    
+    public JwtUserDto getAuthenticationByRefreshToken(String refreshToken) {
+        Claims claims = Jwts.parser()
+        		.verifyWith(this.secretKey)
+        		.build()
+        		.parseSignedClaims(refreshToken).getPayload();
+
+        return JwtUserDto.builder()
+        				  .id(claims.get("id").toString())
+        				  .password(claims.get("password").toString())
+        				  .build();
     }
 
     public Authentication getAuthentication(String token) {

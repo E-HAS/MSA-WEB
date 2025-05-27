@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,10 +41,6 @@ public class UserServiceImpt {
 	private final UserDataRedisService userDataRedisService;
 	private final CacheRedisHashService cacheRedisHashService;
 	private final CacheRedisService cacheRedisService;
-	
-	public Mono<Boolean> addUserRefreshToken(String userId, String token){
-		return cacheRedisService.setValue("refreshToken:", userId, token, Duration.ofDays(7));
-	}
 	
 	//@Transactional(rollbackFor = { Exception.class })  
 	public Mono<Boolean> saveByUser(UserDto user){
@@ -114,40 +111,6 @@ public class UserServiceImpt {
 	
 	public Mono<UserEntity> findByUserId(String id){
 		return ReactiveUserRepo.findById(id);
-	}
-	
-	public Mono<RedisUserDto> findByUserIdToRedis(String id){
-		String userSeqFieldName = "userSeq";
-		String addressSeqFieldName = "addressSeq";
-		String nameFieldName = "name";
-		
-		return cacheRedisHashService.existsByKeyAndField(id, userSeqFieldName) // redis key 존재 여부
-		        .flatMap(exists -> {
-		            if (Boolean.TRUE.equals(exists)) {
-		                return cacheRedisHashService.findAllByKeyAndField(id)   // redis 캐시 데이터 가져오기
-		                    .flatMap(dto -> Mono.just(RedisUserDto.builder()
-		                        .userSeq(Integer.parseInt(dto.get(userSeqFieldName)))
-		                        .addressSeq(Integer.parseInt(dto.get(addressSeqFieldName)))
-		                        .name(dto.get(nameFieldName))
-		                        .build()));
-		            } else {
-		                return ReactiveUserRepo.getUserById(id)   // db 데이터 가져오기
-		                    .flatMap(dto -> {
-		                    	// redis 캐시 데이터 넣기
-		                    	return cacheRedisHashService.addAllByKeyAndMap(id
-		                    											, Map.of(userSeqFieldName, dto.getSeq().toString()
-		                    											,addressSeqFieldName, dto.getAddressSeq().toString()
-		                    											,nameFieldName, dto.getName().toString())
-		                    											, Duration.ofMinutes(60))
-		                    			.thenReturn(RedisUserDto.builder()
-			                                .userSeq(dto.getSeq())
-			                                .addressSeq(dto.getAddressSeq())
-			                                .name(dto.getName())
-			                                .build()
-			                             );
-		                    });
-		            }
-		        });
 	}
 	
 	public Flux<RoleEntity> findRoleByUserSeq(Integer seq){

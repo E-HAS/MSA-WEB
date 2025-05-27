@@ -19,39 +19,29 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 
-import com.ehas.auth.jwt.service.JwtTokenProvider;
+import com.ehas.auth.jwt.service.UserJwtTokenProvider;
 
 import reactor.core.publisher.Mono;
 
 @Slf4j
 @RequiredArgsConstructor
-public class JwtTokenAuthenticationFilter implements WebFilter  {
-	public static final String HEADER_PREFIX = "Bearer ";
-
-    private final JwtTokenProvider jwtTokenProvider;
+public class UserJwtTokenAuthenticationFilter implements WebFilter  {
+    private final UserJwtTokenProvider userJwtTokenProvider;
     
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
     	
         try {
-            String token = this.resolveToken(exchange.getRequest());
-			if(StringUtils.hasText(token) && this.jwtTokenProvider.validateToken(token)) {
-			    Authentication authentication = this.jwtTokenProvider.getAuthentication(token);
+            String token = userJwtTokenProvider.resolveToken(exchange.getRequest());  // Header(Bearer)에서 토큰 가져오기
+			if(StringUtils.hasText(token) && this.userJwtTokenProvider.validateToken(token)) {  // 토큰 검증
+			    Authentication authentication = this.userJwtTokenProvider.getAuthentication(token); // Authentication 생성
 			    return chain.filter(exchange)
-			            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+			            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication)); // reactor context에 Authentication 등록
 			}
 		} catch (Exception e) {
 			return onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
 		}
         return chain.filter(exchange);
-    }
-    
-    private String resolveToken(ServerHttpRequest request) {
-        String bearerToken = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(HEADER_PREFIX)) {
-            return bearerToken.substring(7);
-        }
-        return null;
     }
     
     private Mono<Void> onError(ServerWebExchange exchange, String err, HttpStatus httpStatus) {
