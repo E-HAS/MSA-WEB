@@ -1,4 +1,4 @@
-package com.ehas.auth.redis.api;
+package com.ehas.auth.User.redis.api;
 
 import java.util.Map;
 
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ehas.auth.User.dto.ResponseDto;
-import com.ehas.auth.User.service.UserServiceImpt;
+import com.ehas.auth.User.redis.service.UserRedisSerivceImpt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,14 +18,14 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @RestController
-@RequestMapping("/cache")
+@RequestMapping("/cache/users")
 @RequiredArgsConstructor
 public class RedisUserRestController {
-	private final UserServiceImpt userServiceImpt;
-	/*
+	private final UserRedisSerivceImpt userRedisSerivceImpt;
+	
 	@GetMapping(path="/{userId}")
 	public Mono<ResponseEntity<ResponseDto>> getUser(@PathVariable ("userId") String userId){
-		return userServiceImpt.findByUserIdToRedis(userId)
+		return userRedisSerivceImpt.findByUserId(userId)
 					.map(findEntity ->{ return findEntity != null ? ResponseEntity.status(HttpStatus.OK)
 																					.body(ResponseDto.builder()
 																					.status(HttpStatus.OK.value())
@@ -44,5 +44,4 @@ public class RedisUserRestController {
 							 .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
 							 .build()));
 	}
-	*/
 }

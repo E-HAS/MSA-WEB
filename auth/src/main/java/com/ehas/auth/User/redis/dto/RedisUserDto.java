@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class RedisUserDto implements Serializable{
 	private Integer userSeq;
 	private Integer addressSeq;
-	private Integer roleSeq;
+	private String roleSeq;
 	
 	private String name;
 	private Integer Status;

@@ -1,4 +1,4 @@
-package com.ehas.auth.jwt.filter;
+package com.ehas.auth.User.jwt.filter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +19,9 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 
-import com.ehas.auth.jwt.service.UserJwtTokenProvider;
+import com.ehas.auth.User.jwt.service.UserJwtTokenProvider;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -38,6 +39,15 @@ public class UserJwtTokenAuthenticationFilter implements WebFilter  {
 			    return chain.filter(exchange)
 			            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication)); // reactor context에 Authentication 등록
 			}
+		} catch ( ExpiredJwtException e ){
+			return userJwtTokenProvider.validRefreshToken(exchange)
+										.flatMap(responseEntity -> {
+									        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+									            return chain.filter(exchange);
+									        } else {
+									            return onError(exchange, HttpStatus.UNAUTHORIZED.getReasonPhrase(), HttpStatus.UNAUTHORIZED);
+									        }
+									    });
 		} catch (Exception e) {
 			return onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
 		}

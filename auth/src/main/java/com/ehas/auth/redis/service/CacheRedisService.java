@@ -22,7 +22,7 @@ public class CacheRedisService {
     }
     
  // 단일 키-값 저장 + TTL 설정
-    public Mono<Boolean> setValue(String prefix, String key, String value, Duration ttl) {
+    public Mono<Boolean> save(String prefix, String key, String value, Duration ttl) {
         String fullKey = prefix + key;
         return redisTemplate.opsForValue().set(fullKey, value)
             .flatMap(success -> {
@@ -35,7 +35,7 @@ public class CacheRedisService {
     }
 
     // 여러 키-값 저장 + 각 항목 TTL 설정 (주의: opsForValue에는 putAll 없음)
-    public Mono<Boolean> setValues(String prefix, Map<String, String> values, Duration ttl) {
+    public Mono<Boolean> saves(String prefix, Map<String, String> values, Duration ttl) {
         return Flux.fromIterable(values.entrySet())
             .flatMap(entry -> {
                 String fullKey = prefix + entry.getKey();
@@ -52,18 +52,18 @@ public class CacheRedisService {
     }
 
     // 단일 키 조회
-    public Mono<String> getValue(String prefix, String key) {
+    public Mono<String> get(String prefix, String key) {
         return redisTemplate.opsForValue().get(prefix + key);
     }
 
     // 단일 키 삭제
-    public Mono<Boolean> deleteValue(String prefix, String key) {
+    public Mono<Boolean> delete(String prefix, String key) {
         return redisTemplate.delete(prefix + key)
             .map(count -> count > 0);
     }
 
     // 키 존재 여부 확인
-    public Mono<Boolean> existsKey(String prefix, String key) {
+    public Mono<Boolean> exists(String prefix, String key) {
         return redisTemplate.hasKey(prefix + key);
     }
 }

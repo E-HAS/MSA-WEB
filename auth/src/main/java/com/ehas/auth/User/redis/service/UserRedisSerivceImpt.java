@@ -6,9 +6,10 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.ehas.auth.User.reactive.ReactiveUserRepository;
-import com.ehas.auth.redis.dto.RedisUserDto;
+import com.ehas.auth.User.redis.dto.RedisUserDto;
 import com.ehas.auth.redis.service.CacheRedisHashService;
 import com.ehas.auth.redis.service.CacheRedisService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,43 +22,55 @@ public class UserRedisSerivceImpt {
 	private final ReactiveUserRepository ReactiveUserRepo;
 	private final CacheRedisHashService cacheRedisHashService;
 	private final CacheRedisService cacheRedisService;
-	
-	public Mono<Boolean> addRefreshTokenToRedis(String token, Map<String, String> map){
-		return cacheRedisService.setValue("refreshToken:",token
-														 ,map.toString(), Duration.ofDays(7));
-	}
-	
-	public Mono<RedisUserDto> findByUserIdToRedis(String id){
-		String userSeqFieldName = "userSeq";
-		String addressSeqFieldName = "addressSeq";
-		String nameFieldName = "name";
-		
-		return cacheRedisHashService.existsByKeyAndField(id, userSeqFieldName) // redis key 존재 여부
-		        .flatMap(exists -> {
-		            if (Boolean.TRUE.equals(exists)) {
-		                return cacheRedisHashService.findAllByKeyAndField(id)   // redis 캐시 데이터 가져오기
-		                    .flatMap(dto -> Mono.just(RedisUserDto.builder()
-		                        .userSeq(Integer.parseInt(dto.get(userSeqFieldName)))
-		                        .addressSeq(Integer.parseInt(dto.get(addressSeqFieldName)))
-		                        .name(dto.get(nameFieldName))
-		                        .build()));
-		            } else {
-		                return ReactiveUserRepo.getUserById(id)   // db 데이터 가져오기
-		                    .flatMap(dto -> {
-		                    	// redis 캐시 데이터 넣기
-		                    	return cacheRedisHashService.addAllByKeyAndMap(id
-		                    											, Map.of(userSeqFieldName, dto.getSeq().toString()
-		                    													,addressSeqFieldName, dto.getAddressSeq().toString()
-		                    													,nameFieldName, dto.getName().toString())
-		                    													, Duration.ofMinutes(60))
-		                    			.thenReturn(RedisUserDto.builder()
-			                                .userSeq(dto.getSeq())
-			                                .addressSeq(dto.getAddressSeq())
-			                                .name(dto.getName())
-			                                .build()
-			                             );
-		                    });
-		            }
-		        });
-	}
+    private final String prefixUser= "user:";
+    private final Integer duration= 60;
+ // 저장
+    public Mono<Boolean> save(String userId, RedisUserDto value) {
+        return cacheRedisService.save(prefixUser,userId,value.toString()
+        												,Duration.ofMinutes(duration));
+    }
+
+    // 조회
+    public Mono<RedisUserDto> get(String userId) {
+        return cacheRedisService.get(prefixUser, userId)
+        		.map(obj -> new ObjectMapper().convertValue(obj, RedisUserDto.class));
+    }
+
+    // 삭제
+    public Mono<Boolean> delete(String userId) {
+        return cacheRedisService.delete(prefixUser, userId);
+    }
+
+    // 존재 여부 확인
+    public Mono<Boolean> exists(String userId) {
+        return cacheRedisService.exists(prefixUser, userId);
+    }
+    
+    public Mono<RedisUserDto> findByUserId(String id) {
+        return this.exists(id) // 또는 this.exists(prefixUser + id)
+            .flatMap(exists -> {
+                if (Boolean.TRUE.equals(exists)) {
+                    return this.get(id);
+                } else {
+                    return ReactiveUserRepo.getUserById(id)
+                        .flatMap(dto -> {
+                            RedisUserDto redisUserDto = RedisUserDto.builder()
+                                .userSeq(dto.getSeq())
+                                .addressSeq(dto.getAddressSeq())
+                                .name(dto.getName())
+                                .Status(dto.getStatus())
+                                .build();
+
+                            return this.save(id, redisUserDto)
+                                .flatMap(result -> {
+                                    if (result) {
+                                        return Mono.just(redisUserDto);
+                                    } else {
+                                        return Mono.error(new RuntimeException("Failed to save to Redis"));
+                                    }
+                                });
+                        });
+                }
+            });
+    }
 }

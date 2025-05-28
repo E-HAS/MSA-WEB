@@ -31,11 +31,11 @@ import org.springframework.security.web.server.authorization.AuthorizationContex
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 
+import com.ehas.auth.User.jwt.filter.UserJwtTokenAuthenticationFilter;
+import com.ehas.auth.User.jwt.service.UserJwtTokenProvider;
 import com.ehas.auth.User.service.UserServiceImpt;
 import com.ehas.auth.jwt.filter.ContentJwtTokenAuthenticationFilter;
-import com.ehas.auth.jwt.filter.UserJwtTokenAuthenticationFilter;
 import com.ehas.auth.jwt.service.ContentJwtTokenProvider;
-import com.ehas.auth.jwt.service.UserJwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -184,7 +184,7 @@ public class AuthSecurityConfig {
                 				.collectList()
                                 .map(roles -> {
                                     user.setRoles(roles); // roles 주입
-                                    return user; // ✅ Mono<UserEntity> -> Mono<UserDetails>
+                                    return user;
                                 })
                           );
                                 /*

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,9 +40,9 @@ import com.ehas.auth.User.dto.ResponseDto;
 import com.ehas.auth.User.dto.UserDto;
 import com.ehas.auth.User.dto.UserTokenDto;
 import com.ehas.auth.User.entity.UserEntity;
-import com.ehas.auth.User.redis.service.UserRedisSerivceImpt;
+import com.ehas.auth.User.jwt.service.UserJwtTokenProvider;
+import com.ehas.auth.User.redis.service.UserJwtRedisSerivceImpt;
 import com.ehas.auth.User.service.UserServiceImpt;
-import com.ehas.auth.jwt.service.UserJwtTokenProvider;
 import com.ehas.auth.kafka.service.KafkaLogProducerService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -58,10 +59,10 @@ import reactor.core.publisher.Sinks;
 @RequiredArgsConstructor
 public class UserRestController {
 	private final UserServiceImpt userServiceImpt;
-	private final UserRedisSerivceImpt userRedisSerivceImpt;
+	private final UserJwtTokenProvider userJwtTokenProvider;
+	private final UserJwtRedisSerivceImpt userJwtRedisSerivceImpt;
 	
 	private final ReactiveAuthenticationManager reactiveAuthenticationManager;
-	private final UserJwtTokenProvider userJwtTokenProvider;
 	private final PasswordEncoder passwordEncoder;
 	
 	@PostMapping
@@ -81,6 +82,49 @@ public class UserRestController {
 																	  							.message(HttpStatus.BAD_REQUEST.getReasonPhrase())
 																	  							.build());
 								});
+	}
+	
+	@DeleteMapping
+	public Mono<ResponseEntity<ResponseDto>> logoutUser(ServerHttpRequest request, ServerHttpResponse response){
+		return Mono.justOrEmpty(
+        		request.getCookies().getFirst("refreshToken"))
+                .switchIfEmpty(Mono.error(new RuntimeException("Refresh token not found in cookies.")))
+                .map(HttpCookie::getValue)
+                .flatMap(refreshToken -> {
+                	return userJwtRedisSerivceImpt.deleteRefreshToken(refreshToken)
+                						.flatMap(exists -> {
+                							if(exists) {
+                								ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
+                			                            .httpOnly(true)
+                			                            .secure(true) // HTTPS 환경에서만 전송
+                			                            .path("/jwt/users/token/refresh")
+                			                            .maxAge(0) // 삭제
+                			                            .sameSite("Strict") // CSRF 방지 강화
+                			                            .build();
+                						         response.addCookie(deleteCookie);
+                						            
+                								 return Mono.just(ResponseEntity.status(HttpStatus.NO_CONTENT)
+                			                            .body(ResponseDto.builder()
+                			                                    .status(HttpStatus.NO_CONTENT.value())
+                			                                    .message(HttpStatus.NO_CONTENT.getReasonPhrase())
+                			                                    .build()));
+                							}else {
+                								return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                			                            .body(ResponseDto.builder()
+                			                                    .status(HttpStatus.BAD_REQUEST.value())
+                			                                    .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                			                                    .build()));
+                							}
+                						});
+                	
+                })
+                .onErrorResume(e -> {
+                    return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ResponseDto.builder()
+                            .status(HttpStatus.BAD_REQUEST.value())
+                            .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                            .build()));
+                });
 	}
 	
 	@GetMapping(path="/{userId}")
@@ -116,10 +160,12 @@ public class UserRestController {
         
         return reactiveAuthenticationManager.authenticate(authentication)
                 .flatMap(auth -> {
-                    String refreshToken = userJwtTokenProvider.createRefreshToken(auth); // refreshToken 발급
-                    String accessToken = userJwtTokenProvider.createToken(auth); // accessToken 발급
-                    return userRedisSerivceImpt.addRefreshTokenToRedis(refreshToken, Map.of("ip",request.getRemoteAddress().toString() // Redis에 refreshToken 생성
-                    																		,"User-Agent: ",request.getHeaders().getFirst("User-Agent").toString()))
+                	String tokenId = UUID.randomUUID().toString();
+                    String refreshToken = userJwtTokenProvider.createRefreshToken(tokenId, auth); // refreshToken 발급
+                    String accessToken = userJwtTokenProvider.createToken(tokenId, auth); // accessToken 발급
+                    return userJwtRedisSerivceImpt.addRefreshToken(refreshToken, Map.of("tokenId",tokenId
+                    																,"ip",request.getRemoteAddress().toString() // Redis에 refreshToken 생성
+                    																,"User-Agent: ",request.getHeaders().getFirst("User-Agent").toString()))
                             .flatMap(success -> {
                                 if (Boolean.TRUE.equals(success)) {
                                     UserTokenDto tokenDto = UserTokenDto.builder() // accessToken, refreshToken Dto
@@ -137,7 +183,7 @@ public class UserRestController {
                     ResponseCookie cookie = ResponseCookie.from("refreshToken", token.getRefreshToken())
                             .httpOnly(true)
                             .secure(true) // HTTPS 환경에서만 전송
-                            .path("/jwt/token/refresh")
+                            .path("/jwt/users/token/refresh")
                             .maxAge(Duration.ofDays(7))
                             .sameSite("Strict") // CSRF 방지 강화
                             .build();
@@ -187,7 +233,6 @@ public class UserRestController {
 												 .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
 												 .build()));
 	}
-	
 	@DeleteMapping(path="/{userId}")
 	public Mono<ResponseEntity<ResponseDto>> deleteUser(@PathVariable ("userId") String userId
 													 	){

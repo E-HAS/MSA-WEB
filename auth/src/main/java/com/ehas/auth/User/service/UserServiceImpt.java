@@ -1,29 +1,16 @@
 package com.ehas.auth.User.service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Map;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.ehas.auth.User.api.UserRestController;
+import org.springframework.stereotype.Service; 
 import com.ehas.auth.User.dto.UserDto;
 import com.ehas.auth.User.entity.RoleEntity;
 import com.ehas.auth.User.entity.UserEntity;
 import com.ehas.auth.User.entity.UserRoleEntity;
-import com.ehas.auth.User.entity.UserRoleEntityKey;
 import com.ehas.auth.User.reactive.ReactiveRoleRepository;
 import com.ehas.auth.User.reactive.ReactiveUserRepository;
 import com.ehas.auth.User.reactive.ReactiveUserRoleRepository;
 import com.ehas.auth.User.userstatus.UserStatus;
-import com.ehas.auth.redis.dto.RedisUserDto;
-import com.ehas.auth.redis.service.CacheRedisHashService;
-import com.ehas.auth.redis.service.CacheRedisService;
-import com.ehas.auth.redis.service.UserDataRedisService;
 
-import io.jsonwebtoken.lang.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -37,10 +24,6 @@ public class UserServiceImpt {
 	private final ReactiveUserRepository ReactiveUserRepo;
 	private final ReactiveUserRoleRepository ReactiveUserRoleRepo;
 	private final ReactiveRoleRepository reactiveRoleRepository;
-	
-	private final UserDataRedisService userDataRedisService;
-	private final CacheRedisHashService cacheRedisHashService;
-	private final CacheRedisService cacheRedisService;
 	
 	//@Transactional(rollbackFor = { Exception.class })  
 	public Mono<Boolean> saveByUser(UserDto user){
