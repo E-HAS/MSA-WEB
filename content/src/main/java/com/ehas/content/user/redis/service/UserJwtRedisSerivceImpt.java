@@ -1,10 +1,11 @@
-package com.ehas.auth.User.redis.service;
+package com.ehas.content.user.redis.service;
 
 import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
-import com.ehas.auth.redis.service.CacheRedisService;
+
+import com.ehas.content.redis.service.CacheRedisService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,26 +23,26 @@ public class UserJwtRedisSerivceImpt {
     private final String prefixBlacklistToken= "blacklistToken:";
     private final Integer durationOfMin= 60;
 	
-	public Mono<Boolean> addRefreshToken(String token, Map<String, String> map){
+	public Boolean addRefreshToken(String token, Map<String, String> map){
 		return cacheRedisService.save(prefixRefreshToken,token
 														 ,map.toString(), Duration.ofDays(durationOfDay));
 	}
 	
-	public Mono<Boolean> deleteRefreshToken(String token){
+	public Boolean deleteRefreshToken(String token){
 		return cacheRedisService.delete(prefixRefreshToken,token);
 	}
 	
-	public Mono<Boolean> existsRefreshToken(String token){
+	public Boolean existsRefreshToken(String token){
 		return cacheRedisService.exists(prefixRefreshToken, token);
 	}
 	
     // accessToken -> blacklist 저장
-    public Mono<Boolean> addBlacklistToken(String accessToken, long remain) {
+    public Boolean addBlacklistToken(String accessToken, long remain) {
         return cacheRedisService.save(prefixBlacklistToken,accessToken,""
         												,Duration.ofMillis(remain));
     }
     // blacklist <- accessToken 존재 여부 확인
-    public Mono<Boolean> existsBlacklistToken(String accessToken) {
+    public Boolean existsBlacklistToken(String accessToken) {
         return cacheRedisService.exists(prefixBlacklistToken, accessToken);
     }
 }

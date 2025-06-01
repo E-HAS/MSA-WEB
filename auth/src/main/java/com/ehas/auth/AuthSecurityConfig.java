@@ -183,7 +183,7 @@ public class AuthSecurityConfig {
                 .flatMap(user -> userServiceImpt.findRoleByUserSeq(user.getSeq())
                 				.collectList()
                                 .map(roles -> {
-                                    user.setRoles(roles); // roles 주입
+                                    user.setRoles(roles); // roles 등록
                                     return user;
                                 })
                           );

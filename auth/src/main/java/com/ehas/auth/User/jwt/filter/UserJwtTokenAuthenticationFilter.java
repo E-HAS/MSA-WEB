@@ -33,17 +33,20 @@ public class UserJwtTokenAuthenticationFilter implements WebFilter  {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
     	
         try {
-            String token = userJwtTokenProvider.resolveToken(exchange.getRequest());  // Header(Bearer)에서 토큰 가져오기
-			if(StringUtils.hasText(token) && this.userJwtTokenProvider.validateToken(token)) {  // 토큰 검증
-			    Authentication authentication = this.userJwtTokenProvider.getAuthentication(token); // Authentication 생성
+            String token = userJwtTokenProvider.resolveAccessToken(exchange.getRequest());  // 1. Header(Bearer)에서 토큰 가져오기
+			if(StringUtils.hasText(token) && this.userJwtTokenProvider.validateToken(token)) {  // 2. 토큰 검증
+			    Authentication authentication = this.userJwtTokenProvider.getAuthentication(token); // 3. Authentication 생성
 			    return chain.filter(exchange)
-			            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication)); // reactor context에 Authentication 등록
+			            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication)); // 4. reactor context에 Authentication 등록
 			}
 		} catch ( ExpiredJwtException e ){
 			return userJwtTokenProvider.validRefreshToken(exchange)
 										.flatMap(responseEntity -> {
 									        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-									            return chain.filter(exchange);
+									        	String token = userJwtTokenProvider.resolveAccessToken(exchange.getRequest());
+									        	Authentication authentication = this.userJwtTokenProvider.getAuthentication(token);
+									            return chain.filter(exchange)
+									            		.contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
 									        } else {
 									            return onError(exchange, HttpStatus.UNAUTHORIZED.getReasonPhrase(), HttpStatus.UNAUTHORIZED);
 									        }

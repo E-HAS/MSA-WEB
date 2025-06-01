@@ -91,30 +91,22 @@ public class UserRestController {
                 .switchIfEmpty(Mono.error(new RuntimeException("Refresh token not found in cookies.")))
                 .map(HttpCookie::getValue)
                 .flatMap(refreshToken -> {
-                	return userJwtRedisSerivceImpt.deleteRefreshToken(refreshToken)
+                	return userJwtRedisSerivceImpt.deleteRefreshToken(refreshToken) // 1.Redis에서 refreshToken 제거
                 						.flatMap(exists -> {
-                							if(exists) {
-                								ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
-                			                            .httpOnly(true)
-                			                            .secure(true) // HTTPS 환경에서만 전송
-                			                            .path("/jwt/users/token/refresh")
-                			                            .maxAge(0) // 삭제
-                			                            .sameSite("Strict") // CSRF 방지 강화
-                			                            .build();
-                						         response.addCookie(deleteCookie);
-                						            
-                								 return Mono.just(ResponseEntity.status(HttpStatus.NO_CONTENT)
-                			                            .body(ResponseDto.builder()
-                			                                    .status(HttpStatus.NO_CONTENT.value())
-                			                                    .message(HttpStatus.NO_CONTENT.getReasonPhrase())
-                			                                    .build()));
-                							}else {
-                								return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                			                            .body(ResponseDto.builder()
-                			                                    .status(HttpStatus.BAD_REQUEST.value())
-                			                                    .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                			                                    .build()));
-                							}
+            								ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "") // 2.Set-Cookie <- refreshToken 만료 처리
+            			                            .httpOnly(true)
+            			                            .secure(true) // HTTPS 환경에서만 전송
+            			                            .path("/")
+            			                            .maxAge(0) // 만료처리
+            			                            .sameSite("Strict") // CSRF 방지 강화
+            			                            .build();
+            						         response.addCookie(deleteCookie);
+            						            
+            								 return Mono.just(ResponseEntity.status(HttpStatus.NO_CONTENT)
+            			                            .body(ResponseDto.builder()
+            			                                    .status(HttpStatus.NO_CONTENT.value())
+            			                                    .message(HttpStatus.NO_CONTENT.getReasonPhrase())
+            			                                    .build()));
                 						});
                 	
                 })
@@ -159,37 +151,21 @@ public class UserRestController {
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDto.getId(), userDto.getPassword());
         
         return reactiveAuthenticationManager.authenticate(authentication)
-                .flatMap(auth -> {
-                	String tokenId = UUID.randomUUID().toString();
-                    String refreshToken = userJwtTokenProvider.createRefreshToken(tokenId, auth); // refreshToken 발급
-                    String accessToken = userJwtTokenProvider.createToken(tokenId, auth); // accessToken 발급
-                    return userJwtRedisSerivceImpt.addRefreshToken(refreshToken, Map.of("tokenId",tokenId
-                    																,"ip",request.getRemoteAddress().toString() // Redis에 refreshToken 생성
-                    																,"User-Agent: ",request.getHeaders().getFirst("User-Agent").toString()))
-                            .flatMap(success -> {
-                                if (Boolean.TRUE.equals(success)) {
-                                    UserTokenDto tokenDto = UserTokenDto.builder() // accessToken, refreshToken Dto
-                                            .refreshToken(refreshToken)
-                                            .accessToken(accessToken)
-                                            .build();
-                                    return Mono.just(tokenDto);
-                                } else {
-                                    return Mono.error(new RuntimeException("Failed to store tokens in Redis"));
-                                }
-                            });
-                }).log()
+                .flatMap(userJwtTokenProvider::createJwtToken) // 1. JWT ACCESS, REFRESH TOKEN 생성
                 .map(token -> {
-                    // HttpOnly Secure 쿠키 추가
-                    ResponseCookie cookie = ResponseCookie.from("refreshToken", token.getRefreshToken())
+                	// 2. AUTHORIZATION 헤더에 accessToken 추가
+                    response.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + token.getAccessToken());
+                    
+                    // 3. HttpOnly Secure 쿠키 추가
+                    ResponseCookie cookie = ResponseCookie.from("refreshToken", token.getRefeshToken())
                             .httpOnly(true)
                             .secure(true) // HTTPS 환경에서만 전송
-                            .path("/jwt/users/token/refresh")
+                            //.path("/jwt/users/token/refresh")
+                            .path("/")
                             .maxAge(Duration.ofDays(7))
                             .sameSite("Strict") // CSRF 방지 강화
                             .build();
                     response.addCookie(cookie);
-                    // AUTHORIZATION 헤더에 accessToken 추가
-                    response.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + token.getAccessToken());
                     
                     return ResponseEntity.status(HttpStatus.CREATED)
                         .body(ResponseDto.builder()

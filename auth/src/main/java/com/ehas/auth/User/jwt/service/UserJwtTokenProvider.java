@@ -32,6 +32,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 import com.ehas.auth.User.dto.ResponseDto;
 import com.ehas.auth.User.entity.UserEntity;
+import com.ehas.auth.User.jwt.dto.JwtToken;
 import com.ehas.auth.User.redis.service.UserJwtRedisSerivceImpt;
 import com.ehas.auth.jwt.dto.JwtUserDto;
 
@@ -39,6 +40,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -51,6 +53,7 @@ public class UserJwtTokenProvider {
 	
 	public static final String HEADER_PREFIX = "Bearer ";
     private static final String PERMISSIONS_KEY = "permissions";
+    private static final String TOKEN_ID_KEY = "tokenId";
 
     @Value("${jwt.secretkey}")
     private String secret;
@@ -68,7 +71,24 @@ public class UserJwtTokenProvider {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String resolveToken(ServerHttpRequest request) {
+    public Mono<JwtToken> createJwtToken(Authentication authentication) {
+    	String accessToken = createAccessToken(authentication);
+    	String refreshToken = createRefreshToken(authentication);
+    	
+    	return userJwtRedisSerivceImpt.addRefreshToken(refreshToken, null)
+    		   .flatMap(create -> {
+    			   if(!create) {
+    				   Mono.error(new RuntimeException("Failed to store tokens in Redis"));
+    			   }
+    			   return Mono.just(JwtToken.builder()
+      		    			.prefix(HEADER_PREFIX)
+      		    			.accessToken(accessToken)
+      		    			.RefeshToken(refreshToken)
+      		    			.build());
+    		   });
+    }
+    
+    public String resolveAccessToken(ServerHttpRequest request) {
         String bearerToken = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(HEADER_PREFIX)) {
             return bearerToken.substring(7);
@@ -90,20 +110,21 @@ public class UserJwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(userDetail, token, authorities);
     }
     
-    public String createToken(String tokenId, Authentication authentication) {
+    public String createAccessToken(Authentication authentication) {
         UserEntity userEntity = (UserEntity) authentication.getPrincipal();
-        //Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        String permissions = authentication.getAuthorities().stream()
+        
+        String permissions = authentication.getAuthorities().stream()	//Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
+        
+        String tokenId = UUID.randomUUID().toString();
         
         Claims claims = Jwts.claims()
         		.subject(userEntity.getId())
         		.add(PERMISSIONS_KEY, permissions)
-        		.add("id", userEntity.getId())
+        		.add(TOKEN_ID_KEY, tokenId)
         		.add("name", userEntity.getName())
         		.add("address", userEntity.getAddressSeq())
-        		.add("tokenId", tokenId)
         		.build();
         
         Date now = new Date();
@@ -117,17 +138,18 @@ public class UserJwtTokenProvider {
                 .compact();
     }
     
-    public String createRefreshToken(String tokenId, Authentication authentication) {
+    public String createRefreshToken(Authentication authentication) {
+    	String tokenId = UUID.randomUUID().toString();
     	String username = authentication.getName();
         
         Claims claims = Jwts.claims()
         					.subject(username)
-        					.add("tokenId", tokenId)
+        					.add(TOKEN_ID_KEY, tokenId)
         					.build();
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + refreshTokenExpirationMillis);
-
+        
         return Jwts.builder()
             .claims(claims)
             .issuedAt(now)
@@ -160,7 +182,7 @@ public class UserJwtTokenProvider {
         }
     }
     
-    public String recreateToken(String token){
+    public String recreateAccessToken(String token){
     	
     	Date now = new Date();
         Date expiryDate = new Date(now.getTime() + Long.parseLong(expirationTime));
@@ -183,10 +205,22 @@ public class UserJwtTokenProvider {
                     .expiration(expiryDate)
                     .signWith(secretKey)
                     .compact();
-        } catch (JwtException e) {
-            // 유효하지 않은 토큰
-        	throw new RuntimeException("Invalid JWT token: "+e.getMessage());
         }
+    }
+    
+    public Mono<Boolean> addBlacklist(String token){
+    	Jws<Claims> claims = Jwts.parser()
+				        		.verifyWith(secretKey).build()
+				        		.parseSignedClaims(token);
+        Date expiration = claims.getPayload().getExpiration();
+        long now = new Date().getTime();
+        long remainExpiration = expiration.getTime() - now;
+        
+        return userJwtRedisSerivceImpt.addBlacklistToken(token, remainExpiration);
+    }
+    
+    public Mono<Boolean> existsBlacklist(String token){
+    	return userJwtRedisSerivceImpt.existsBlacklistToken(token);
     }
     
     public Mono<ResponseEntity<?>> validRefreshToken(ServerWebExchange exchange){
@@ -197,6 +231,7 @@ public class UserJwtTokenProvider {
         		request.getCookies().getFirst("refreshToken"))
                 .switchIfEmpty(Mono.error(new RuntimeException("Refresh token not found in cookies.")))
                 .map(HttpCookie::getValue)
+                .log()
                 .flatMap(refreshToken -> {
                 	return userJwtRedisSerivceImpt.existsRefreshToken(refreshToken)
                 						.flatMap(exists -> {
@@ -211,8 +246,8 @@ public class UserJwtTokenProvider {
                 			                                .body(e.getMessage()));
                 			            		}
                 			                	
-                			                	String accessTokenInHeader = this.resolveToken(request);
-                			                	String recreateAccessToken = this.recreateToken(accessTokenInHeader);
+                			                	String accessTokenInHeader = this.resolveAccessToken(request);
+                			                	String recreateAccessToken = this.recreateAccessToken(accessTokenInHeader);
                 			                	
                 			                	response.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + recreateAccessToken);
                 			                    return Mono.just(ResponseEntity.status(HttpStatus.CREATED)
@@ -230,6 +265,7 @@ public class UserJwtTokenProvider {
                 						});
                 	
                 })
+                .log()
                 .onErrorResume(e -> Mono.just(ResponseEntity
                         .status(HttpStatus.UNAUTHORIZED)
                         .body(e.getMessage())));

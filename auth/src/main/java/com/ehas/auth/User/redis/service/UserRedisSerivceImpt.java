@@ -20,14 +20,14 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UserRedisSerivceImpt {
 	private final ReactiveUserRepository ReactiveUserRepo;
-	private final CacheRedisHashService cacheRedisHashService;
 	private final CacheRedisService cacheRedisService;
     private final String prefixUser= "user:";
-    private final Integer duration= 60;
+    private final Integer durationOfMin= 60;
+    
  // 저장
     public Mono<Boolean> save(String userId, RedisUserDto value) {
         return cacheRedisService.save(prefixUser,userId,value.toString()
-        												,Duration.ofMinutes(duration));
+        												,Duration.ofMinutes(durationOfMin));
     }
 
     // 조회
