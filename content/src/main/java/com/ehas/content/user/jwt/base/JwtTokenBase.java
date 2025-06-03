@@ -15,7 +15,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import com.ehas.content.user.entity.UserEntity;
+import com.ehas.content.user.dto.UserDetail;
 import com.ehas.content.user.jwt.dto.JwtToken;
 
 import io.jsonwebtoken.Claims;
@@ -113,6 +113,17 @@ public class JwtTokenBase {
         return accessTokenexpirationTime;
     }
     
+    // AccessToken 재생성
+    public String recreateAccessToken(String token){
+	    	Date now = new Date();
+	        Date expiryDate = new Date(now.getTime() + this.getAccessTokenexpirationTime());
+			Claims payload = this.getPayloadToken(token);
+			if(payload == null) {
+				new Exception("Failed Recreate AccessToken");
+			}
+			return this.createTokenByPayload(payload, now, expiryDate);
+    }
+    
     // AccessToken -> Authentication 생성 ( 인증된 사용자로 처리 )
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parser()
@@ -133,7 +144,7 @@ public class JwtTokenBase {
     
     // Authentication -> AccessToken 생성
     public JwtToken createAccessToken(Authentication authentication) {
-        UserEntity userEntity = (UserEntity) authentication.getPrincipal();
+        UserDetail userDetail = (UserDetail) authentication.getPrincipal();
         
         /*
         String permissions = authentication.getAuthorities().stream()	//Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -144,11 +155,11 @@ public class JwtTokenBase {
         String accessTokenId = UUID.randomUUID().toString();
         
         Claims claims = Jwts.claims()
-        		.subject(userEntity.getId())
+        		.subject(userDetail.getId())
         		//.add(PERMISSIONS_KEY, permissions)
         		.add(TOKEN_ID_KEY, accessTokenId)
-        		.add("name", userEntity.getName())
-        		.add("address", userEntity.getAddressSeq())
+        		.add("name", userDetail.getName())
+        		.add("address", userDetail.getAddressSeq())
         		.build();
         
         Date now = new Date();

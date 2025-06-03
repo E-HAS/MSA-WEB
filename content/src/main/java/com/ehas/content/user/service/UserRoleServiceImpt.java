@@ -1,6 +1,9 @@
 package com.ehas.content.user.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ehas.content.user.dto.UserRoleDto;
 import com.ehas.content.user.entity.RoleEntity;
@@ -21,14 +24,16 @@ public class UserRoleServiceImpt {
 	private final UserRoleRepository UserRoleRepository;
 	private final RoleRepository RoleRepository;
 	
-	public UserRoleEntity addRole(UserRoleDto userRoleDto){
+	@Transactional(rollbackFor = { Exception.class })
+	public UserRoleEntity add(UserRoleDto userRoleDto){
 		return UserRoleRepository.save(UserRoleEntity.builder()
 														.userSeq(userRoleDto.getUserSeq())
 														.roleSeq(userRoleDto.getRoleSeq())
 														.build());
 	}
 	
-	public Boolean deleteRole(UserRoleDto userRoleDto){
+	@Transactional(rollbackFor = { Exception.class })
+	public Boolean delete(UserRoleDto userRoleDto){
 		try {
 			 UserRoleRepository.deleteById(UserRoleEntityKey.builder()
 						.userSeq(userRoleDto.getUserSeq())
@@ -40,6 +45,7 @@ public class UserRoleServiceImpt {
 		}
 	}
 	
+	@Transactional(rollbackFor = { Exception.class })
 	public Boolean deleteRoleByUserIdAndRoleSeq(String userId, Integer roleSeq){
 		try {
 			UserRoleRepository.findByUserIdAndRoleSeq(userId, roleSeq);
@@ -49,8 +55,8 @@ public class UserRoleServiceImpt {
 		}
 	}
 	
-	public UserRoleEntity findByUserSeq(Integer seq){
-		return UserRoleRepository.findByUserSeq(seq);
+	public List<UserRoleEntity> findListByUserSeq(Integer seq){
+		return UserRoleRepository.findListByUserSeq(seq);
 	}
 	
 	public RoleEntity findRoleByUserSeq(Integer userSeq){

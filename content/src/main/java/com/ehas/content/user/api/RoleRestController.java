@@ -26,7 +26,7 @@ public class RoleRestController {
     @GetMapping
     public ResponseEntity<ResponseDto> getRoles() {
         try {
-            List<RoleEntity> roles = roleServiceImpt.findAllRole();  // 동기 메서드로 변경 필요
+            List<RoleEntity> roles = roleServiceImpt.findAll();  // 동기 메서드로 변경 필요
             if (!roles.isEmpty()) {
                 return ResponseEntity.ok(
                         ResponseDto.builder()
@@ -56,7 +56,7 @@ public class RoleRestController {
     @PostMapping
     public ResponseEntity<ResponseDto> addRole(@RequestBody RoleDto roleDto) {
         try {
-            Boolean added = roleServiceImpt.addRole(roleDto);
+            Boolean added = roleServiceImpt.add(roleDto);
             if (added) {
                 return ResponseEntity.status(HttpStatus.CREATED).body(
                         ResponseDto.builder()
@@ -85,7 +85,7 @@ public class RoleRestController {
     @PutMapping
     public ResponseEntity<ResponseDto> modifyRole(@RequestBody RoleDto roleDto) {
         try {
-            Boolean modified = roleServiceImpt.ModifyRole(roleDto);
+            Boolean modified = roleServiceImpt.UpdateBySeq(roleDto);
             if (modified) {
                 return ResponseEntity.ok(
                         ResponseDto.builder()
@@ -114,7 +114,7 @@ public class RoleRestController {
     @DeleteMapping("/{seq}")
     public ResponseEntity<ResponseDto> deleteRole(@PathVariable("seq") Integer seq) {
         try {
-            boolean deleted = roleServiceImpt.deleteRole(seq);
+            boolean deleted = roleServiceImpt.delete(seq);
             if (deleted) {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
                         ResponseDto.builder()

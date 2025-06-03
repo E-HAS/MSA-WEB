@@ -1,5 +1,7 @@
 package com.ehas.content.user.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +13,7 @@ import jakarta.transaction.Transactional;
 
 public interface UserRoleRepository extends JpaRepository<UserRoleEntity, UserRoleEntityKey>{
 	@Query(value="SELECT * FROM user_role WHERE user_seq = :seq", nativeQuery = true)
-	UserRoleEntity findByUserSeq(Integer seq);
+	List<UserRoleEntity> findListByUserSeq(Integer seq);
 	
 	@Transactional
 	@Modifying

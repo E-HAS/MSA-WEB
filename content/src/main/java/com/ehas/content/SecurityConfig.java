@@ -131,7 +131,7 @@ public class SecurityConfig {
 
 	    @Bean
 	    public UserDetailsService userDetailsService(UserServiceImpt userServiceImpt) {
-	        return username -> userServiceImpt.findByUserId(username);
+	        return username -> userServiceImpt.findUserDetailByUserId(username);
 	        //userServiceImpt.findRoleByUserSeq(user.getSeq())
 	        //user.setRoles(roles);
 	    }

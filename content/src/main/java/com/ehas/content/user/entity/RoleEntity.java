@@ -27,8 +27,4 @@ public class RoleEntity {
 
     @Column(name = "role_dept", nullable = false, length = 200)
     private String roleDept;
-    
-    //@ManyToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "content_seq", nullable = false)
-    //private ContentEntity content;
 }

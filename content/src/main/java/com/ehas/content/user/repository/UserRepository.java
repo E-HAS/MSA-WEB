@@ -15,10 +15,10 @@ import jakarta.transaction.Transactional;
 
 public interface UserRepository extends JpaRepository<UserEntity, Integer>{
 	@Query(value="SELECT * FROM USER WHERE seq = :seq", nativeQuery = true)
-	UserEntity findBySeq(@Param("seq")Integer seq);
+	UserEntity findByUserSeq(@Param("seq")Integer seq);
 	
 	@Query(value="SELECT * FROM USER WHERE id = :id", nativeQuery = true)
-	UserEntity findById(@Param("id")String id);
+	UserEntity findByUserId(@Param("id")String id);
 	
 	@Query(value="""
 			SELECT SEQ
@@ -50,7 +50,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer>{
 	            deleted_date = :deletedDate
 	        WHERE seq = :seq
 		    """, nativeQuery = true)
-    int updateUserBySeq(
+    int updateBySeq(
     	    @Param("seq") Integer seq,
     	    @Param("name") String name,
     	    @Param("password") String password,

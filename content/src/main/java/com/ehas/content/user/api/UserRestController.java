@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import com.ehas.content.user.dto.ResponseDto;
+import com.ehas.content.user.dto.UserDetail;
 import com.ehas.content.user.dto.UserDto;
 import com.ehas.content.user.entity.UserEntity;
 import com.ehas.content.user.jwt.dto.JwtToken;
@@ -44,7 +45,7 @@ public class UserRestController {
     public ResponseEntity<ResponseDto> registerUser(@RequestBody UserDto userDto) {
         try {
             userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
-            boolean result = userServiceImpt.saveByUser(userDto);
+            boolean result = userServiceImpt.add(userDto);
 
             if (result) {
                 return ResponseEntity.status(HttpStatus.CREATED)
@@ -85,30 +86,31 @@ public class UserRestController {
             if (refreshToken == null) {
                 throw new RuntimeException("Refresh token not found in cookies.");
             }
-
+            
             boolean deleted = userJwtRedisSerivceImpt.deleteRefreshToken(refreshToken);
-            if (deleted) {
-                Cookie deleteCookie = new Cookie("refreshToken", "");
-                deleteCookie.setHttpOnly(true);
-                deleteCookie.setSecure(true);
-                deleteCookie.setPath("/");
-                deleteCookie.setMaxAge(0); // 즉시 만료
-                // SameSite 설정은 Servlet API 4.0 이상 또는 별도 필터 필요 (생략 가능)
-
-                response.addCookie(deleteCookie);
-
-                return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                        .body(ResponseDto.builder()
-                                .status(HttpStatus.NO_CONTENT.value())
-                                .message(HttpStatus.NO_CONTENT.getReasonPhrase())
-                                .build());
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(ResponseDto.builder()
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                                .build());
+            if(!deleted){
+            	throw new RuntimeException("Refresh token not found in cookies.");
             }
+             
+            Cookie deleteCookie = new Cookie("refreshToken", "");
+            deleteCookie.setHttpOnly(true);
+            deleteCookie.setSecure(true);
+            deleteCookie.setPath("/");
+            deleteCookie.setMaxAge(0); // 즉시 만료
+            // SameSite 설정은 Servlet API 4.0 이상 또는 별도 필터 필요 (생략 가능)
+            response.addCookie(deleteCookie);
+
+            String accessToken = userJwtTokenService.resolveAccessToken(request);
+            if(accessToken != null) {
+            	userJwtTokenService.addBlacklist(accessToken);
+            }else {
+            	throw new RuntimeException("Access token not found");
+            }
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(ResponseDto.builder()
+                            .status(HttpStatus.NO_CONTENT.value())
+                            .message(HttpStatus.NO_CONTENT.getReasonPhrase())
+                            .build());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResponseDto.builder()
@@ -121,7 +123,7 @@ public class UserRestController {
     @GetMapping("/{userId}")
     public ResponseEntity<ResponseDto> getUser(@PathVariable("userId") String userId) {
         try {
-            UserEntity user = userServiceImpt.findByUserId(userId);
+            UserDetail user = userServiceImpt.findUserDetailByUserId(userId);
             if (user != null) {
                 return ResponseEntity.ok(ResponseDto.builder()
                         .status(HttpStatus.OK.value())
@@ -191,7 +193,7 @@ public class UserRestController {
             if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
                 userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
             }
-            boolean updated = userServiceImpt.updateByUser(userDto);
+            boolean updated = userServiceImpt.updateBySeq(userDto);
             if (updated) {
                 return ResponseEntity.ok(ResponseDto.builder()
                         .status(HttpStatus.OK.value())
@@ -216,7 +218,7 @@ public class UserRestController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<ResponseDto> deleteUser(@PathVariable("userId") String userId) {
         try {
-            boolean deleted = userServiceImpt.deleteByUser(userId);
+            boolean deleted = userServiceImpt.delete(userId);
             if (deleted) {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT)
                         .body(ResponseDto.builder()

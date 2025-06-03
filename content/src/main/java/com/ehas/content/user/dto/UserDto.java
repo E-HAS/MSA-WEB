@@ -1,11 +1,15 @@
 package com.ehas.content.user.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.Transient;
 
 @Data
 @NoArgsConstructor
@@ -21,6 +25,10 @@ public class UserDto {
 	
 	private Integer addressSeq;
 	private Integer roleSeq;
+	
+	@Transient
+	@Builder.Default
+	private List<String> roles = new ArrayList<String>();
 	
 	public interface UserData {
 	    String getSeq();

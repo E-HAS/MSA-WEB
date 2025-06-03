@@ -24,12 +24,13 @@ public class UserRoleEntityKey implements Serializable{
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof UserRoleEntityKey)) return false;
-        UserRoleEntityKey userroleEntity = (UserRoleEntityKey) o;
-        return Objects.equals(userSeq, userroleEntity.userSeq) && Objects.equals(roleSeq, userroleEntity.roleSeq);
+        UserRoleEntityKey userRoleEntity = (UserRoleEntityKey) o;
+        return Objects.equals(this.userSeq, userRoleEntity.getUserSeq()) 
+        		&& Objects.equals(this.roleSeq, userRoleEntity.getRoleSeq());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash( userSeq, roleSeq);
+        return Objects.hash(this.userSeq, this.roleSeq);
     }
 }

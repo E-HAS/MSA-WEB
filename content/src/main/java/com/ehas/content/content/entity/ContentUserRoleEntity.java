@@ -1,4 +1,4 @@
-package com.ehas.content.user.entity;
+package com.ehas.content.content.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -20,21 +20,23 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name ="user_role")
-@IdClass(UserRoleEntityKey.class)
+@Table(name ="content_user_role")
+@IdClass(ContentUserRoleEntityKey.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ToString(exclude = {"user", "role"})
-public class UserRoleEntity {
+@ToString(exclude = {"contentUser", "contentRole"})
+public class ContentUserRoleEntity {
     @Id
 	private Integer userSeq;
     @Id
-	private Integer roleSeq;
-    
+	private Integer contentSeq;
+    @Id
+	private Integer contentRoleSeq;
+	
     @ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="userSeq", referencedColumnName="seq", insertable = false, updatable = false)//상대 객체 검색 컬럼 name=, 내 객체 검색 컬럼 referencedColumnName=
-    private UserEntity user;  
+    private ContentUserEntity contentUser;  
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="roleSeq", referencedColumnName="seq", insertable = false, updatable = false)//상대 객체 검색 컬럼 name=, 내 객체 검색 컬럼 referencedColumnName=
-    private RoleEntity role;
+    private ContentRoleEntity contentRole;
 }

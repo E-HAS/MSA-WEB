@@ -1,6 +1,5 @@
 package com.ehas.content.user.api;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -55,7 +54,7 @@ public class UserRoleRestController {
     public ResponseEntity<ResponseDto> addRole(@PathVariable("userId") String userId,
                                                @RequestBody UserRoleDto userDto) {
         try {
-        	UserRoleEntity addedRole = userRoleServiceImpt.addRole(userDto);
+        	UserRoleEntity addedRole = userRoleServiceImpt.add(userDto);
             if (addedRole != null) {
                 return ResponseEntity.status(HttpStatus.CREATED)
                         .body(ResponseDto.builder()

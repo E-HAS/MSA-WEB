@@ -5,8 +5,10 @@ import com.ehas.content.user.entity.RoleEntity;
 import com.ehas.content.user.repository.RoleRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,27 +19,21 @@ import lombok.extern.slf4j.Slf4j;
 public class RoleServiceImpt {
 	private final RoleRepository RoleRepository;
 	
-	public RoleEntity findRole(Integer seq){
-		return RoleRepository.findById(seq).get();
-	}
-	
-	public List<RoleEntity> findAllRole(){
-		return RoleRepository.findAll();
-	}
-	
-	public Boolean addRole(RoleDto roleDto){
+	@Transactional(rollbackFor = { Exception.class })
+	public Boolean add(RoleDto roleDto){
 		try {
-			RoleRepository.save(RoleEntity.builder()
-					.roleName(roleDto.getRoleName())
-					.roleDept(roleDto.getRoleDept())
-					.build());
+				RoleRepository.save(RoleEntity.builder()
+						.roleName(roleDto.getRoleName())
+						.roleDept(roleDto.getRoleDept())
+						.build());
 			return true;
 		}catch(Exception e) {
 			return false;
 		}
 	}
 	
-	public Boolean ModifyRole(RoleDto roleDto){
+	@Transactional(rollbackFor = { Exception.class })
+	public Boolean UpdateBySeq(RoleDto roleDto){
 		try {
 			RoleRepository.updateByseq(roleDto.getSeq()
 					,roleDto.getRoleName()
@@ -48,8 +44,8 @@ public class RoleServiceImpt {
 		}
 	}
 	
-	
-	public Boolean deleteRole(Integer seq){
+	@Transactional(rollbackFor = { Exception.class })
+	public Boolean delete(Integer seq){
 		try {
 			RoleRepository.deleteById(seq);
 			return true;
@@ -58,7 +54,15 @@ public class RoleServiceImpt {
 		}
 	}
 
+	public RoleEntity findById(Integer seq){
+		return RoleRepository.findById(seq).orElse(null);
+	}
 	
+	public List<RoleEntity> findAll(){
+		return RoleRepository.findAll();
+	}
+	
+	// USER 관련
 	public RoleEntity findRoleByUserSeq(Integer userSeq){
 		return RoleRepository.findByUserSeq(userSeq);
 	}

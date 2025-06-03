@@ -1,28 +1,22 @@
 package com.ehas.content.user.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.ehas.content.user.dto.UserDetail;
 import com.ehas.content.user.dto.UserDto;
-import com.ehas.content.user.entity.QRoleEntity;
-import com.ehas.content.user.entity.QUserEntity;
-import com.ehas.content.user.entity.QUserRoleEntity;
-import com.ehas.content.user.entity.RoleEntity;
+import com.ehas.content.user.dto.UserRoleDto;
 import com.ehas.content.user.entity.UserEntity;
 import com.ehas.content.user.entity.UserRoleEntity;
-import com.ehas.content.user.repository.RoleRepository;
 import com.ehas.content.user.repository.UserRepository;
-import com.ehas.content.user.repository.UserRoleRepository;
 import com.ehas.content.user.userstatus.UserStatus;
-import com.querydsl.core.Tuple;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
@@ -30,12 +24,10 @@ import reactor.core.publisher.Mono;
 public class UserServiceImpt {
 
 	private final UserRepository UserRepository;
-	private final RoleRepository RoleRepository;
-	private final UserRoleRepository UserRoleRepository;
+	private final UserRoleServiceImpt UserRoleServiceImpt;
 	
-	private final JPAQueryFactory queryFactory;
-	//@Transactional(rollbackFor = { Exception.class })  
-	public Boolean saveByUser(UserDto user){
+	@Transactional(rollbackFor = { Exception.class })  
+	public Boolean add(UserDto user){
 		try {
 			UserEntity userEntity = UserRepository.save(UserEntity.builder()
 									.id(user.getId())
@@ -46,19 +38,31 @@ public class UserServiceImpt {
 									.registeredDate(LocalDateTime.now())
 									.build());
 			
-			UserRoleEntity roleEntity = UserRoleRepository.save(UserRoleEntity
-															.builder()
-															.userSeq(userEntity.getSeq())
-															.roleSeq(user.getRoleSeq())
-															.build());
+			UserRoleEntity roleEntity = UserRoleServiceImpt.add(UserRoleDto.builder()
+																				.userSeq(userEntity.getSeq())
+																				.roleSeq(user.getRoleSeq())
+																				.build());
 			return true;
 		}catch(Exception e) {
+			new Exception("Insert Failed User");
 			return false;
 		}
 	}
 	
-	//@Transactional(rollbackFor = { Exception.class })  
-	public boolean updateByUser(UserDto userDto){
+	@Transactional(rollbackFor = { Exception.class })
+	public Boolean updateBySeq(UserEntity entity){
+		return UserRepository.updateBySeq(entity.getSeq()
+												,entity.getName()
+												,entity.getPassword()
+												,entity.getStatus()
+												,entity.getAddressSeq()
+												,entity.getPasswordUpdatedDate()
+												,entity.getUpdatedDate()
+												,entity.getDeletedDate()) == 1 ? true : false;
+	}
+	
+	@Transactional(rollbackFor = { Exception.class })  
+	public Boolean updateBySeq(UserDto userDto){
 		try {
 			UserEntity findUserEntity = this.findByUserId(userDto.getId());
 					
@@ -75,70 +79,54 @@ public class UserServiceImpt {
 			if( userDto.getAddressSeq() != null ) {
 				findUserEntity.setAddressSeq(userDto.getAddressSeq());
 			}
-				findUserEntity.setUpdatedDate(LocalDateTime.now());
-			return this.updateByUserBySeq(findUserEntity)?true:false;		
+			findUserEntity.setUpdatedDate(LocalDateTime.now());
+			
+			return this.updateBySeq(findUserEntity)? true:false;		
 		}catch(Exception e) {
+			new Exception("Update Failed User");
 			return false;
 		}
 	}
 	
-	//@Transactional(rollbackFor = { Exception.class })  
-	public boolean deleteByUser(String userId){
+	@Transactional(rollbackFor = { Exception.class })  
+	public Boolean delete(String userId){
 		try {
 			UserEntity findUserEntity = this.findByUserId(userId);
+			//UserRepository.delete(findUserEntity);
+			
 			findUserEntity.setStatus(UserStatus.INACTIVE);
 			findUserEntity.setDeletedDate(LocalDateTime.now());
-			return this.updateByUserBySeq(findUserEntity) ? true : false;
+			return this.updateBySeq(findUserEntity) ? true : false;
 		}catch(Exception e) {
+			new Exception("Delete Failed User");
 			return false;
 		}
 	}
 	
-	
 	public UserEntity findByUserSeq(Integer seq){
-		return UserRepository.findBySeq(seq);
+		return UserRepository.findByUserSeq(seq);
 	}
 	
+	@Transactional
 	public UserEntity findByUserId(String id){
-		QUserEntity qUserEntity = QUserEntity.userEntity;
-		QUserRoleEntity qUserRoleEntity = QUserRoleEntity.userRoleEntity;
-		QRoleEntity qRoleEntity = QRoleEntity.roleEntity;
+		return UserRepository.findByUserId(id);
+	}
+	
+	@Transactional
+	public UserDetail findUserDetailByUserId(String id){
+		UserEntity entity = UserRepository.findByUserId(id);
+		List<String> roles = new ArrayList<String>();
+		entity.getRoles().forEach(v -> { 
+			roles.add(v.getRole().getRoleName());
+    	});
 		
-		List<UserEntity> result = queryFactory
-							.select(qUserEntity)
-							.from(qUserEntity)
-							.join(qUserEntity.roles, qUserRoleEntity)
-							.join(qUserRoleEntity.role,qRoleEntity)
-							.where(qUserEntity.id.eq(id))
-							.fetch();
-
-		result.forEach(v->{
-			v.getRoles().forEach(e->{
-				log.info(e.getUser().toString());
-				log.info(e.getRole().toString());
-				log.info(e.toString());
-			});
-		});
+		UserDetail userDetail = new UserDetail(entity);
+		userDetail.setRoles(roles);
 		
-		return UserRepository.findById(id);
+		return userDetail;
 	}
 	
-	public RoleEntity findRoleByUserSeq(Integer seq){
-		return RoleRepository.findByUserSeq(seq);
-	}
-	
-	public Boolean updateByUserBySeq(UserEntity entity){
-		return UserRepository.updateUserBySeq(entity.getSeq()
-												,entity.getName()
-												,entity.getPassword()
-												,entity.getStatus()
-												,entity.getAddressSeq()
-												,entity.getPasswordUpdatedDate()
-												,entity.getUpdatedDate()
-												,entity.getDeletedDate()) == 1 ? true : false;
-	}
-	
-	public boolean isStringNullOrEmpty(String str) {
+	public Boolean isStringNullOrEmpty(String str) {
 	    return str == null || str.trim().isEmpty();
 	}
 }
