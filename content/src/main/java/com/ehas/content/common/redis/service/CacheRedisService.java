@@ -1,4 +1,4 @@
-package com.ehas.content.redis.service;
+package com.ehas.content.common.redis.service;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;

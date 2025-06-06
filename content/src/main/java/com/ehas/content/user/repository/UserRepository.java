@@ -2,18 +2,23 @@ package com.ehas.content.user.repository;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.ehas.content.common.user.status.UserStatus;
 import com.ehas.content.user.dto.UserDto;
 import com.ehas.content.user.entity.UserEntity;
-import com.ehas.content.user.userstatus.UserStatus;
 
 import jakarta.transaction.Transactional;
 
 public interface UserRepository extends JpaRepository<UserEntity, Integer>{
+	@Query("SELECT new com.example.dto.UserDto(u.id, u.name) FROM UserEntity u WHERE u.status = :status")
+	Page<UserDto> findDtoByStatus(@Param("status") Integer status, Pageable pageable);
+	
 	@Query(value="SELECT * FROM USER WHERE seq = :seq", nativeQuery = true)
 	UserEntity findByUserSeq(@Param("seq")Integer seq);
 	

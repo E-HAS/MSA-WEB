@@ -22,7 +22,7 @@ import java.io.PrintWriter;
 @RequiredArgsConstructor
 public class UserJwtTokenAuthenticationFilter extends OncePerRequestFilter {
 
-    private final UserJwtTokenProvider userJwtTokenProvider;
+    private final UserJwtTokenProvider JwtTokenProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -30,25 +30,30 @@ public class UserJwtTokenAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         try {
-            String token = userJwtTokenProvider.resolveAccessToken(request); // 1. Authorization 헤더에서 토큰 추출
-            if (token != null && userJwtTokenProvider.validateToken(token)) { // 2. 토큰 유효성 검사
-            	if(userJwtTokenProvider.existsBlacklist(token)) {             // 3. 블랙리스트 여부 검사
-            		Authentication authentication = userJwtTokenProvider.getAuthentication(token); // 4. 인증 객체 생성
+            String token = JwtTokenProvider.resolveAccessToken(request); // 1. Authorization 헤더에서 토큰 추출
+            if (token != null && JwtTokenProvider.validateToken(token)) { // 2. 토큰 유효성 검사
+            	if(JwtTokenProvider.existsBlacklist(token)) {             // 3. 블랙리스트 여부 검사
+            		Authentication authentication = JwtTokenProvider.getAuthentication(token); // 4. 인증 객체 생성
                     SecurityContextHolder.getContext().setAuthentication(authentication); // 5. SecurityContext에 설정
             	}
             }
             filterChain.doFilter(request, response); // 다음 필터 실행
         }catch (ExpiredJwtException e) { // 만료된 JWT 일시
-        	log.error("JWT token is expired: {}", e.getMessage());
+        	log.error("Access token is expired: {}", e.getMessage());
         	
-        	String token = userJwtTokenProvider.validdateRefreshToken(request, response); // 1. 토큰 재발행
-        	Authentication authentication = userJwtTokenProvider.getAuthentication(token);// 2. 인증 객체 생성
-            SecurityContextHolder.getContext().setAuthentication(authentication);         // 3. SecurityContext에 설정
+        	try {
+	        	String token = JwtTokenProvider.validdateRefreshToken(request, response); // 1. 토큰 재발행
+	        	Authentication authentication = JwtTokenProvider.getAuthentication(token);// 2. 인증 객체 생성
+	            SecurityContextHolder.getContext().setAuthentication(authentication);         // 3. SecurityContext에 설정
             
-            filterChain.doFilter(request, response); // 다음 필터 실행
+	            filterChain.doFilter(request, response); // 다음 필터 실행
+        	}catch (Exception e2) {
+                log.error("User AuthenticationFilter Refresh Token error: {}", e2.getMessage());
+                onError(response, e.getMessage(), HttpStatus.UNAUTHORIZED.value());
+        	}
         }
         catch (Exception e) {
-            log.error("Authentication error: {}", e.getMessage());
+            log.error("User AuthenticationFilter Error: {}", e.getMessage());
             onError(response, e.getMessage(), HttpStatus.UNAUTHORIZED.value());
         }
     }

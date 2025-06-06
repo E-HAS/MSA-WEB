@@ -1,4 +1,4 @@
-package com.ehas.content.redis.service;
+package com.ehas.content.common.redis.service;
 
 import java.time.Duration;
 import java.util.HashMap;

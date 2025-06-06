@@ -1,7 +1,6 @@
-package com.ehas.content.user.jwt.base;
+package com.ehas.content.common.jwt.base;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 
@@ -9,14 +8,12 @@ import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
-import com.ehas.content.user.dto.UserDetail;
-import com.ehas.content.user.jwt.dto.JwtToken;
+import com.ehas.content.common.jwt.dto.JwtToken;
+import com.ehas.content.common.jwt.service.JwtRedisSerivceImpt;
+import com.ehas.content.user.principal.entity.UserDetail;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -26,7 +23,9 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -46,12 +45,11 @@ public class JwtTokenBase {
 
     protected SecretKey secretKey;
 
-    protected final UserDetailsService userDetailsService;
-    
-    protected JwtTokenBase(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
-
+    protected  final JwtRedisSerivceImpt JwtRedisSerivceImpt;
+    protected  JwtTokenBase(JwtRedisSerivceImpt JwtRedisSerivceImpt) {
+       this.JwtRedisSerivceImpt = JwtRedisSerivceImpt;
+   }
+   
     @PostConstruct
     public void init() {
         //var secret = Base64.getEncoder().encodeToString(this.secret.getBytes());
@@ -124,24 +122,6 @@ public class JwtTokenBase {
 			return this.createTokenByPayload(payload, now, expiryDate);
     }
     
-    // AccessToken -> Authentication 생성 ( 인증된 사용자로 처리 )
-    public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(secretKey).build()
-                .parseSignedClaims(token).getPayload();
-        
-        /*
-        Object authoritiesClaim = claims.get(PERMISSIONS_KEY);
-        Collection<? extends GrantedAuthority> authorities = authoritiesClaim == null ? AuthorityUtils.NO_AUTHORITIES
-                : AuthorityUtils.commaSeparatedStringToAuthorityList(authoritiesClaim.toString());
-        */
-        
-        UserDetails userDetail = userDetailsService.loadUserByUsername(claims.getSubject());
-        Collection<? extends GrantedAuthority> authorities = userDetail.getAuthorities();
-        
-        return new UsernamePasswordAuthenticationToken(userDetail, token, authorities);
-    }
-    
     // Authentication -> AccessToken 생성
     public JwtToken createAccessToken(Authentication authentication) {
         UserDetail userDetail = (UserDetail) authentication.getPrincipal();
@@ -204,5 +184,62 @@ public class JwtTokenBase {
 						.refreshTokenId(refresTokenId)
 						.refreshToken(refreshToken)
 						.build();
+    }
+    
+    
+    // RefreshToken 유효성검사
+    public String validdateRefreshToken(HttpServletRequest request, HttpServletResponse response) throws Exception{
+        // 1. 쿠키에서 refreshToken 가져오기
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+        	throw new Exception("Refresh token not found in cookies.");
+        }
+
+        String refreshToken = null;
+        for (Cookie cookie : cookies) {
+            if ("refreshToken".equals(cookie.getName())) {
+                refreshToken = cookie.getValue();
+                break;
+            }
+        }
+
+        if (refreshToken == null) {
+        	throw new Exception("Refresh token not found in cookies.");
+        }
+
+        // 2. Redis에 존재하는지 확인
+        if (!JwtRedisSerivceImpt.existsRefreshToken(refreshToken)) {
+        	throw new Exception(HttpStatus.UNAUTHORIZED.getReasonPhrase());
+        }
+
+        // 3. 토큰 유효성 검사
+        try {
+            if (!this.validateToken(refreshToken)) {
+            	throw new Exception("Invalid refresh token.");
+            }
+        } catch (Exception e) {
+        	throw new Exception(e.getMessage());
+        }
+        // 4. 새로운 액세스 토큰 재발급
+        String accessTokenInHeader = this.resolveAccessToken(request);
+        String recreatedAccessToken = this.recreateAccessToken(accessTokenInHeader);
+
+        // 5. 응답 헤더에 액세스 토큰 추가
+        response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + recreatedAccessToken);
+        
+        return recreatedAccessToken;
+    }
+
+    // AccessToken 블랙리스트 존재여부
+    public Boolean existsBlacklist(String token) throws Exception {
+    	try {
+    		if(!JwtRedisSerivceImpt.existsBlacklistToken(token)) {
+    			return true;
+    		}else {
+    			throw new Exception("Invalid JWT token");
+    		}
+    	}catch (Exception e) {
+    		throw new Exception("Invalid JWT token");
+    	}
     }
 }

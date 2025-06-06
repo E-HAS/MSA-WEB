@@ -2,9 +2,9 @@ package com.ehas.content.content.entity;
 
 import java.time.LocalDateTime;
 
+import com.ehas.content.common.user.status.UserStatus;
+import com.ehas.content.common.user.status.UserStatus.UserStatusConverter;
 import com.ehas.content.content.base.DateEntityBase;
-import com.ehas.content.user.userstatus.UserStatus;
-import com.ehas.content.user.userstatus.UserStatus.UserStatusConverter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.persistence.Column;

@@ -38,7 +38,7 @@ public class QUserEntity extends EntityPathBase<UserEntity> {
 
     public final NumberPath<Integer> seq = createNumber("seq", Integer.class);
 
-    public final EnumPath<com.ehas.content.user.userstatus.UserStatus> status = createEnum("status", com.ehas.content.user.userstatus.UserStatus.class);
+    public final EnumPath<com.ehas.content.common.user.status.UserStatus> status = createEnum("status", com.ehas.content.common.user.status.UserStatus.class);
 
     public final DateTimePath<java.time.LocalDateTime> updatedDate = createDateTime("updatedDate", java.time.LocalDateTime.class);
 

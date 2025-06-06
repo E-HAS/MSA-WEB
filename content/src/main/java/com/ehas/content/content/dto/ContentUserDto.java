@@ -2,7 +2,7 @@ package com.ehas.content.content.dto;
 
 import java.time.LocalDateTime;
 
-import com.ehas.content.user.userstatus.UserStatus;
+import com.ehas.content.common.user.status.UserStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

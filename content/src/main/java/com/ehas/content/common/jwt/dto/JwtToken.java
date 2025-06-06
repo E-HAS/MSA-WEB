@@ -1,4 +1,4 @@
-package com.ehas.content.user.jwt.dto;
+package com.ehas.content.common.jwt.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

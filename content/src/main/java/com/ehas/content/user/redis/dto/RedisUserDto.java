@@ -1,6 +1,10 @@
 package com.ehas.content.user.redis.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.ehas.content.user.dto.UserDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,4 +23,18 @@ public class RedisUserDto implements Serializable{
 	
 	private String name;
 	private Integer Status;
+	
+	@Builder.Default
+	private List<String> roles = new ArrayList<String>();
+	
+    public UserDto convertUserDto(String id) {
+    	return UserDto.builder()
+    				  .seq(this.getUserSeq())
+    				  .id(id)
+    				  .addressSeq(this.getAddressSeq())
+    				  .name(this.getName())
+    				  .status(this.getStatus())
+    				  .roles(this.getRoles())
+    				  .build();
+    }
 }

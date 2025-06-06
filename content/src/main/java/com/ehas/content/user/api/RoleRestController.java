@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.ehas.content.user.dto.ResponseDto;
+import com.ehas.content.common.dto.ResponseDto;
 import com.ehas.content.user.dto.RoleDto;
 import com.ehas.content.user.entity.RoleEntity;
 import com.ehas.content.user.service.RoleServiceImpt;

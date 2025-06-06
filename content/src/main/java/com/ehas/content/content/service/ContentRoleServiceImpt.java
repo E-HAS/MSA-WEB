@@ -1,6 +1,12 @@
 package com.ehas.content.content.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ehas.content.content.dto.ContentRoleDto;
 import com.ehas.content.content.entity.ContentRoleEntity;
@@ -18,9 +24,33 @@ import lombok.extern.slf4j.Slf4j;
 public class ContentRoleServiceImpt {
 	private final JPAQueryFactory queryFactory;
 
-	public ContentRoleEntity find(ContentRoleDto contentRoleDto){
+	@Transactional
+	public Page<ContentRoleDto> findAll(ContentRoleDto contentRoleDto, Pageable pageable){
+		List<ContentRoleDto> ContentRoles = queryFactory
+								            .select(Projections.fields(ContentRoleDto.class
+								            		,QContentRoleEntity.contentRoleEntity.seq
+								            		,QContentRoleEntity.contentRoleEntity.contentSeq
+													,QContentRoleEntity.contentRoleEntity.roleName
+													,QContentRoleEntity.contentRoleEntity.roleDept
+								                ))
+								             .from(QContentRoleEntity.contentRoleEntity)
+								             .where(getDefaultWheres(contentRoleDto))
+								             .offset(pageable.getOffset())
+								             .limit(pageable.getPageSize())
+								             .orderBy(QContentRoleEntity.contentRoleEntity.seq.asc())
+								             .fetch();
+		
+		long total = queryFactory.select(QContentRoleEntity.contentRoleEntity.count())
+								 .from(QContentRoleEntity.contentRoleEntity)
+								 .fetchOne();
+		
+		return new PageImpl<>(ContentRoles, pageable, total);
+	}
+	
+	public ContentRoleEntity findContentRole(ContentRoleDto contentRoleDto){
 		return queryFactory
-				.select(Projections.constructor(ContentRoleEntity.class
+				.select(Projections.fields(ContentRoleEntity.class
+						,QContentRoleEntity.contentRoleEntity.seq
 						,QContentRoleEntity.contentRoleEntity.contentSeq
 						,QContentRoleEntity.contentRoleEntity.roleName
 						,QContentRoleEntity.contentRoleEntity.roleDept))

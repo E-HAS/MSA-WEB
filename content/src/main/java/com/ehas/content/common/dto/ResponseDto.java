@@ -1,4 +1,4 @@
-package com.ehas.content.user.dto;
+package com.ehas.content.common.dto;
 
 import java.util.Map;
 

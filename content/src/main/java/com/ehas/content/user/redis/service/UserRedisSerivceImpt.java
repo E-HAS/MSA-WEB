@@ -5,10 +5,11 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.ehas.content.redis.service.CacheRedisService;
+import com.ehas.content.common.redis.service.CacheRedisService;
 import com.ehas.content.user.dto.UserDto;
 import com.ehas.content.user.redis.dto.RedisUserDto;
 import com.ehas.content.user.repository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -24,16 +25,18 @@ public class UserRedisSerivceImpt {
     private final String prefixUser= "user:";
     private final Integer durationOfMin= 60;
     
- // 저장
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    
+    // 저장
     public Boolean save(String userId, RedisUserDto value) {
-        return cacheRedisService.save(prefixUser,userId,value.toString()
+        return cacheRedisService.save(prefixUser,userId, this.toJson(value) 
         												,Duration.ofMinutes(durationOfMin));
     }
 
     // 조회
     public RedisUserDto get(String userId) {
     	String jsonUser = cacheRedisService.get(prefixUser, userId);
-    	return new ObjectMapper().convertValue(jsonUser, RedisUserDto.class);
+    	return this.fromJson(jsonUser);
     }
 
     // 삭제
@@ -62,11 +65,27 @@ public class UserRedisSerivceImpt {
             if (result) {
                 return redisUserDto;
             } else {
-                new RuntimeException("Failed to save to Redis");
+                throw new RuntimeException("Failed to save to Redis");
             }
         }
         
         return this.get(id);
        
+    }
+    
+    public RedisUserDto fromJson(String json) {
+        try {
+            return objectMapper.readValue(json, RedisUserDto.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed JSON to Object", e);
+        }
+    }
+    
+    public String toJson(RedisUserDto dto) {
+        try {
+            return objectMapper.writeValueAsString(dto);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed Object to JSON", e);
+        }
     }
 }

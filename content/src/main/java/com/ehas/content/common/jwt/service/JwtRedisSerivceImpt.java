@@ -1,11 +1,11 @@
-package com.ehas.content.user.redis.service;
+package com.ehas.content.common.jwt.service;
 
 import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.ehas.content.redis.service.CacheRedisService;
+import com.ehas.content.common.redis.service.CacheRedisService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserJwtRedisSerivceImpt {
+public class JwtRedisSerivceImpt {
 	private final CacheRedisService cacheRedisService;
 	
     private final String prefixRefreshToken= "refreshToken:";

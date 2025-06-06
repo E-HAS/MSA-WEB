@@ -1,4 +1,4 @@
-package com.ehas.content.user.userstatus;
+package com.ehas.content.common.user.status;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

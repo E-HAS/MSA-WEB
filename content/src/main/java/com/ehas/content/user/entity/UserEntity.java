@@ -4,8 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ehas.content.user.userstatus.UserStatus;
-import com.ehas.content.user.userstatus.UserStatus.UserStatusConverter;
+import com.ehas.content.common.user.status.UserStatus;
+import com.ehas.content.common.user.status.UserStatus.UserStatusConverter;
+import com.ehas.content.user.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -68,4 +69,14 @@ public class UserEntity{
     @OneToMany(fetch=FetchType.LAZY, mappedBy = "user") // mappedBy= 프로퍼티 이름
     @Builder.Default
     private List<UserRoleEntity> roles = new ArrayList<UserRoleEntity>();
+    
+    
+    public UserDto convertUserDto() {
+    	return UserDto.builder()
+    				  .seq(this.seq)
+    				  .id(this.id)
+    				  .name(this.name)
+    				  .addressSeq(this.addressSeq)
+    				  .build();
+    }
 }

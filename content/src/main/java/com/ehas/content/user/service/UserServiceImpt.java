@@ -4,16 +4,21 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ehas.content.user.dto.UserDetail;
+import com.ehas.content.common.user.status.UserStatus;
+import com.ehas.content.common.utill.validation;
 import com.ehas.content.user.dto.UserDto;
 import com.ehas.content.user.dto.UserRoleDto;
 import com.ehas.content.user.entity.UserEntity;
 import com.ehas.content.user.entity.UserRoleEntity;
+import com.ehas.content.user.principal.entity.UserDetail;
+import com.ehas.content.user.redis.dto.RedisUserDto;
+import com.ehas.content.user.redis.service.UserRedisSerivceImpt;
 import com.ehas.content.user.repository.UserRepository;
-import com.ehas.content.user.userstatus.UserStatus;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +28,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserServiceImpt {
 
-	private final UserRepository UserRepository;
-	private final UserRoleServiceImpt UserRoleServiceImpt;
+	private final UserRepository userRepository;
+	private final UserRoleServiceImpt userRoleServiceImpt;
+	private final UserRedisSerivceImpt userRedisSerivceImpt;
 	
 	@Transactional(rollbackFor = { Exception.class })  
-	public Boolean add(UserDto user){
+	public Boolean add(UserDto user) throws Exception{
 		try {
-			UserEntity userEntity = UserRepository.save(UserEntity.builder()
+			UserEntity userEntity = userRepository.save(UserEntity.builder()
 									.id(user.getId())
 									.password(user.getPassword())
 									.name(user.getName())
@@ -38,20 +44,20 @@ public class UserServiceImpt {
 									.registeredDate(LocalDateTime.now())
 									.build());
 			
-			UserRoleEntity roleEntity = UserRoleServiceImpt.add(UserRoleDto.builder()
+			UserRoleEntity roleEntity = userRoleServiceImpt.add(UserRoleDto.builder()
 																				.userSeq(userEntity.getSeq())
 																				.roleSeq(user.getRoleSeq())
 																				.build());
 			return true;
 		}catch(Exception e) {
-			new Exception("Insert Failed User");
-			return false;
+			log.error("User Registration Failed Error : "+e.getMessage());
+			throw new Exception("User Registration Failed");
 		}
 	}
 	
 	@Transactional(rollbackFor = { Exception.class })
 	public Boolean updateBySeq(UserEntity entity){
-		return UserRepository.updateBySeq(entity.getSeq()
+		return userRepository.updateBySeq(entity.getSeq()
 												,entity.getName()
 												,entity.getPassword()
 												,entity.getStatus()
@@ -66,10 +72,10 @@ public class UserServiceImpt {
 		try {
 			UserEntity findUserEntity = this.findByUserId(userDto.getId());
 					
-			if(!isStringNullOrEmpty(userDto.getName())) {
+			if(!validation.isStringNullOrEmpty(userDto.getName())) {
 				findUserEntity.setName(userDto.getName());
 			}
-			if(!isStringNullOrEmpty(userDto.getPassword())) {
+			if(!validation.isStringNullOrEmpty(userDto.getPassword())) {
 				findUserEntity.setPassword(userDto.getPassword());
 				findUserEntity.setPasswordUpdatedDate(LocalDateTime.now());
 			}
@@ -83,7 +89,7 @@ public class UserServiceImpt {
 			
 			return this.updateBySeq(findUserEntity)? true:false;		
 		}catch(Exception e) {
-			new Exception("Update Failed User");
+			log.error("User Update Failed Error : "+e.getMessage());
 			return false;
 		}
 	}
@@ -98,35 +104,42 @@ public class UserServiceImpt {
 			findUserEntity.setDeletedDate(LocalDateTime.now());
 			return this.updateBySeq(findUserEntity) ? true : false;
 		}catch(Exception e) {
-			new Exception("Delete Failed User");
+			log.error("User Delete Failed Error : "+e.getMessage());
 			return false;
 		}
 	}
 	
 	public UserEntity findByUserSeq(Integer seq){
-		return UserRepository.findByUserSeq(seq);
+		return userRepository.findByUserSeq(seq);
 	}
 	
 	@Transactional
 	public UserEntity findByUserId(String id){
-		return UserRepository.findByUserId(id);
-	}
-	
-	@Transactional
-	public UserDetail findUserDetailByUserId(String id){
-		UserEntity entity = UserRepository.findByUserId(id);
+		UserEntity entity = userRepository.findByUserId(id);
 		List<String> roles = new ArrayList<String>();
 		entity.getRoles().forEach(v -> { 
 			roles.add(v.getRole().getRoleName());
     	});
 		
-		UserDetail userDetail = new UserDetail(entity);
-		userDetail.setRoles(roles);
+		if(!userRedisSerivceImpt.exists(id)) {
+			userRedisSerivceImpt.save(id, RedisUserDto.builder()
+	                .userSeq(entity.getSeq())
+	                .addressSeq(entity.getAddressSeq())
+	                .name(entity.getName())
+	                .Status(entity.getStatus().getInteger())
+	                .roles(roles)
+	                .build());
+		}
 		
-		return userDetail;
+		return entity;
 	}
-	
-	public Boolean isStringNullOrEmpty(String str) {
-	    return str == null || str.trim().isEmpty();
+
+	public Page<UserDto> findByAll(Integer seq,
+									Integer status,
+									String id,
+									String name,
+									Pageable pageable){
+		
+		return userRepository.findDtoByStatus(status, pageable);
 	}
 }

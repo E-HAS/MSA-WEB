@@ -27,7 +27,7 @@ public class ContentServiceImpt {
 	@Transactional
 	public Page<ContentDto> findAll(ContentDto contentDto, Pageable pageable){
 		List<ContentDto> contents = queryFactory
-							            .select(Projections.constructor(ContentDto.class,
+							            .select(Projections.fields(ContentDto.class,
 							            		QContentEntity.contentEntity.seq
 							            		,QContentEntity.contentEntity.contentName
 							            		,QContentEntity.contentEntity.contentDept
@@ -36,7 +36,7 @@ public class ContentServiceImpt {
 							             .where(getDefaultWheres(contentDto))
 							             .offset(pageable.getOffset())
 							             .limit(pageable.getPageSize())
-							             .orderBy(QContentEntity.contentEntity.seq.desc())
+							             .orderBy(QContentEntity.contentEntity.seq.asc())
 							             .fetch();
         long total = queryFactory
                 .select(QContentEntity.contentEntity.count())
@@ -49,7 +49,7 @@ public class ContentServiceImpt {
 	@Transactional
 	public ContentEntity findContent(ContentDto contentDto){
 		return queryFactory
-	            .select(Projections.constructor(ContentEntity.class,
+	            .select(Projections.fields(ContentEntity.class,
 	            		QContentEntity.contentEntity.seq
 	            		,QContentEntity.contentEntity.contentName
 	            		,QContentEntity.contentEntity.contentDept

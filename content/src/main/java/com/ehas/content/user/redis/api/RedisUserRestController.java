@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ehas.content.user.dto.ResponseDto;
+import com.ehas.content.common.dto.ResponseDto;
 import com.ehas.content.user.redis.dto.RedisUserDto;
 import com.ehas.content.user.redis.service.UserRedisSerivceImpt;
 

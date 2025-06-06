@@ -22,19 +22,23 @@ public class QContentUserEntity extends EntityPathBase<ContentUserEntity> {
 
     public static final QContentUserEntity contentUserEntity = new QContentUserEntity("contentUserEntity");
 
+    public final com.ehas.content.content.base.QDateEntityBase _super = new com.ehas.content.content.base.QDateEntityBase(this);
+
     public final QContentEntity content;
 
     public final NumberPath<Integer> contentSeq = createNumber("contentSeq", Integer.class);
 
     public final DateTimePath<java.time.LocalDateTime> deletedDate = createDateTime("deletedDate", java.time.LocalDateTime.class);
 
-    public final DateTimePath<java.time.LocalDateTime> registeredDate = createDateTime("registeredDate", java.time.LocalDateTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> registeredDate = _super.registeredDate;
 
     public final NumberPath<Integer> seq = createNumber("seq", Integer.class);
 
-    public final EnumPath<com.ehas.content.user.userstatus.UserStatus> status = createEnum("status", com.ehas.content.user.userstatus.UserStatus.class);
+    public final EnumPath<com.ehas.content.common.user.status.UserStatus> status = createEnum("status", com.ehas.content.common.user.status.UserStatus.class);
 
-    public final DateTimePath<java.time.LocalDateTime> updatedDate = createDateTime("updatedDate", java.time.LocalDateTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedDate = _super.updatedDate;
 
     public final StringPath userDept = createString("userDept");
 

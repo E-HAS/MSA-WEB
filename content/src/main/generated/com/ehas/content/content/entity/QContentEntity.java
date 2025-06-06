@@ -20,15 +20,19 @@ public class QContentEntity extends EntityPathBase<ContentEntity> {
 
     public static final QContentEntity contentEntity = new QContentEntity("contentEntity");
 
+    public final com.ehas.content.content.base.QDateEntityBase _super = new com.ehas.content.content.base.QDateEntityBase(this);
+
     public final StringPath contentDept = createString("contentDept");
 
     public final StringPath contentName = createString("contentName");
 
-    public final DateTimePath<java.time.LocalDateTime> registeredDate = createDateTime("registeredDate", java.time.LocalDateTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> registeredDate = _super.registeredDate;
 
     public final NumberPath<Integer> seq = createNumber("seq", Integer.class);
 
-    public final DateTimePath<java.time.LocalDateTime> updatedDate = createDateTime("updatedDate", java.time.LocalDateTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedDate = _super.updatedDate;
 
     public final BooleanPath used = createBoolean("used");
 

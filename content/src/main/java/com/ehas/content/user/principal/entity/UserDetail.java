@@ -1,4 +1,4 @@
-package com.ehas.content.user.dto;
+package com.ehas.content.user.principal.entity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,9 +10,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.ehas.content.common.user.status.UserStatus;
+import com.ehas.content.common.user.status.UserStatus.UserStatusConverter;
+import com.ehas.content.user.dto.UserDto;
 import com.ehas.content.user.entity.UserEntity;
-import com.ehas.content.user.userstatus.UserStatus;
-import com.ehas.content.user.userstatus.UserStatus.UserStatusConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -65,6 +66,7 @@ public class UserDetail implements UserDetails{
 		this.updatedDate = userEntity.getUpdatedDate();
 		this.deletedDate = userEntity.getDeletedDate();
 	}
+	
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return  roles
