@@ -1,5 +1,6 @@
 package com.ehas.content.user.api;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -25,13 +26,13 @@ public class UserRoleRestController {
     @GetMapping("/{userId}/roles")
     public ResponseEntity<ResponseDto> getRoles(@PathVariable("userId") String userId) {
         try {
-        	RoleEntity roles = userRoleServiceImpt.findRoleByUserId(userId);
+        	List<UserRoleDto> roles = userRoleServiceImpt.findByUserId(userId);
 
             if (roles != null) {
                 return ResponseEntity.ok(ResponseDto.builder()
                         .status(HttpStatus.OK.value())
                         .message(HttpStatus.OK.getReasonPhrase())
-                        .data(Map.of("User", roles))
+                        .data(Map.of("role", roles))
                         .build());
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)

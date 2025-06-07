@@ -27,6 +27,7 @@ import com.ehas.content.common.dto.ResponseDto;
 import com.ehas.content.common.jwt.dto.JwtToken;
 import com.ehas.content.common.jwt.service.JwtRedisSerivceImpt;
 import com.ehas.content.user.dto.UserDto;
+import com.ehas.content.user.entity.UserEntity;
 import com.ehas.content.user.jwt.service.UserJwtTokenService;
 import com.ehas.content.user.service.UserServiceImpt;
 
@@ -56,23 +57,25 @@ public class UserRestController {
             this.passwordEncoder = passwordEncoder;
             this.authenticationManager = new ProviderManager(authenticationProvider);
     }
+    
+    //GET 유저 목록 조회
     @GetMapping
-    public ResponseEntity<ResponseDto> getUsers(@RequestParam(defaultValue = "") Integer seq,
-    											@RequestParam(defaultValue = "") Integer status,
-									    		@RequestParam(defaultValue = "") String id,
-									    		@RequestParam(defaultValue = "") String name,
-									    		@RequestParam(defaultValue = "0") Integer page,
-									    	    @RequestParam(defaultValue = "10") Integer size,
-									    	    @RequestParam(defaultValue = "seq,desc") String[] sort) {
+    public ResponseEntity<ResponseDto> getUsers(@RequestParam(value="seq", required=false) Integer seq,
+    											@RequestParam(value="status", required=false) Integer status,
+									    		@RequestParam(value="id", required=false) String id,
+									    		@RequestParam(value="name", required=false) String name,
+									    		@RequestParam(value="stDt", required=false) String stDt,
+									    		@RequestParam(value="enDt", required=false) String enDt,
+									    		@RequestParam(value="page", defaultValue = "0") Integer page,
+									    	    @RequestParam(value="size", defaultValue = "10") Integer size,
+									    	    @RequestParam(value="sort", defaultValue = "seq,desc") String[] sort) {
         try {
-        	//Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-        	//Sort.by(direction, sort[0])
         	Sort.Order direction = sort[1].equalsIgnoreCase("desc") ? Sort.Order.desc(sort[0]) : Sort.Order.asc(sort[0]);
             Pageable pageable = PageRequest.of(page, size, Sort.by(direction));
             
-            Page<UserDto> lists = userServiceImpt.findByAll(seq, status, id, name, pageable);
+            Page<UserDto> lists = userServiceImpt.findBySpecAndPageable(status,seq, id, name, stDt, enDt, pageable);
             if (lists != null) {
-            	log.info("Get User : "+lists);
+            	log.info("GET /users User Lists: "+lists);
                 return ResponseEntity.ok(ResponseDto.builder()
                         .status(HttpStatus.OK.value())
                         .message(HttpStatus.OK.getReasonPhrase())
@@ -86,7 +89,7 @@ public class UserRestController {
                                 .build());
             }
         } catch (Exception e) {
-        	log.error("Get User Failed");
+        	log.error("[Fail] GET /users User Lists");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResponseDto.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
@@ -95,14 +98,16 @@ public class UserRestController {
         }
     }
     
+    //POST 유저 등록
     @PostMapping
     public ResponseEntity<ResponseDto> registerUser(@RequestBody UserDto userDto) {
         try {
-        	log.info("Request User Registration : "+userDto);
+        	log.info("[Request] POST /users User Add : "+userDto);
             userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
             boolean result = userServiceImpt.add(userDto);
 
             if (result) {
+            	log.info("POST /users User Add : "+userDto);
                 return ResponseEntity.status(HttpStatus.CREATED)
                         .body(ResponseDto.builder()
                                 .status(HttpStatus.CREATED.value())
@@ -116,7 +121,7 @@ public class UserRestController {
                                 .build());
             }
         } catch (Exception e) {
-        	log.error("User Registration Failed");
+        	log.error("[Fail] POST /users User Add Failed");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResponseDto.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
@@ -125,6 +130,7 @@ public class UserRestController {
         }
     }
 
+    //DELETE 유저 로그아웃
     @DeleteMapping
     public ResponseEntity<ResponseDto> logoutUser(HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -141,7 +147,7 @@ public class UserRestController {
                 }
             }
             
-            log.info("User Logout RefreshToken : "+refreshToken);
+            log.info("Delete /users User Logout RefreshToken : "+refreshToken);
             if (refreshToken == null) {
                 throw new RuntimeException("Refresh Token Not Found In Cookies.");
             }
@@ -163,7 +169,7 @@ public class UserRestController {
 
             //4. Header에서 Access Token 가져오기, Redis <- Access Token 블랙리스트 추가
             String accessToken = userJwtTokenService.resolveAccessToken(request);
-            log.info("User Logout AccessToken : "+accessToken);
+            log.info("Delete /users User Logout AccessToken : "+accessToken);
             if(accessToken != null) {
             	userJwtTokenService.addBlacklist(accessToken);
             }else {
@@ -175,7 +181,7 @@ public class UserRestController {
                             .message(HttpStatus.NO_CONTENT.getReasonPhrase())
                             .build());
         } catch (Exception e) {
-        	log.error("User Logout Failed");
+        	log.error("[Fail] Delete /users User Logout Failed");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResponseDto.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
@@ -184,10 +190,12 @@ public class UserRestController {
         }
     }
 
+    //GET 유저 조회
     @GetMapping("/{userId}")
     public ResponseEntity<ResponseDto> getUser(@PathVariable("userId") String userId) {
         try {
-            UserDto user = userServiceImpt.findByUserId(userId).convertUserDto();
+        	log.info("[Request] Get /User/"+userId+" User Get");
+            UserDto user = userServiceImpt.findByUserId(userId).convertToUserDto();
             if (user != null) {
             	log.info("Get User : "+user);
                 return ResponseEntity.ok(ResponseDto.builder()
@@ -203,7 +211,7 @@ public class UserRestController {
                                 .build());
             }
         } catch (Exception e) {
-        	log.error("Get User Failed");
+        	log.error("[Fail] Get /User/"+userId+" User Get");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResponseDto.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
@@ -212,12 +220,13 @@ public class UserRestController {
         }
     }
 
+    //POST 유저 로그인
     @PostMapping("/{userId}")
     public ResponseEntity<ResponseDto> loginUser(@PathVariable("userId") String userId,
                                                   @RequestBody UserDto userDto,
                                                   HttpServletResponse response) {
         try {
-        	log.info("Request User Login : "+userId);
+        	log.info("[Request] POST /users/"+userId+" User Login : "+userDto);
         	
         	// 1. 유저 Id, Password 검사
             Authentication authentication = authenticationManager.authenticate(
@@ -245,7 +254,7 @@ public class UserRestController {
                             .build());
 
         } catch (Exception e) {
-        	log.error("User Login Failed");
+        	log.info("[Fail] POST /users/"+userId+" User Login : "+userDto);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ResponseDto.builder()
                             .status(HttpStatus.UNAUTHORIZED.value())
@@ -254,15 +263,19 @@ public class UserRestController {
         }
     }
 
+    //PUT 유저 수정
     @PutMapping("/{userId}")
     public ResponseEntity<ResponseDto> updateUser(@PathVariable("userId") String userId,
                                                   @RequestBody UserDto userDto) {
         try {
+        	log.info("[Request] Put /users/"+userId+" User Update : "+userDto);
+        	
             if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
                 userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
             }
-            boolean updated = userServiceImpt.updateBySeq(userDto);
+            boolean updated = userServiceImpt.update(userDto);
             if (updated) {
+            	log.info("Put /users/"+userId+" User Update : "+userDto);
                 return ResponseEntity.ok(ResponseDto.builder()
                         .status(HttpStatus.OK.value())
                         .message(HttpStatus.OK.getReasonPhrase())
@@ -275,7 +288,8 @@ public class UserRestController {
                                 .build());
             }
         } catch (Exception e) {
-        	log.error("User Update Failed");
+        	log.info("[Fail] Put /users/"+userId+" User Update : "+userDto);
+        	
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResponseDto.builder()
                             .status(HttpStatus.BAD_REQUEST.value())
@@ -284,11 +298,15 @@ public class UserRestController {
         }
     }
 
+    //DELETE 유저 삭제
     @DeleteMapping("/{userId}")
     public ResponseEntity<ResponseDto> deleteUser(@PathVariable("userId") String userId) {
         try {
+        	log.info("[Request] Delete /users/"+userId+" User Delete");
+        	
             boolean deleted = userServiceImpt.delete(userId);
             if (deleted) {
+            	log.info("Delete /users/"+userId+" User Delete");
                 return ResponseEntity.status(HttpStatus.NO_CONTENT)
                         .body(ResponseDto.builder()
                                 .status(HttpStatus.NO_CONTENT.value())
@@ -302,7 +320,7 @@ public class UserRestController {
                                 .build());
             }
         } catch (Exception e) {
-        	log.error("User Delete Failed");
+        	log.info("[Fail] Delete /users/"+userId+" User Delete");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResponseDto.builder()
                             .status(HttpStatus.BAD_REQUEST.value())

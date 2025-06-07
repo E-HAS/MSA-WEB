@@ -61,13 +61,5 @@ public class RoleServiceImpt {
 	public List<RoleEntity> findAll(){
 		return RoleRepository.findAll();
 	}
-	
-	// USER 관련
-	public RoleEntity findRoleByUserSeq(Integer userSeq){
-		return RoleRepository.findByUserSeq(userSeq);
-	}
-	
-	public RoleEntity findRoleByUserId(String userId){
-		return RoleRepository.findByUserId(userId);
-	}
+
 }

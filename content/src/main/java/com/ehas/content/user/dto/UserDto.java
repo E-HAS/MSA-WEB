@@ -2,9 +2,15 @@ package com.ehas.content.user.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import com.ehas.content.user.entity.RoleEntity;
+import com.ehas.content.user.entity.UserEntity;
+import com.ehas.content.user.entity.UserRoleEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.jsonwebtoken.lang.Collections;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,9 +38,7 @@ public class UserDto {
 	
 	public interface UserData {
 	    String getSeq();
-	    String getId();
-	    String getStatus();
+	    String getName();
 	    String getAddressSeq();
-	    String getroleSeq();
 	}
 }

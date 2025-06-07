@@ -3,10 +3,13 @@ package com.ehas.content.user.entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.ehas.content.common.user.status.UserStatus;
 import com.ehas.content.common.user.status.UserStatus.UserStatusConverter;
 import com.ehas.content.user.dto.UserDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -66,17 +69,24 @@ public class UserEntity{
     @Column(name = "deleted_date", columnDefinition = "DATETIME(3)")
     private LocalDateTime deletedDate;
     
-    @OneToMany(fetch=FetchType.LAZY, mappedBy = "user") // mappedBy= 프로퍼티 이름
+    @JsonIgnore
     @Builder.Default
+    @OneToMany(fetch=FetchType.LAZY, mappedBy = "user") // mappedBy= 프로퍼티 이름
     private List<UserRoleEntity> roles = new ArrayList<UserRoleEntity>();
     
-    
-    public UserDto convertUserDto() {
-    	return UserDto.builder()
-    				  .seq(this.seq)
-    				  .id(this.id)
-    				  .name(this.name)
-    				  .addressSeq(this.addressSeq)
-    				  .build();
+    public UserDto convertToUserDto() {
+        List<String> roleNames = this.roles.stream()
+                .map(UserRoleEntity::getRole)
+                .filter(Objects::nonNull)
+                .map(RoleEntity::getRoleName)
+                .collect(Collectors.toList());
+
+            return UserDto.builder()
+                .seq(this.seq)
+                .id(this.id)
+                .name(this.name)
+                .addressSeq(this.addressSeq)
+                .roles(roleNames)
+                .build();
     }
 }

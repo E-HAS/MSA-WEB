@@ -4,10 +4,14 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.Nullable;
 
 import com.ehas.content.common.user.status.UserStatus;
 import com.ehas.content.user.dto.UserDto;
@@ -15,31 +19,31 @@ import com.ehas.content.user.entity.UserEntity;
 
 import jakarta.transaction.Transactional;
 
-public interface UserRepository extends JpaRepository<UserEntity, Integer>{
-	@Query("SELECT new com.example.dto.UserDto(u.id, u.name) FROM UserEntity u WHERE u.status = :status")
-	Page<UserDto> findDtoByStatus(@Param("status") Integer status, Pageable pageable);
-	
-	@Query(value="SELECT * FROM USER WHERE seq = :seq", nativeQuery = true)
-	UserEntity findByUserSeq(@Param("seq")Integer seq);
-	
-	@Query(value="SELECT * FROM USER WHERE id = :id", nativeQuery = true)
-	UserEntity findByUserId(@Param("id")String id);
-	
-	@Query(value="""
-			SELECT SEQ
-				  ,NAME
-				  ,STATUS
-				  ,ADDRESS_SEQ
-			 FROM USER 
-			WHERE id = :id
-			""", nativeQuery = true)
-	UserDto getUserById(@Param("id")String id);
-	
-	@Query(value=   " SELECT * "
-			+ " FROM USER "
-			+ " WHERE status = :status "
-			+ " AND id = :id", nativeQuery = true)
-	UserEntity findByStatusAndId(@Param("status")String status, @Param("id")String id);
+public interface UserRepository extends JpaRepository<UserEntity, Integer>, JpaSpecificationExecutor<UserEntity>{
+
+    @EntityGraph(attributePaths = {
+            "roles",         // UserRoleEntity
+            "roles.role"     // RoleEntity
+        })
+    Page<UserEntity> findAll(@Nullable Specification<UserEntity> spec,Pageable pageable);
+    
+    @Query("""
+    	    SELECT DISTINCT u
+    	    FROM UserEntity u
+    	    LEFT JOIN FETCH u.roles ur
+    	    LEFT JOIN FETCH ur.role
+    	    WHERE u.seq = :seq
+    		""")
+    UserEntity findByUserSeq(@Param("seq")Integer seq);
+    
+    @Query("""
+    	    SELECT DISTINCT u
+    	    FROM UserEntity u
+    	    LEFT JOIN FETCH u.roles ur
+    	    LEFT JOIN FETCH ur.role
+    	    WHERE u.id = :id
+    		""")
+    UserEntity findByUserId(@Param("id")String id);
 	
 	@Transactional
     @Modifying
@@ -65,4 +69,14 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer>{
     	    @Param("updatedDate") LocalDateTime updatedDate,
     	    @Param("deletedDate") LocalDateTime deletedDate
     );
+	
+	@Query(value="""
+			SELECT SEQ
+				  ,NAME
+				  ,STATUS
+				  ,ADDRESS_SEQ
+			 FROM USER 
+			WHERE id = :id
+			""", nativeQuery = true)
+	UserDto getUserById(@Param("id")String id);
 }

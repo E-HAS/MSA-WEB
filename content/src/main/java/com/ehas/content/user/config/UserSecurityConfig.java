@@ -54,7 +54,7 @@ public class UserSecurityConfig {
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
 						.accessDeniedHandler((req, res, e) -> res.sendError(HttpStatus.FORBIDDEN.value())))
 				.authorizeHttpRequests(auth -> 
-						auth.requestMatchers(HttpMethod.POST, "/users/*").permitAll()
+						auth.requestMatchers(HttpMethod.POST, "/users", "/users/*").permitAll()
 						.anyRequest().authenticated())
 				.addFilterBefore(new UserJwtTokenAuthenticationFilter(userJwtTokenProvider),
 						UsernamePasswordAuthenticationFilter.class)

@@ -11,22 +11,6 @@ import jakarta.transaction.Transactional;
 
 
 public interface RoleRepository extends JpaRepository<RoleEntity, Integer>{
-	@Query(value=   "SELECT r.* "
-			+ "FROM USER_ROLE as ur "
-			+ "LEFT OUTER JOIN ROLE as r "
-			+ "			 ON ur.role_seq = r.seq "
-			+ "WHERE ur.user_seq = :seq ", nativeQuery = true)
-	RoleEntity findByUserSeq(Integer seq);
-	
-	@Query(value=   "SELECT r.* "
-			+ "FROM User as u "
-			+ "LEFT OUTER JOIN USER_ROLE as ur "
-			+ "			 ON u.seq = ur.user_seq "
-			+ "LEFT OUTER JOIN ROLE as r "
-			+ "			 ON ur.role_seq = r.seq "
-			+ "WHERE u.id = :id ", nativeQuery = true)
-	RoleEntity findByUserId(String id);
-	
 	@Transactional
     @Modifying
     @Query(value="""
