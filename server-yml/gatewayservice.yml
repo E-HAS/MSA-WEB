@@ -1,5 +1,14 @@
 server:
   port: 8001
+  ssl:
+    enabled: true
+    #key-store: classpath:server.p12
+    trust-store: file:///C:/ssl/server.p12
+    trust-store-password: QWas!@34
+    key-store: file:///C:/ssl/server.p12
+    key-store-password: QWas!@34
+    key-store-type: PKCS12
+    key-alias: server-ssl-key
 #r2dbc
 spring:
   main:
@@ -9,7 +18,13 @@ spring:
     username: root
     password: QWas!@34
   cloud:
+    discovery:
+      enabled: true
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       default-filters:
         - name : GlobalFilter
           args :
@@ -24,6 +39,13 @@ spring:
           filters:
             - RewritePath=/auth/(?<segment>.*), /$\{segment}
             - CustomFilter
+        - id : contentservice
+          uri : lb://contentservice
+          predicates : 
+            - Path=/content/**
+          filters:
+            - RewritePath=/content/(?<segment>.*), /$\{segment}
+            - CustomFilter
 
 
 eureka:
@@ -36,7 +58,7 @@ eureka:
     fetch-registry: true
     disable-delta: true
     registry-fetch-interval-seconds: 5
-    service-url.defaultZone: http://root:QWas1234@192.168.1.101:8761/eureka
+    service-url.defaultZone: http://root:QWas1234@192.168.1.102:8761/eureka
 
 logging:
   level:

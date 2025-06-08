@@ -1,5 +1,15 @@
 server:
-  port: 0
+  port: 443
+  ssl:
+    enabled: true
+    #key-store: classpath:server.p12
+    trust-store: file:///C:/ssl/server.p12
+    trust-store-password: QWas!@34
+    key-store: file:///C:/ssl/server.p12
+    key-store-password: QWas!@34
+    key-store-type: PKCS12
+    key-alias: server-ssl-key
+
 spring:
   main:
     web-application-type: reactive
@@ -23,6 +33,12 @@ spring:
     user:
       name: root
       password: QWas1234
+  data:
+    redis:
+      host: 192.168.1.101
+      port: 6379
+      password: QWas1234
+      timeout: 60000
       
 logging:
   level:
@@ -36,22 +52,28 @@ logging:
 
 eureka:
   instance:
+    prefer-ip-address: true
+    secure-port-enabled: true
     hostname: 192.168.1.102  # 실제 IP 주소
-    instance-id: ${spring.application.instance_id:${random.value}}:${server.port}
+    #instance-id: ${spring.application.instance_id:${random.value}}:${server.port}
     lease-renewal-interval-in-seconds: 3
     lease-expiration-duration-in-seconds: 10
     enable-self-preservation: true
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+    metadata-map:
+      instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+      protocol: https
   client:
     register-with-eureka: true
     fetch-registry:       true
     disable-delta:        true
     registry-fetch-interval-seconds: 5
-    service-url.defaultZone: http://root:QWas1234@192.168.1.101:8761/eureka
+    service-url.defaultZone: http://root:QWas1234@192.168.1.102:8761/eureka
 
 jwt:
   header : Authorization #X-AUTH-TOKEN
   secretkey : secretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkey
-  expiration : 600000  
+  expiration : 3600000
 
 management:
   endpoints:
