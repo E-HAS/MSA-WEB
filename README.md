@@ -1,8 +1,11 @@
-![image](https://github.com/user-attachments/assets/c672883b-b69b-4bfc-8eb7-74ea7acea4b7)
+![image](https://github.com/user-attachments/assets/8b28138b-ec05-453c-9ea6-074b37c643e5)
 
 
 MSA
-- webflux, r2dbc, config, security, actuator, jpa, eureka, kafka
+- Spring Boot (Config, Eureka, Security, Actuator, Jpa, QueryDsl, WebFlux, R2dbc, Redis)
+- Kafka
+- Docker
+- Redis
 
 
 
