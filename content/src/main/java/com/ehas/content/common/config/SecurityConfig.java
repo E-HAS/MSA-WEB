@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @Configuration
 public class SecurityConfig {
-	@Value("${message.security.allow-ip-list}")
+	@Value("${value.security.allow-ip-list}")
 	private List<String> allowIpList;
 
 	@Bean

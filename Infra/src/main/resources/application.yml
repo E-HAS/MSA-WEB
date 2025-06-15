@@ -1,0 +1,46 @@
+server:
+  port: 8761
+  ssl:
+    enabled: true
+    trust-store: file:///C:/ssl/truststore.jks
+    trust-store-password: QWas!@34
+    key-store: file:///C:/ssl/server.p12
+    key-store-password: QWas!@34
+    key-store-type: PKCS12
+    key-alias: server-ssl-key
+    
+spring:
+  application:
+    name: infra-server
+  profiles:
+    active: native
+  security:
+    basic:
+      enabled: true
+    user:
+      name: root
+      password: QWas1234
+  cloud:
+    config:
+      server:
+        native:
+          #search-locations: file:/server-yml/
+          search-locations: file:///D:/server-yml/
+    
+eureka:
+  server:
+    response-cache-update-interval-ms: 5000
+    eviction-interval-timer-in-ms: 10000
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+         
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*' #include: refresh, health, beans
+  prometheus: #Micrometer를 통해 수집된 Metric 데이터를 Prometheus 형식으로 노출할지 여부를 결정
+    metrics:
+      export:
+        enabled: true

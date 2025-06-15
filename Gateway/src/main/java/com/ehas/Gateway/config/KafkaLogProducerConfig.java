@@ -1,4 +1,4 @@
-package com.ehas.content;
+package com.ehas.Gateway.config;
 
 import java.util.HashMap;
 import java.util.Map;

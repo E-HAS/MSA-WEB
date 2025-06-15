@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Configuration
 public class ContentSecurityConfig {
-	@Value("${message.security.allow-ip-list}")
+	@Value("${value.security.allow-ip-list}")
 	private List<String> allowIpList;
 
 	@Bean
