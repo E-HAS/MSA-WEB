@@ -1,0 +1,9 @@
+curl -k -X POST https://192.168.1.102:443/users/testid -H "Content-Type: application/json" -d '{"id":"testid","password":"QWas!@34"}'
+
+curl --cacert server-cert.crt -X POST https://192.168.1.102:443/users/testid -H "Content-Type: application/json" -d '{"id":"testid","password":"QWas!@34"}'
+
+curl --cacert truststore.jks -X POST https://192.168.1.102:443/users/testid -H "Content-Type: application/json" -d '{"id":"testid","password":"QWas!@34"}'
+
+curl -i -k -X POST https://192.168.1.102:443/users/testid -H "Content-Type: application/json" -d "{\"id\":\"testid\",\"password\":\"QWas!@34\"}"
+
+curl --cacert server-cert.crt -X POST https://192.168.1.102:443/users/testid -H "Content-Type: application/json" -d "{\"id\":\"testid\",\"password\":\"QWas!@34\"}"

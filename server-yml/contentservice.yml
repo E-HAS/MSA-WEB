@@ -2,9 +2,9 @@ server:
   port: 443
   ssl:
     enabled: true
-    trust-store: file:///C:/ssl/truststore.jks
+    trust-store: C:/ssl/truststore.jks
     trust-store-password: QWas!@34
-    key-store: file:///C:/ssl/server.p12
+    key-store: C:/ssl/server.p12
     key-store-password: QWas!@34
     key-store-type: PKCS12
     key-alias: server-ssl-key
@@ -40,11 +40,19 @@ spring:
 logging:
   level:
     ROOT: INFO
+    org.hibernate: DEBUG
+
     com.ehas.content.user: DEBUG
     com.ehas.content.content: DEBUG
-    org.springframework.web: DEBUG
+    org.springframework.web: INFO
+    org.springframework.web.servlet.DispatcherServlet: INFO
     org.springframework.security: DEBUG
-    org.hibernate: DEBUG
+    org.springframework.security.web: INFO
+
+    # Actuator
+    org.springframework.boot.actuate: INFO
+    org.springframework.boot.actuate.endpoint.web.servlet: INFO 
+    org.springframework.boot.actuate.metrics: INFO
     com.netflix.discovery.DiscoveryClient: ERROR
     org.apache.hc.client5.http.headers: INFO
     org.apache.hc.client5.http.impl.classic: INFO
@@ -57,23 +65,18 @@ logging:
 
 eureka:
   instance:
-    prefer-ip-address: true
-    secure-port-enabled: true
-    hostname: 192.168.1.102  # 실제 IP 주소
-    #instance-id: ${spring.application.instance_id:${random.value}}:${server.port}
-    lease-renewal-interval-in-seconds: 3
-    lease-expiration-duration-in-seconds: 10
-    enable-self-preservation: true
-    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
     metadata-map:
       instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
       protocol: https
-  client:
-    register-with-eureka: true
-    fetch-registry:       true
-    disable-delta:        true
-    registry-fetch-interval-seconds: 5
-    service-url.defaultZone: http://root:QWas1234@192.168.1.102:8761/eureka
+    status-page-url: https://192.168.1.102:443/actuator/info
+    health-check-url: https://192.168.1.102:443/actuator/health
+    home-page-url: https://192.168.1.102:443/
+    ip-address: 192.168.1.102
+    hostname: 192.168.1.102
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+    lease-renewal-interval-in-seconds: 3
+    lease-expiration-duration-in-seconds: 10
+    enable-self-preservation: true
 
 jwt:
   header : Authorization #X-AUTH-TOKEN
@@ -86,7 +89,7 @@ management:
     web:
       exposure:
         include: '*'
-message:
+value:
   security:
     allow-ip-list: 127.0.0.1, 192.168.1.128, 192.168.1.101, 192.168.1.102
   kafka:
@@ -95,5 +98,5 @@ message:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       topic:
-        name: TestTopic
+        name: LogTopic
  

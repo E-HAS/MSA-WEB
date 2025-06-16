@@ -1,25 +1,30 @@
 server:
   port: 0
+  ssl:
+    enabled: true
+    trust-store: C:/ssl/truststore.jks
+    trust-store-password: QWas!@34
+    key-store: C:/ssl/server.p12
+    key-store-password: QWas!@34
+    key-store-type: PKCS12
+    key-alias: server-ssl-key
+    client-auth: none #Mutual TLS를 안 쓰는 경우 (기본 HTTPS만 쓸 경우)
 
 spring:
   main:
     web-application-type: reactive
-  #datasource:
-    #url: jdbc:mariadb://127.0.0.1:3306/project?characterEncoding=UTF-8&serverTimezone=UTC
-    #username: root
-    #password: QWas!@34
-    #driver-class-name: org.mariadb.jdbc.Driver
   r2dbc:
-    url: r2dbc:pool:mariadb://127.0.0.1:3306/project
+    url: r2dbc:pool:mariadb://192.168.1.101:3306/project
     username: root
     password: QWas!@34
   jpa:
     properties:
       hibernate:
-        ddl-auto: create
+        ddl-auto: update
         show_sql: true         #모든 SQL문을 콘솔로 출력
         format_sql: true       #JPA 실행쿼리 가독성있게 표현
         use_sql_comments: true #SQL문 이외에 추가적인 정보 출력
+        dialect: org.hibernate.dialect.MariaDBDialect
   security:
     user:
       name: root
@@ -27,16 +32,14 @@ spring:
 
 eureka:
   instance:
-    instance-id: ${spring.application.instance_id:${random.value}}:${server.port}
+    metadata-map:
+      instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+      protocol: https
+    ip-address: 192.168.1.102
+    hostname: 192.168.1.102
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
     lease-renewal-interval-in-seconds: 3
     lease-expiration-duration-in-seconds: 10
-    enable-self-preservation: true
-  client:
-    register-with-eureka: true
-    fetch-registry:       true
-    disable-delta:        true
-    registry-fetch-interval-seconds: 5
-    service-url.defaultZone: http://root:QWas1234@localhost:8761/eureka
 
 logging:
   level:
@@ -48,15 +51,15 @@ management:
       exposure:
         include: '*'
 
-message:
+value:
   kafka:
     consumer:
       bootstrap-servers: 192.168.1.101:9092
-      group-id: consumerGroup
+      group-id: LogGroup
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       topic:
-        name: TestTopic
+        name: LogTopic
 
  

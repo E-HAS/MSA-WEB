@@ -2,21 +2,17 @@ server:
   port: 8001
   ssl:
     enabled: true
-    #key-store: classpath:server.p12
-    trust-store: file:///C:/ssl/server.p12
+    trust-store: C:/ssl/truststore.jks
     trust-store-password: QWas!@34
-    key-store: file:///C:/ssl/server.p12
+    key-store: C:/ssl/server.p12
     key-store-password: QWas!@34
     key-store-type: PKCS12
     key-alias: server-ssl-key
+
 #r2dbc
 spring:
   main:
     web-application-type: reactive
-  r2dbc:
-    url: r2dbc:pool:mariadb://192.168.1.101:3306/project
-    username: root
-    password: QWas!@34
   cloud:
     discovery:
       enabled: true
@@ -32,33 +28,32 @@ spring:
             preLogger   : true
             postLogger  : true
       routes:
-        - id : authservice
-          uri : lb://authservice
-          predicates : 
-            - Path=/auth/**
-          filters:
-            - RewritePath=/auth/(?<segment>.*), /$\{segment}
-            - CustomFilter
         - id : contentservice
           uri : lb://contentservice
           predicates : 
             - Path=/content/**
           filters:
             - RewritePath=/content/(?<segment>.*), /$\{segment}
-            - CustomFilter
+            - name: CustomFilter
+              args:
+                baseMessage: Spring Cloud Gateway Custom Filter
+                preLogger: true
+                postLogger: true
 
 
 eureka:
   instance:
-    instance-id: ${spring.application.instance_id:${random.value}}:${server.port}
+    metadata-map:
+      instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+      protocol: https
+    status-page-url: https://192.168.1.102:8001/actuator/info
+    health-check-url: https://192.168.1.102:8001/actuator/health
+    home-page-url: https://192.168.1.102:8001/
+    ip-address: 192.168.1.102
+    hostname: 192.168.1.102
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
     lease-renewal-interval-in-seconds: 3
     lease-expiration-duration-in-seconds: 10
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    disable-delta: true
-    registry-fetch-interval-seconds: 5
-    service-url.defaultZone: http://root:QWas1234@192.168.1.102:8761/eureka
 
 logging:
   level:
