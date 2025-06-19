@@ -26,7 +26,13 @@ spring:
         native:
           #search-locations: file:/server-yml/
           search-locations: file:///D:/server-yml/
-    
+  datasource:
+    #url: jdbc:mysql://192.168.1.101:3306/project?characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mariadb://192.168.1.101:3306/project?characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: QWas!@34
+    #driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.mariadb.jdbc.Driver    
 eureka:
   server:
     response-cache-update-interval-ms: 5000
@@ -44,3 +50,24 @@ management:
     metrics:
       export:
         enabled: true
+        
+value:
+  security:
+    allow-ip-list: 127.0.0.1, 192.168.1.128, 192.168.1.101, 192.168.1.102
+  kafka:
+    metrics:
+      bootstrap-servers: 192.168.1.101:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      topic:
+        services-metrics-name: serversMetrics
+  prometheus:
+    check:
+      list: process_cpu
+        , system_cpu 
+        , jvm_memory
+        , jvm_threads
+        , tomcat_sessions
+        , http_server
+        , executor_pool
+        , executor_active

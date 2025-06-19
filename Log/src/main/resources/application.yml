@@ -1,3 +1,13 @@
+server:
+  ssl:
+    enabled: true
+    trust-store: file:///C:/ssl/truststore.jks
+    trust-store-password: QWas!@34
+    key-store: file:///C:/ssl/server.p12
+    key-store-password: QWas!@34
+    key-store-type: PKCS12
+    key-alias: server-ssl-key
+    
 spring:
   profiles:
     active: default

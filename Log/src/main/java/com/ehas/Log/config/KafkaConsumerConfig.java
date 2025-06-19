@@ -6,27 +6,29 @@ import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.stereotype.Service;
 
-@Service
+
+@Configuration
 public class KafkaConsumerConfig {
 
-	@Value("${value.kafka.consumer.bootstrap-servers}")
+	@Value("${value.kafka.metrics.bootstrap-servers}")
 	private String bootstrapServer;
 	
-	@Value("${value.kafka.consumer.group-id}")
+	@Value("${value.kafka.metrics.group-id}")
 	private String groupId;
 	
-	@Value("${value.kafka.consumer.auto-offset-reset}")
+	@Value("${value.kafka.metrics.auto-offset-reset}")
 	private String offsetReset;
 	
-	@Value("${value.kafka.consumer.key-deserializer}")
+	@Value("${value.kafka.metrics.key-deserializer}")
 	private String keyDeserializer;
 	
-	@Value("${value.kafka.consumer.value-deserializer}")
+	@Value("${value.kafka.metrics.value-deserializer}")
 	private String valueDeserializer;
 	
 	@Bean

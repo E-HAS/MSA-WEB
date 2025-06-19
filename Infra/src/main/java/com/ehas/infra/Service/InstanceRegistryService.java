@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.netflix.appinfo.InstanceInfo.PortType;
 import com.netflix.eureka.registry.PeerAwareInstanceRegistry;
 
 import lombok.RequiredArgsConstructor;
@@ -39,34 +40,27 @@ public class InstanceRegistryService {
 		List<String> instancesList = new ArrayList<>();
 		registry.getApplication(_serviceName).getInstances().forEach(instance -> {
         	String id  = instance.getInstanceId();
-            String url = instance.getHomePageUrl();
+        	String url = instance.getHomePageUrl();
             instancesList.add(
             		id+" "+actuatorService.onRefresh(String.format("%s/actuator/refresh", url))
-            		);
+            );
         });
 		
 		return instancesList;
 	}
 	
-	public Map<String, Map> onMetricsByService(String _serviceName){
-		Map<String, Map> instancesList = new HashMap<>();
+	public Map<String, List> onPrometheusByService(String _serviceName){
+		Map<String, List> instancesList = new HashMap<>();
 		
 		 registry.getApplication(_serviceName).getInstances().forEach(instance -> {
-	            String url = instance.getHomePageUrl();
-	            String urlMaxJvmMemory = String.format("%s/actuator/metrics/jvm.memory.max", url);
-	            String urlUsedJvmMemory = String.format("%s/actuator/metrics/jvm.memory.used", url);
-	            String urlProcessCpuUsage = String.format("%s/actuator/metrics/process.cpu.usage", url);
-	            String urlSystemCpuCount = String.format("%s/actuator/metrics/system.cpu.count", url);
-	            String urlSystemCpuUsage = String.format("%s/actuator/metrics/system.cpu.usage", url);
-
-	            instancesList.put(url+ "(" + instance.getInstanceId() + ")",
-	                    Map.of(
-	                            "jvm.memory.max", actuatorService.onPerformanceMonitoring(urlMaxJvmMemory),
-	                            "jvm.memory.used", actuatorService.onPerformanceMonitoring(urlUsedJvmMemory),
-	                            "process.cpu.usage", actuatorService.onPerformanceMonitoring(urlProcessCpuUsage),
-	                            "system.cpu.count", actuatorService.onPerformanceMonitoring(urlSystemCpuCount),
-	                            "system.cpu.usage", actuatorService.onPerformanceMonitoring(urlSystemCpuUsage)
-	                    ));
+				String ip = instance.getIPAddr();
+				int port = instance.getSecurePort();
+				
+				String url = instance.isPortEnabled(PortType.SECURE)? "https://" + ip + ":" + port
+						: "http://" + ip + ":" + instance.getPort();
+	            url += "/actuator/prometheus";
+	            
+	            instancesList.put(_serviceName+"|"+instance.getHomePageUrl(), actuatorService.onPrometheusMonitoring(url));
 	     });
 		 
 		 return instancesList;

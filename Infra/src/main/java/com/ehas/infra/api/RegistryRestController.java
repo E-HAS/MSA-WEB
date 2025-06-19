@@ -27,32 +27,33 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-public class ServiceRestController {
+public class RegistryRestController {
 	private final InstanceRegistryService instanceRegistryService;
 	
-	@GetMapping("/services")  
+	@GetMapping("/registrys")  
 	public Map<String, List<String>> getServices() {
         List<String> services = instanceRegistryService.getServices();
 		return Map.of("services", services);
 	}
 	
-	@GetMapping("/services/{serviceName}")  
+	@GetMapping("/registrys/{serviceName}")  
 	public Map<String, List<String>> getInstanceIdsByService(@PathVariable("serviceName") String _serviceName) {
         List<String> instances = instanceRegistryService.getInstanceIdsByService(_serviceName);
 		return Map.of("instances", instances);
 	}  
 	
 	
-	@GetMapping("/services/{serviceName}/refresh")  
+	@GetMapping("/registrys/{serviceName}/refresh")  
 	public ResponseEntity onRefreshByService(@PathVariable("serviceName") String _serviceName) {
         List<String> instancesList = instanceRegistryService.onRefreshByService(_serviceName);
 
         return ResponseEntity.ok(instancesList);
 	}
 	
-	@GetMapping("/services/{serviceName}/monitoring")  
+	@GetMapping("/registrys/{serviceName}/monitoring")  
 	public ResponseEntity monitorigByserviceName(@PathVariable("serviceName") String _serviceName) {
-		Map<String, Map> instancesList =instanceRegistryService.onMetricsByService(_serviceName);
+		Map<String, Map> instancesList = null;
+				//instanceRegistryService.onPrometheusByService(_serviceName);
 
         return ResponseEntity.ok(instancesList);
 	}
