@@ -1,6 +1,7 @@
 package com.ehas.infra.handler;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -64,7 +65,7 @@ public class ActuatorScheduler {
 	}
 	
 	@Scheduled(cron = "0/1 * * * * ?")
-    public void scheduledPerformanceMonitoring() throws JsonProcessingException {
+    public void scheduledPerformanceMonitoringForSecond() throws JsonProcessingException {
 		List<String> services = instanceRegistryService.getServices();
 		
 		for(String serviceName : services) {
@@ -118,5 +119,17 @@ public class ActuatorScheduler {
 				}
 			});
 		}
+    }
+	
+	@Scheduled(cron = "0/60 * * * * ?")
+    public void scheduledPerformanceMonitoringForMinute() throws JsonProcessingException {
+		LocalDateTime dateNow = LocalDateTime.now();
+		
+		String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(Map.of("second",60
+																							,"stDt",dateNow.minusSeconds(60).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+																							,"enDt",dateNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+		JsonNode jsonNode = objectMapper.readTree(json);
+		String changeJson = objectMapper.writeValueAsString(jsonNode);
+		kafkaMetricsProducerService.sendMessage(changeJson);
     }
 }

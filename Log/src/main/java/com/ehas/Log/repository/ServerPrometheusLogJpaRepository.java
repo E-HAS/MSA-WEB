@@ -6,4 +6,5 @@ import com.ehas.Log.entity.ServerPrometheusLogEntity;
 
 public interface ServerPrometheusLogJpaRepository extends ReactiveCrudRepository<ServerPrometheusLogEntity, Integer>{
 
+	
 }

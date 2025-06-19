@@ -23,5 +23,7 @@ import lombok.NoArgsConstructor;
 public class ConsumePrometheusDto {
 	private Integer serverSeq;
 	private Integer second;
+	private String stDt;
+	private String enDt;
 	private List<prometheusDto> list;
 }
