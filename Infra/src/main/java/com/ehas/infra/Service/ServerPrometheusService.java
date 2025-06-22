@@ -38,4 +38,8 @@ public class ServerPrometheusService {
     public void delete(Integer seq) {
     	serverPrometheusJpaRepository.deleteById(seq);
     }
+    
+    public void insertPrometheusStatsFor1Min(String stDt, String enDt) {
+    	serverPrometheusJpaRepository.insertPrometheusStatsFor1Min(stDt, enDt);
+    }
 }

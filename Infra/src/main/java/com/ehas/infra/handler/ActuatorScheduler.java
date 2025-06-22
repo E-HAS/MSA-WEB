@@ -125,11 +125,7 @@ public class ActuatorScheduler {
     public void scheduledPerformanceMonitoringForMinute() throws JsonProcessingException {
 		LocalDateTime dateNow = LocalDateTime.now();
 		
-		String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(Map.of("second",60
-																							,"stDt",dateNow.minusSeconds(60).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-																							,"enDt",dateNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-		JsonNode jsonNode = objectMapper.readTree(json);
-		String changeJson = objectMapper.writeValueAsString(jsonNode);
-		kafkaMetricsProducerService.sendMessage(changeJson);
+		serverPrometheusService.insertPrometheusStatsFor1Min(dateNow.minusSeconds(60).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+															, dateNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 }

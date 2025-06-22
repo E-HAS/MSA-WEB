@@ -1,5 +1,6 @@
 package com.ehas.infra.api;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ehas.infra.Service.ServerPrometheusService;
+import com.ehas.infra.dto.ServerPrometheusEntityDto;
 import com.ehas.infra.entity.ServerPrometheusEntity;
 
 import lombok.RequiredArgsConstructor;
@@ -25,8 +27,13 @@ public class ServerPrometheusRestController {
     private final ServerPrometheusService service;
 
     @PostMapping
-    public ResponseEntity<ServerPrometheusEntity> create(@RequestBody ServerPrometheusEntity entity) {
-        return ResponseEntity.ok(service.create(entity));
+    public ResponseEntity<ServerPrometheusEntity> create(@RequestBody ServerPrometheusEntityDto dto) {
+        return ResponseEntity.ok(service.create(ServerPrometheusEntity.builder()
+        																.label(dto.getLabel())
+        																.opt(dto.getOpt())
+        																.dept(dto.getDept())
+        																.regDate(LocalDateTime.now())
+        																.build()));
     }
 
     @GetMapping
@@ -40,8 +47,12 @@ public class ServerPrometheusRestController {
     }
 
     @PutMapping("/{seq}")
-    public ResponseEntity<ServerPrometheusEntity> update(@PathVariable Integer seq, @RequestBody ServerPrometheusEntity updatedEntity) {
-        return ResponseEntity.ok(service.update(seq, updatedEntity));
+    public ResponseEntity<ServerPrometheusEntity> update(@PathVariable Integer seq, @RequestBody ServerPrometheusEntityDto dto) {
+        return ResponseEntity.ok(service.update(seq, ServerPrometheusEntity.builder()
+																			.label(dto.getLabel())
+																			.opt(dto.getOpt())
+																			.dept(dto.getDept())
+																			.build()));
     }
 
     @DeleteMapping("/{seq}")

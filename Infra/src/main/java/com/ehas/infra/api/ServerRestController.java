@@ -1,5 +1,6 @@
 package com.ehas.infra.api;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ehas.infra.Service.ServerService;
+import com.ehas.infra.dto.ServerEntityDto;
 import com.ehas.infra.entity.ServerEntity;
 
 import lombok.RequiredArgsConstructor;
@@ -25,8 +27,13 @@ public class ServerRestController {
     private final ServerService serverService;
 
     @PostMapping
-    public ResponseEntity<ServerEntity> create(@RequestBody ServerEntity serverEntity) {
-        return ResponseEntity.ok(serverService.create(serverEntity));
+    public ResponseEntity<ServerEntity> create(@RequestBody ServerEntityDto dto) {
+        return ResponseEntity.ok(serverService.create(ServerEntity.builder()
+        															.name(dto.getName())
+        															.host(dto.getHost())
+        															.dept(dto.getDept())
+        															.regDate(LocalDateTime.now())
+        														  .build()));
     }
 
     @GetMapping
@@ -40,8 +47,12 @@ public class ServerRestController {
     }
 
     @PutMapping("/{seq}")
-    public ResponseEntity<ServerEntity> update(@PathVariable Integer seq, @RequestBody ServerEntity updatedEntity) {
-        return ResponseEntity.ok(serverService.update(seq, updatedEntity));
+    public ResponseEntity<ServerEntity> update(@PathVariable Integer seq, @RequestBody ServerEntityDto dto) {
+        return ResponseEntity.ok(serverService.update(seq, ServerEntity.builder()
+																		.name(dto.getName())
+																		.host(dto.getHost())
+																		.dept(dto.getDept())
+																	  .build()));
     }
 
     @DeleteMapping("/{seq}")

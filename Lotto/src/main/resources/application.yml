@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    active: default
+  application:
+    name: lottoservice
+  config:
+    import: optional:configserver:https://192.168.1.102:8761
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry:       true
+    disable-delta:        true
+    registry-fetch-interval-seconds: 5
+    service-url:
+      defaultZone: https://root:QWas1234@192.168.1.102:8761/eureka

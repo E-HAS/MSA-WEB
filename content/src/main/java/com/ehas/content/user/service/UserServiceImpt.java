@@ -12,8 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ehas.content.common.user.status.UserStatus;
 import com.ehas.content.common.utill.validation;
+import com.ehas.content.user.dto.UserAccountDto;
 import com.ehas.content.user.dto.UserDto;
 import com.ehas.content.user.dto.UserRoleDto;
+import com.ehas.content.user.entity.UserAccountEntity;
 import com.ehas.content.user.entity.UserEntity;
 import com.ehas.content.user.entity.UserRoleEntity;
 import com.ehas.content.user.principal.entity.UserDetail;
@@ -33,6 +35,7 @@ public class UserServiceImpt {
 	private final UserRepository userRepository;
 	private final UserRoleServiceImpt userRoleServiceImpt;
 	private final UserRedisSerivceImpt userRedisSerivceImpt;
+	private final UserAccountServiceImpt userAccountServiceImpt;
 	
 	@Transactional(rollbackFor = { Exception.class })  
 	public Boolean add(UserDto user) throws Exception{
@@ -50,6 +53,13 @@ public class UserServiceImpt {
 																				.userSeq(userEntity.getSeq())
 																				.roleSeq(user.getRoleSeq())
 																				.build());
+			
+			UserAccountEntity userAccountEntity =  userAccountServiceImpt.add(UserAccountDto.builder()
+																							.userSeq(userEntity.getSeq())
+																							.balance(0)
+																							.status(1)
+																							.build());
+			
 			return true;
 		}catch(Exception e) {
 			log.error("[Fail] User Add Error : "+e.getMessage());

@@ -9,8 +9,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.ehas.Log.dto.ConsumePrometheusDto;
-import com.ehas.Log.entity.ServerPrometheusLogEntity;
-import com.ehas.Log.service.ServerPrometheusLogService;
+import com.ehas.Log.entity.ServerPrometheusStatEntity;
+import com.ehas.Log.service.ServerPrometheusStatService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
@@ -24,7 +24,7 @@ import reactor.kafka.receiver.ReceiverRecord;
 @Service
 @RequiredArgsConstructor
 public class kafkaLogHandler {
-	private final ServerPrometheusLogService serverPrometheusLogService;
+	private final ServerPrometheusStatService serverPrometheusStatService;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	
 	private final KafkaReceiver<String, String> kafkaReceiver;
@@ -43,8 +43,8 @@ public class kafkaLogHandler {
 
             switch(dto.getSecond()) {
             	case 1:
-            		List<ServerPrometheusLogEntity> list = dto.getList().stream()
-                    .map(v -> ServerPrometheusLogEntity.builder()
+            		List<ServerPrometheusStatEntity> list = dto.getList().stream()
+                    .map(v -> ServerPrometheusStatEntity.builder()
                             .second(dto.getSecond())
                             .regDate(LocalDateTime.now())
                             .serverSeq(dto.getServerSeq())
@@ -53,14 +53,10 @@ public class kafkaLogHandler {
                             .build())
                     .toList();
 
-		            return serverPrometheusLogService.addAll(list)
+		            return serverPrometheusStatService.addAll(list)
 							                    .doOnSuccess(v -> record.receiverOffset().acknowledge())
 							                    .doOnError(e -> log.error("Error saving logs: {}", e.getMessage(), e))
 							                    .then();
-            	case 60:
-            		 return serverPrometheusLogService.statisticsSecond(dto.getStDt(), dto.getEnDt())
-							                     .doOnSuccess(v -> record.receiverOffset().acknowledge())
-							                     .doOnError(e -> log.error("Error in statistics: {}", e.getMessage(), e));
             }
 
         } catch (Exception e) {

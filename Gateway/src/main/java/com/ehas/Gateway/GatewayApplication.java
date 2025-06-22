@@ -30,24 +30,4 @@ public class GatewayApplication {
     		    .csrf(csrf -> csrf.disable())
     		    .build();
     }
-    
-    
-    /*
-    @Bean
-    public EurekaInstanceConfigBean eurekaInstanceConfig(InetUtils inetUtils) {
-        EurekaInstanceConfigBean config = new EurekaInstanceConfigBean(inetUtils);
-        //config.setSecurePortEnabled(true); // 중요
-        return config;
-    }
-    /*
-    @Bean
-    public HttpClient httpClient() {
-        return HttpClient.create().secure(spec -> {
-            spec.sslContext(Http2SslContextSpec.forClient()
-                    .configure(sslContextBuilder -> 
-                        sslContextBuilder.trustManager(InsecureTrustManagerFactory.INSTANCE) // 신뢰하지 않는 인증서를 허용 ( SSL 설정 )
-                    ));
-        });
-    }
-    */
 }

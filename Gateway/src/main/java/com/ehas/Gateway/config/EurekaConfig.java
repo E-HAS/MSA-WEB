@@ -1,27 +1,31 @@
 package com.ehas.Gateway.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Configuration;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-@Component
-public class EurekaConfig {
+@Configuration
+@RequiredArgsConstructor
+@Slf4j
+public class EurekaConfig implements ApplicationListener<WebServerInitializedEvent>{
+	private final EurekaInstanceConfigBean instance;
 
-    private final EurekaInstanceConfigBean eurekaInstanceConfig;
-
-    @Autowired
-    public EurekaConfig(EurekaInstanceConfigBean eurekaInstanceConfig) {
-        this.eurekaInstanceConfig = eurekaInstanceConfig;
-    }
-
-    @EventListener
-    public void onWebServerReady(WebServerInitializedEvent event) {
+    @Override
+    public void onApplicationEvent(WebServerInitializedEvent event) {
         int port = event.getWebServer().getPort();
-        eurekaInstanceConfig.setSecurePort(port);
-        eurekaInstanceConfig.setSecurePortEnabled(true);
-        eurekaInstanceConfig.setPreferIpAddress(true);
-        eurekaInstanceConfig.setNonSecurePortEnabled(false);
+        String ip = instance.getIpAddress();
+
+        instance.setNonSecurePort(port);
+        instance.setSecurePort(port);
+        instance.setSecurePortEnabled(true);
+
+        String baseUrl = "https://" + ip + ":" + port;
+        
+        instance.setStatusPageUrl(baseUrl + "/actuator/info");
+        instance.setHealthCheckUrl(baseUrl + "/actuator/health");
+        instance.setHomePageUrl(baseUrl);
     }
 }

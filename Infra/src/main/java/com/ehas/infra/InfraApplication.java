@@ -21,11 +21,4 @@ public class InfraApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(InfraApplication.class, args);
 	}
-
-	@Bean
-	public EurekaInstanceConfigBean eurekaInstanceConfig(InetUtils inetUtils) {
-		EurekaInstanceConfigBean config = new EurekaInstanceConfigBean(inetUtils);
-		config.setSecurePortEnabled(true);
-		return config;
-	}
 }
