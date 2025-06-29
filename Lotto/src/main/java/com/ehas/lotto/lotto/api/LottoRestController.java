@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/lottos/")
+@RequestMapping("/api/lottos")
 @RequiredArgsConstructor
 public class LottoRestController {
 	private final LottoService lottoService;
@@ -29,7 +29,7 @@ public class LottoRestController {
 												@RequestParam(value="enRound", required=false) Integer enRound,
 												@RequestParam(value="page", defaultValue = "0") Integer page,
 											    @RequestParam(value="size", defaultValue = "10") Integer size,
-											    @RequestParam(value="sort", defaultValue = "seq,desc") String[] sort) {
+											    @RequestParam(value="sort", defaultValue = "round,desc") String[] sort) {
 		try {
 	    	Sort.Order direction = sort[1].equalsIgnoreCase("desc") ? Sort.Order.desc(sort[0]) : Sort.Order.asc(sort[0]);
 	        Pageable pageable = PageRequest.of(page, size, Sort.by(direction));
@@ -69,13 +69,13 @@ public class LottoRestController {
 	}
 	
 	@GetMapping("/{round}")
-	public ResponseEntity<ResponseDto> get(@PathVariable Integer round) {
+	public ResponseEntity<ResponseDto> get(@PathVariable("round") Integer round) {
 		try {
 			LottoDto dto = lottoService.findByRound(round);
-			return ResponseEntity.status(HttpStatus.CREATED)
+			return ResponseEntity.status(HttpStatus.OK)
 						            .body(ResponseDto.builder()
-						                    .status(HttpStatus.CREATED.value())
-						                    .message(HttpStatus.CREATED.getReasonPhrase())
+						                    .status(HttpStatus.OK.value())
+						                    .message(HttpStatus.OK.getReasonPhrase())
 						                    .data(Map.of("lotto", dto))
 						                    .build());
 		}catch(Exception e) {
@@ -88,7 +88,7 @@ public class LottoRestController {
 	}
 	
 	@DeleteMapping("/{round}")
-	public ResponseEntity<ResponseDto> delete(@PathVariable Integer round) {
+	public ResponseEntity<ResponseDto> delete(@PathVariable("round") Integer round) {
 		try {
 			lottoService.deleteByRound(round);
 			return ResponseEntity.status(HttpStatus.NO_CONTENT)

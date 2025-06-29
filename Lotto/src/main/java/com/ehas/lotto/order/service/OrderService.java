@@ -12,6 +12,7 @@ import com.ehas.lotto.order.entity.OrderEntity;
 import com.ehas.lotto.order.repository.OrderJpaRepository;
 import com.ehas.lotto.order.repository.OrderSpecifications;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,7 @@ public class OrderService {
 	private final OrderJpaRepository orderJpaRepository;
 
     public OrderDto add(OrderDto dto) {
+    	dto.setCreatedDate(LocalDateTime.now());
         OrderEntity saved = orderJpaRepository.save(dto.toEntity(dto));
         return  saved.toDto(saved);
     }

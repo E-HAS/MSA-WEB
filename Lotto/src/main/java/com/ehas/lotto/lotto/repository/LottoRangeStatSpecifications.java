@@ -5,13 +5,15 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.ehas.lotto.lotto.entity.LottoRangeStatEntity;
+import com.ehas.lotto.lotto.entity.LottoNumberStatEntity;
 
 import jakarta.persistence.criteria.Predicate;
 
 public class LottoRangeStatSpecifications {
-	public static Specification<LottoRangeStatEntity> findWith(
-		    Integer number
+	public static Specification<LottoNumberStatEntity> findWith(
+			Integer stRound
+			,Integer enRound
+			,Integer number
 		    ,Short one
 		    ,Short two
 		    ,Short three
@@ -22,7 +24,16 @@ public class LottoRangeStatSpecifications {
     ) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
+            if (stRound != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("round"), stRound));
+            }
 
+            if (enRound != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("round"), enRound));
+            }
+            if (number != null) {
+                predicates.add(criteriaBuilder.equal(root.get("number"), number));
+            }
             if (one != null) {
                 predicates.add(criteriaBuilder.equal(root.get("one"), one));
             }
@@ -49,10 +60,6 @@ public class LottoRangeStatSpecifications {
 
             if (bonus != null) {
                 predicates.add(criteriaBuilder.equal(root.get("bonus"), bonus));
-            }
-
-            if (number != null) {
-                predicates.add(criteriaBuilder.equal(root.get("number"), number));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

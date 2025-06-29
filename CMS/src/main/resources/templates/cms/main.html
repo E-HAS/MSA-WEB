@@ -1,0 +1,179 @@
+<html>
+
+<head>
+	<script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+	<script th:src="@{/js/sockjs.min.js}"></script>
+	<script th:src="@{/js/stomp.min.js}"></script>
+	
+	<script type="text/javascript" th:src="@{/js/jquery/jquery.min.js}"></script>
+	
+	<script type="text/javascript" th:src="@{/tui/js/tui-chart/chart/dist/toastui-chart.min.js}"></script>
+	
+	<link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+</head>
+
+<script>
+	let stompClient = null;
+	
+	let stompServer={};
+
+	function stompConnect() {
+		const socket = new WebSocket('wss://192.168.1.102:8761/stomp');
+		stompClient = Stomp.over(socket);
+		stompClient.debug = null;
+
+		stompClient.connect({}, () => {
+			stompClient.subscribe('/topic/monitoring/11', (message) => {
+				const datas = JSON.parse(message.body);
+				
+				if(!stompServer['11']){
+					stompServer['11']={};	
+				}
+				
+				console.log(datas);
+				//4:{seq: 182, label: 'jvm_memory_committed_bytes', opt: '{area="heap",id="G1 Eden Space"}', value: 104857600}
+				
+				/*
+				datas.forEach(item => {
+				  seqList.push(item.seq);
+				  labelList.push(item.label);
+				  valueList.push(item.value);
+				});
+				*/
+			});
+		});
+	}
+	
+</script>
+
+
+<script>
+	
+	function translateForByte(val){
+		return (bytes / 1024 / 1024).toFixed(2);
+	}
+	
+	function truncatedForPercent(val){
+		return Math.floor(val * 1000) / 1000;
+	}
+	
+	
+	function getLast10SecondsTimestamps() {
+	  const timestamps = [];
+	  const now = new Date();
+	
+	  for (let i = 0; i < 10; i++) {
+	    const pastTime = new Date(now.getTime() - i * 1000); // i초 전
+	    const timeStr = pastTime.toTimeString().split(' ')[0]; // HH:MM:SS 포맷
+	    timestamps.unshift(timeStr); // 시간 순서를 과거 → 현재로 정렬
+	  }
+	
+	  return timestamps;
+	}
+
+	window.onload = function () {
+		stompConnect();
+
+		let timeList = getLast10SecondsTimestamps();
+		const el = document.getElementById('system-chart');
+		const data = {
+			categories: timeList,
+			series: [
+				{
+					name: 'A',
+					data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				},
+				{
+					name: 'B',
+					data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				},
+			],
+		};
+		const options = {
+			chart: {title: '시스템 모니터링', width: 450, height: 200},
+			xAxis: {pointOnColumn: false, title: {text: '시간'}},
+			yAxis: {title: '크기'},
+			series: {shift: true},
+		};
+
+		const chart = toastui.Chart.areaChart({el, data, options});
+
+		let index = 11;
+		const intervalId = setInterval(() => {
+			const random = Math.round(Math.random() * 100);
+			const random2 = Math.round(Math.random() * 100);
+			
+			chart.setData({
+			  categories: timeList,
+			  series: [
+			    {
+			      name: 'a',
+			      data: [random,random,random,random,random,random,random,random,random,random],
+			    },
+			    {
+			      name: 'b',
+			      data: [random2,random2,random2,random2,random2,random2,random2,random2,random2,random2],
+			    }
+			  ]
+			});
+			
+			index += 1;
+			if (index === 30) {
+				clearInterval(intervalId);
+			}
+		}, 1500);
+		
+		/*
+		let index = 11;
+		const intervalId = setInterval(() => {
+			const random = Math.round(Math.random() * 100);
+			const random2 = Math.round(Math.random() * 100);
+			chart.addData([random, random2], index.toString());
+			index += 1;
+			if (index === 30) {
+				clearInterval(intervalId);
+			}
+		}, 1500);
+		*/
+	}
+</script>
+
+<body>
+	<nav class="navbar navbar-expand-lg bg-body-tertiary bg-dark">
+		<div class="container-fluid">
+			<a class="navbar-brand text-white" href="#"> TEST MSA SERVER </a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll"
+				aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarScroll">
+				<ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+					<li class="nav-item">
+						<a class="nav-link active text-white" aria-current="page" href="#">Home</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link text-white" th:href="@{/cms/monitoring}">모니터링</a>
+					</li>
+				</ul>
+				<form class="d-flex" role="search">
+					<button class="btn btn-success" type="submit">Login</button>
+				</form>
+		</div>
+	</nav>
+	<div class="container-fluid">
+		<div class="card" style="width: 18rem;">
+		  <div class="card-body">
+		    <h5 class="card-title">Card title</h5>
+		    <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+		    <p class="card-text">
+				<div id="system-chart"></div>
+			</p>
+		    <a href="#" class="card-link">Card link</a>
+		    <a href="#" class="card-link">Another link</a>
+		  </div>
+		</div>
+	</div>
+
+</body>
+
+</html>

@@ -13,6 +13,7 @@ import jakarta.persistence.criteria.Predicate;
 public class ProductSpecifications {
 	public static Specification<ProductEntity> findWith(
 			Integer seq
+			,Integer user_seq
 			, String name
 			, Integer status
 			, String stCreatedDate
@@ -23,6 +24,9 @@ public class ProductSpecifications {
 
             if (seq != null) {
                 predicates.add(criteriaBuilder.equal(root.get("seq"), seq));
+            }
+            if (user_seq != null) {
+                predicates.add(criteriaBuilder.equal(root.get("user_seq"), user_seq));
             }
             
             if (name != null) {

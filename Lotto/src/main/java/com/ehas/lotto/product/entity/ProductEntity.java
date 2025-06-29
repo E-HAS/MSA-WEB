@@ -19,6 +19,9 @@ public class ProductEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "seq")
     private Integer seq;
+    
+    @Column(name = "user_seq")
+    private Integer userSeq;
 
     @Column(name = "name", nullable = false, length = 255)
     private String name;
@@ -41,6 +44,7 @@ public class ProductEntity {
     public ProductDto toDto(ProductEntity entity) {
         return ProductDto.builder()
                 .seq(entity.getSeq())
+                .userSeq(entity.getUserSeq())
                 .name(entity.getName())
                 .dept(entity.getDept())
                 .price(entity.getPrice())

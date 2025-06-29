@@ -62,13 +62,13 @@ public class OrderRestController {
 	}
 
 	@GetMapping("/{seq}")
-	public ResponseEntity<ResponseDto> get(@PathVariable Integer seq) {
+	public ResponseEntity<ResponseDto> get(@PathVariable("seq") Integer seq) {
 		try {
 			OrderDto dto = orderService.findBySeq(seq);
-			return ResponseEntity.status(HttpStatus.CREATED)
+			return ResponseEntity.status(HttpStatus.OK)
 		            .body(ResponseDto.builder()
-		                    .status(HttpStatus.CREATED.value())
-		                    .message(HttpStatus.CREATED.getReasonPhrase())
+		                    .status(HttpStatus.OK.value())
+		                    .message(HttpStatus.OK.getReasonPhrase())
 		                    .data(Map.of("order", dto))
 		                    .build());
 		}catch(Exception e) {
@@ -81,7 +81,7 @@ public class OrderRestController {
 	}
 
 	@DeleteMapping("/{seq}")
-	public ResponseEntity<ResponseDto> delete(@PathVariable Integer seq) {
+	public ResponseEntity<ResponseDto> delete(@PathVariable("seq") Integer seq) {
 		try {
 			orderService.deleteBySeq(seq);
 			return ResponseEntity.status(HttpStatus.NO_CONTENT)

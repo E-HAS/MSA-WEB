@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,7 +30,7 @@ public class UserAccountEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer seq;
 
-    @Column(name = "user_seq")
+    @Column
     private Integer userSeq;
     
     @Column(name = "balance")
@@ -42,7 +43,7 @@ public class UserAccountEntity {
     private LocalDateTime created_date;
     
     @JsonIgnore
-    @ManyToOne(fetch=FetchType.LAZY)
+    @OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="userSeq", referencedColumnName="seq", insertable = false, updatable = false)
     private UserEntity user;  
 }

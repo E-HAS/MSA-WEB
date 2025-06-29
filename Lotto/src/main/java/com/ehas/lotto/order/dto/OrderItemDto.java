@@ -19,7 +19,6 @@ public class OrderItemDto {
     private Short four;
     private Short five;
     private Short six;
-    private Short bonus;
     
     public OrderItemEntity toEntity(OrderItemDto dto) {
         return OrderItemEntity.builder()
@@ -33,7 +32,6 @@ public class OrderItemDto {
                 .four(dto.getFour())
                 .five(dto.getFive())
                 .six(dto.getSix())
-                .bonus(dto.getBonus())
                 .build();
     }
 }

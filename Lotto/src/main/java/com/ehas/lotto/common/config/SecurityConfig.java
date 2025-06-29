@@ -14,6 +14,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.ehas.lotto.common.user.filter.UserJwtTokenAuthenticationFilter;
+import com.ehas.lotto.common.user.provider.UserJwtTokenProvider;
 
 @Configuration
 public class SecurityConfig {
@@ -21,7 +25,9 @@ public class SecurityConfig {
 	private List<String> allowIpList;
 
 	@Bean
-	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain defaultSecurityFilterChain(
+															HttpSecurity http
+															, UserJwtTokenProvider userJwtTokenProvider) throws Exception {
 		String ipExpressions = allowIpList.stream().map(ip -> "hasIpAddress('" + ip.trim() + "')")
 				.collect(Collectors.joining(" or "));
 		WebExpressionAuthorizationManager ipExcpressionManager = new WebExpressionAuthorizationManager(ipExpressions);
@@ -36,8 +42,9 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers("/actuator/**").access(ipExcpressionManager)
 						.requestMatchers(HttpMethod.GET, "/api/lottos", "/api/stat/lottos/**").permitAll()
-						.anyRequest().authenticated()
-						)
+						.anyRequest().permitAll())				
+				.addFilterBefore(new UserJwtTokenAuthenticationFilter(userJwtTokenProvider),
+						UsernamePasswordAuthenticationFilter.class)
 				.build();
 	}
 }

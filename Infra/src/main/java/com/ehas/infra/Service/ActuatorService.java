@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.ehas.infra.dto.prometheusDto;
+import com.ehas.infra.dto.PrometheusDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +69,7 @@ public class ActuatorService {
 		return "0";
 	}
 	
-	public List<prometheusDto> onPrometheusMonitoring(String url) {
+	public List<PrometheusDto> onPrometheusMonitoring(String url) {
 		RestTemplate restTemplate = new RestTemplate();
 		String prometheusTexts = restTemplate.getForObject(url, String.class);
 		
@@ -77,7 +77,7 @@ public class ActuatorService {
 			return Collections.emptyList();
 		}
 		
-		Map<String, List<prometheusDto>> prometheusMap = new HashMap<>(); 
+		Map<String, List<PrometheusDto>> prometheusMap = new HashMap<>(); 
 		for(String line : prometheusTexts.split("\n")) { // 라인별 읽기
 			if(line.isEmpty() || line.startsWith("#")) { // 빈칸 또는 "#" 건너 뛰기
 				continue;
@@ -96,10 +96,10 @@ public class ActuatorService {
 			    
 				try {
 					if(!prometheusMap.containsKey(key)) {
-						prometheusMap.put(key, new ArrayList<prometheusDto>());
+						prometheusMap.put(key, new ArrayList<PrometheusDto>());
 					}
 					
-					prometheusMap.get(key).add(new prometheusDto(line));
+					prometheusMap.get(key).add(new PrometheusDto(line));
 					
 				}catch(Exception e) {
 					log.info("[Error] Prometheus Read Line :"+line);
@@ -107,13 +107,13 @@ public class ActuatorService {
 			}
 		}
 		
-		List<prometheusDto> results = new ArrayList<prometheusDto>();
+		List<PrometheusDto> results = new ArrayList<PrometheusDto>();
 		for(String findKey : prometheusList) {
 		    if (!prometheusMap.containsKey(findKey)) {
 		        continue;
 		    }
 		    
-			for(prometheusDto findDto : prometheusMap.get(findKey)) {
+			for(PrometheusDto findDto : prometheusMap.get(findKey)) {
 				findDto.onExtract();
 			}
 			

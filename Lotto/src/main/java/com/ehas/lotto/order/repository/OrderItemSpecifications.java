@@ -24,11 +24,11 @@ public class OrderItemSpecifications {
             }
             
             if (orderSeq != null) {
-                predicates.add(criteriaBuilder.equal(root.get("userSeq"), orderSeq));
+                predicates.add(criteriaBuilder.equal(root.get("orderSeq"), orderSeq));
             }
             
             if (productSeq != null) {
-                predicates.add(criteriaBuilder.equal(root.get("status"), productSeq));
+                predicates.add(criteriaBuilder.equal(root.get("productSeq"), productSeq));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

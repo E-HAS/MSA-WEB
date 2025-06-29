@@ -50,7 +50,7 @@ public class OrderItemRestController {
     }
     
     @PostMapping("{orderSeq}/items")
-    public ResponseEntity<ResponseDto> add(@PathVariable(value="orderSeq") Integer orderSeq,
+    public ResponseEntity<ResponseDto> add(@PathVariable("orderSeq") Integer orderSeq,
     										@RequestBody OrderItemDto dto) {
     	try {
     		dto.setOrderSeq(orderSeq);
@@ -70,14 +70,14 @@ public class OrderItemRestController {
     }
 
     @GetMapping("{orderSeq}/items/{seq}")
-    public ResponseEntity<ResponseDto> get(@PathVariable(value="orderSeq") Integer orderSeq
-    										,@PathVariable Integer seq) {
+    public ResponseEntity<ResponseDto> get(@PathVariable("orderSeq") Integer orderSeq
+    										,@PathVariable("seq") Integer seq) {
     	try {
     		OrderItemDto dto = orderItemService.findBySeq(seq);
-	    	return ResponseEntity.status(HttpStatus.CREATED)
+	    	return ResponseEntity.status(HttpStatus.OK)
 		            .body(ResponseDto.builder()
-		                    .status(HttpStatus.CREATED.value())
-		                    .message(HttpStatus.CREATED.getReasonPhrase())
+		                    .status(HttpStatus.OK.value())
+		                    .message(HttpStatus.OK.getReasonPhrase())
 		                    .data(Map.of("item", dto))
 		                    .build());
 		}catch(Exception e) {
@@ -90,8 +90,8 @@ public class OrderItemRestController {
     }
 
     @DeleteMapping("{orderSeq}/items/{seq}")
-    public ResponseEntity<ResponseDto> delete(@PathVariable(value="orderSeq") Integer orderSeq
-    										 ,@PathVariable Integer seq) {
+    public ResponseEntity<ResponseDto> delete(@PathVariable("orderSeq") Integer orderSeq
+    										 ,@PathVariable("seq") Integer seq) {
     	try {
     		orderItemService.deleteBySeq(seq);
 			return ResponseEntity.status(HttpStatus.NO_CONTENT)

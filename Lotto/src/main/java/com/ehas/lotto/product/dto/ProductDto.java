@@ -12,6 +12,7 @@ import com.ehas.lotto.product.entity.ProductEntity;
 @Builder
 public class ProductDto {
     private Integer seq;
+    private Integer userSeq;
     private String name;
     private String dept;
     private Integer price;
@@ -22,6 +23,7 @@ public class ProductDto {
     public ProductEntity toEntity(ProductDto dto) {
         return ProductEntity.builder()
                 .seq(dto.getSeq())
+                .userSeq(dto.getUserSeq())
                 .name(dto.getName())
                 .dept(dto.getDept())
                 .price(dto.getPrice())

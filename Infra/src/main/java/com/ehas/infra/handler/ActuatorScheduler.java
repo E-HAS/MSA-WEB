@@ -2,6 +2,7 @@ package com.ehas.infra.handler;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -22,11 +24,11 @@ import com.ehas.infra.Service.InstanceRegistryService;
 import com.ehas.infra.Service.KafkaMetricsProducerService;
 import com.ehas.infra.Service.ServerPrometheusService;
 import com.ehas.infra.Service.ServerService;
-import com.ehas.infra.dto.prometheusDto;
+import com.ehas.infra.Service.StompPrometheusService;
+import com.ehas.infra.dto.PrometheusDto;
 import com.ehas.infra.entity.ServerEntity;
 import com.ehas.infra.entity.ServerPrometheusEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
@@ -40,14 +42,13 @@ import lombok.extern.slf4j.Slf4j;
 public class ActuatorScheduler {
 	private final InstanceRegistryService instanceRegistryService;
 	private final KafkaMetricsProducerService kafkaMetricsProducerService;
-    
+	private final StompPrometheusService stompPrometheusService;
+
 	private static final Map<String, Integer> ServerMap = new ConcurrentHashMap<String, Integer>();
 	private final ServerService serverService;
-	
+
 	private static final Map<String, Integer> ServerPrometheusMap = new ConcurrentHashMap<String, Integer>();
 	private final ServerPrometheusService serverPrometheusService;
-	
-	 private final ObjectMapper objectMapper;
 	
 	@PostConstruct
 	public void init() {
@@ -87,9 +88,14 @@ public class ActuatorScheduler {
 					});
 					
 					//라벨 관련
-					List<prometheusDto> prometheusList = (List<prometheusDto>) instances.get(instanceName);
+					List<PrometheusDto> prometheusList = (List<PrometheusDto>) instances.get(instanceName);
+					if(prometheusList.size() < 1) {
+						return;
+					}
+					log.info("list server : "+serviceName+", Seq"+serverSeq+", size:"+prometheusList.size());
 					 prometheusList.parallelStream().forEach(PrometheusDto -> {
 							String serverPrometheus = PrometheusDto.getLabel()+PrometheusDto.getOpt();
+							
 							
 							int serverPrometheusSeq = ServerPrometheusMap.computeIfAbsent(serverPrometheus, key -> {
 							    ServerPrometheusEntity created = serverPrometheusService.create(
@@ -104,18 +110,13 @@ public class ActuatorScheduler {
 							
 							PrometheusDto.setSeq(serverPrometheusSeq);
 							PrometheusDto.setText(null);
-							PrometheusDto.setLabel(null);
-							PrometheusDto.setOpt(null);
-					 });
-					 String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(Map.of("serverSeq",serverSeq
-							 																				,"second",1
-																											,"list", instances.get(instanceName)));
-					 JsonNode jsonNode = objectMapper.readTree(json);
-					 String changeJson = objectMapper.writeValueAsString(jsonNode);
-					 
-					 kafkaMetricsProducerService.sendMessage(changeJson);
+					});
+					 //log.info("stomp server : "+serviceName+", Seq"+serverSeq);
+					 stompPrometheusService.onMessagePrometheus(serverSeq, 1, prometheusList);
+					 //log.info("kafka server : "+serviceName+", Seq"+serverSeq);
+					 kafkaMetricsProducerService.sendMessage(serverSeq, 1, prometheusList);
 				}catch(Exception e){
-					log.error("[Error] PerformanceMonitoring in instances error : "+e.getMessage());
+					log.error("[ERROR] PerformanceMonitoring in instances error : "+e.getMessage());
 				}
 			});
 		}

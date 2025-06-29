@@ -47,9 +47,6 @@ public class OrderItemEntity {
 
     @Column(name = "six", nullable = false)
     private Short six;
-
-    @Column(name = "bonus", nullable = false)
-    private Short bonus;
     
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
@@ -73,7 +70,6 @@ public class OrderItemEntity {
                 .four(entity.getFour())
                 .five(entity.getFive())
                 .six(entity.getSix())
-                .bonus(entity.getBonus())
                 .build();
     }
 }

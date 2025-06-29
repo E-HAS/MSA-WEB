@@ -73,7 +73,7 @@ public class JwtTokenBase {
             throw new Exception("Invalid JWT signature: " + e.getMessage());
         } catch (ExpiredJwtException e) {
             log.error("JWT token is expired: {}", e.getMessage());
-            throw new Exception("JWT token is expired: " + e.getMessage());
+            throw e;
         } catch (UnsupportedJwtException e) {
             log.error("JWT token is unsupported: {}", e.getMessage());
             throw new Exception("JWT token is unsupported: " + e.getMessage());

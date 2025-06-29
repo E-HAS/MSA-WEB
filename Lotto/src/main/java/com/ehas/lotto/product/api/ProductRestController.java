@@ -25,6 +25,7 @@ public class ProductRestController {
 
     @GetMapping
     public ResponseEntity<ResponseDto> getAll(@RequestParam(value="seq", required=false) Integer seq,
+    											@RequestParam(value="user_seq", required=false) Integer user_seq,
 									    		@RequestParam(value="name", required=false) String name,
 									    		@RequestParam(value="seq", required=false) Integer status,
 												@RequestParam(value="stCreatedDate", required=false) String stCreatedDate,
@@ -36,7 +37,7 @@ public class ProductRestController {
 			Sort.Order direction = sort[1].equalsIgnoreCase("desc") ? Sort.Order.desc(sort[0]) : Sort.Order.asc(sort[0]);
 	        Pageable pageable = PageRequest.of(page, size, Sort.by(direction));
 	        
-	        Page<ProductDto> lists = productService.findAllBySpecAndPageable(seq, name, status, stCreatedDate, enCreatedDate, pageable);
+	        Page<ProductDto> lists = productService.findAllBySpecAndPageable(seq, user_seq, name, status, stCreatedDate, enCreatedDate, pageable);
 	    	return ResponseEntity.ok(ResponseDto.builder()
                     .status(HttpStatus.OK.value())
                     .message(HttpStatus.OK.getReasonPhrase())
@@ -70,13 +71,13 @@ public class ProductRestController {
 		}
     }
     @GetMapping("/{seq}")
-    public ResponseEntity<ResponseDto> get(@PathVariable Integer seq) {
+    public ResponseEntity<ResponseDto> get(@PathVariable("seq") Integer seq) {
     	try {
 	        ProductDto dto = productService.findBySeq(seq);
-	    	return ResponseEntity.status(HttpStatus.CREATED)
+	    	return ResponseEntity.status(HttpStatus.OK)
 		            .body(ResponseDto.builder()
-		                    .status(HttpStatus.CREATED.value())
-		                    .message(HttpStatus.CREATED.getReasonPhrase())
+		                    .status(HttpStatus.OK.value())
+		                    .message(HttpStatus.OK.getReasonPhrase())
 		                    .data(Map.of("product", dto))
 		                    .build());
 		}catch(Exception e) {
@@ -89,7 +90,7 @@ public class ProductRestController {
     }
     
     @DeleteMapping("/{seq}")
-    public ResponseEntity<ResponseDto> delete(@PathVariable Integer seq) {
+    public ResponseEntity<ResponseDto> delete(@PathVariable("seq") Integer seq) {
     	try {
     		productService.deleteBySeq(seq);
     		return ResponseEntity.status(HttpStatus.NO_CONTENT)

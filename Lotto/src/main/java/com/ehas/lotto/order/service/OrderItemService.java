@@ -12,6 +12,7 @@ import com.ehas.lotto.order.entity.OrderItemEntity;
 import com.ehas.lotto.order.repository.OrderItemJpaRepository;
 import com.ehas.lotto.order.repository.OrderItemSpecifications;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 

@@ -12,6 +12,7 @@ import com.ehas.lotto.product.entity.ProductEntity;
 import com.ehas.lotto.product.repository.ProductJpaRepository;
 import com.ehas.lotto.product.repository.ProductSpecifications;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class ProductService {
 	private final ProductJpaRepository productJpaRepository;
 
     public ProductDto add(ProductDto dto) {
+    	dto.setCreatedDate(LocalDateTime.now());
         ProductEntity saved = productJpaRepository.save(dto.toEntity(dto));
         return saved.toDto(saved);
     }
@@ -37,8 +39,8 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
     
-    public Page<ProductDto> findAllBySpecAndPageable(Integer seq, String name, Integer status, String stCreatedDate, String enCreatedDate, Pageable pageable) {
-    	Specification<ProductEntity> spec = ProductSpecifications.findWith(seq, name, status, stCreatedDate, enCreatedDate);
+    public Page<ProductDto> findAllBySpecAndPageable(Integer seq, Integer user_seq, String name, Integer status, String stCreatedDate, String enCreatedDate, Pageable pageable) {
+    	Specification<ProductEntity> spec = ProductSpecifications.findWith(seq, user_seq, name, status, stCreatedDate, enCreatedDate);
     	return productJpaRepository.findAll(spec, pageable)
                 .map(v->v.toDto(v));
     }
