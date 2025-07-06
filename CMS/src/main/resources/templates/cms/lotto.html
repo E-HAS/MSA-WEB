@@ -1,0 +1,137 @@
+<html>
+
+<head>
+	<script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+	<script th:src="@{/js/sockjs.min.js}"></script>
+	<script th:src="@{/js/stomp.min.js}"></script>
+	
+	<script type="text/javascript" th:src="@{/js/jquery/jquery.min.js}"></script>
+	
+	<script type="text/javascript" th:src="@{/tui/js/tui-chart/chart/dist/toastui-chart.min.js}"></script>
+	
+	<link rel="stylesheet" th:href="@{/jquery-ui/jquery-ui.css}">
+	<script th:href="@{/jquery-ui/jquery-ui.js}"></script>
+	
+	<link rel="stylesheet" th:href="@{/tui/js/tui-pagination/dist/tui-pagination.css}" />
+	<script type="text/javascript" th:src="@{/tui/js/tui-pagination/dist/tui-pagination.js}"></script>
+	
+	<link rel="stylesheet" th:href="@{/tui/js/tui-grid/dist/tui-grid.css}" />
+	<script type="text/javascript" th:src="@{/tui/js/tui-grid/dist/tui-grid.js}"></script>
+
+	<link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+</head>
+<style>
+.btn-square-md {
+	width: 50px !important;
+	height: 50px !important;
+	text-align: center;
+	padding: 0px;
+	font-size: 12px;
+}
+.table-LottoSIze{
+  width: 450px;
+  height:620px;
+}
+.row-LottoSize {
+  width:  440px;
+  height: 70px;
+  padding: 10px;
+  margin :0px;
+}
+.col-LottoSize {
+  width: 60px;
+  height: 60px;
+}
+.btn-outline-lotto{color:#B90E0A;border-color:#B90E0A; border-width: 3px; border-style: solid none;}
+.btn-outline-lotto:hover{color:#fff; border-color:#B90E0A; background-color:#B90E0A;}
+.btn-outline-lotto.focus,
+.btn-outline-lotto:focus{box-shadow:0 0 0 .2rem rgba(0,123,255,.5)}
+.btn-outline-lotto.disabled,
+.btn-outline-lotto:disabled{color:#B90E0A;background-color:transparent}
+
+</style>
+
+<script>
+	function setNumbersToLotto(){
+	if($('#LottoNumbers')){
+		$('#LottoNumbers').remove();
+	}
+	
+	var lottoPage ='<div id="LottoNumbers" ><div class="row row-LottoSize">';
+	for(var count =1; count<46; count++){
+		lottoPage += '<div class="col-auto col-LottoSize">'
+			+'<button type="button" class="btn btn-outline-lotto btn-square-md" id="lottoNumber'+count+'">'+count+'</button>'
+			+'</div>';
+		if(count%7==0){
+			lottoPage += '</div>';
+			lottoPage += '<div class="row row-LottoSize">';
+		}
+	}
+	lottoPage +='</div></div>';
+
+	$('#lottoPage').append($(lottoPage));
+	}
+	
+	
+	
+	window.onload = function(){
+		setNumbersToLotto()
+	}
+</script>
+<body style="min-width:1650px">
+	<nav class="navbar bg-dark navbar-dark">
+		<div class="container-fluid d-flex justify-content-between align-items-center">
+			<!-- 왼쪽 영역 -->
+			<div class="d-flex align-items-center">
+				<a class="navbar-brand" href="#">TEST MSA SERVER</a>
+				<ul class="navbar-nav flex-row ms-3">
+					<li class="nav-item me-3">
+						<a class="nav-link text-white" th:href="@{/cms/main}">메인</a>
+					</li>
+					<li class="nav-item me-3">
+						<a class="nav-link text-white" th:href="@{/cms/monitoring}">모니터링</a>
+					</li>
+					<li class="nav-item me-3">
+						<a class="nav-link text-white" th:href="@{/cms/lotto}">로또</a>
+					</li>
+				</ul>
+			</div>
+
+			<!-- 오른쪽 영역 -->
+			<div>
+				<form class="d-flex" role="search">
+					<button class="btn btn-success btn-sm" type="submit">Login</button>
+				</form>
+			</div>
+		</div>
+	</nav>
+	
+	<div class="container-fluid" id="container-body">
+		<div class="row">
+			<div class="card shadow mb-4 table-LottoSIze" id="lottoPage">
+				<div class="card-header py-3">
+					<h6 class="m-0 font-weight-bold text-danger">Lotto</h6>
+				</div>
+				<div class="card-body">
+					<div class="form-row text-center">
+						<div class="row">
+						<div class="col">
+							<input class="form-control" type="text" id="endRound">
+						</div>
+						~
+						<div class="col">
+							<input class="form-control" type="text" id="stRound">
+						</div>
+						<div class="col">
+							<button type="button" class="btn btn-danger" onclick="clickSearchRound();">검색</button>
+						</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+</html>

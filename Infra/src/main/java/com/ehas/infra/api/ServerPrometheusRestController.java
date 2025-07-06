@@ -24,11 +24,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ServerPrometheusRestController {
 
-    private final ServerPrometheusService service;
+    private final ServerPrometheusService serverPrometheusService;
 
     @PostMapping
     public ResponseEntity<ServerPrometheusEntity> create(@RequestBody ServerPrometheusEntityDto dto) {
-        return ResponseEntity.ok(service.create(ServerPrometheusEntity.builder()
+        return ResponseEntity.ok(serverPrometheusService.create(ServerPrometheusEntity.builder()
         																.label(dto.getLabel())
         																.opt(dto.getOpt())
         																.dept(dto.getDept())
@@ -38,17 +38,17 @@ public class ServerPrometheusRestController {
 
     @GetMapping
     public ResponseEntity<List<ServerPrometheusEntity>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+        return ResponseEntity.ok(serverPrometheusService.findAll());
     }
 
     @GetMapping("/{seq}")
     public ResponseEntity<ServerPrometheusEntity> getById(@PathVariable Integer seq) {
-        return ResponseEntity.ok(service.findById(seq));
+        return ResponseEntity.ok(serverPrometheusService.findById(seq));
     }
 
     @PutMapping("/{seq}")
     public ResponseEntity<ServerPrometheusEntity> update(@PathVariable Integer seq, @RequestBody ServerPrometheusEntityDto dto) {
-        return ResponseEntity.ok(service.update(seq, ServerPrometheusEntity.builder()
+        return ResponseEntity.ok(serverPrometheusService.update(seq, ServerPrometheusEntity.builder()
 																			.label(dto.getLabel())
 																			.opt(dto.getOpt())
 																			.dept(dto.getDept())
@@ -57,7 +57,7 @@ public class ServerPrometheusRestController {
 
     @DeleteMapping("/{seq}")
     public ResponseEntity<Void> delete(@PathVariable Integer seq) {
-        service.delete(seq);
+    	serverPrometheusService.delete(seq);
         return ResponseEntity.noContent().build();
     }
 }

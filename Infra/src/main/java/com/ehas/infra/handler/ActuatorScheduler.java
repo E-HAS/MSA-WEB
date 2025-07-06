@@ -92,7 +92,6 @@ public class ActuatorScheduler {
 					if(prometheusList.size() < 1) {
 						return;
 					}
-					log.info("list server : "+serviceName+", Seq"+serverSeq+", size:"+prometheusList.size());
 					 prometheusList.parallelStream().forEach(PrometheusDto -> {
 							String serverPrometheus = PrometheusDto.getLabel()+PrometheusDto.getOpt();
 							

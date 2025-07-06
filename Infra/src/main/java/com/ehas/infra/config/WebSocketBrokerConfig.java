@@ -50,13 +50,13 @@ public class WebSocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
                 StompHeaderAccessor accessor =
                         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 
-                StompCommand stompStatus = accessor.getCommand();
+                StompCommand sessionStatus = accessor.getCommand();
                 String sessenId = accessor.getSessionId();
                 String sessenToken = accessor.getFirstNativeHeader("Authorization");
                 
-                MessageHeaders headers = message.getHeaders();
+                //essageHeaders headers = message.getHeaders();
                 
-                switch (accessor.getCommand()) {
+                switch (sessionStatus) {
                 case CONNECT:
                     break;
                 case DISCONNECT:

@@ -1,0 +1,367 @@
+<html>
+
+<head>
+	<script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
+	<script th:src="@{/js/sockjs.min.js}"></script>
+	<script th:src="@{/js/stomp.min.js}"></script>
+	
+	<script type="text/javascript" th:src="@{/js/jquery/jquery.min.js}"></script>
+	
+	<script type="text/javascript" th:src="@{/tui/js/tui-chart/chart/dist/toastui-chart.min.js}"></script>
+	
+	<link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+</head>
+<style>
+  .toastui-chart-tooltip-container {
+    position: absolute !important;
+    z-index: 9999;
+    pointer-events: none;
+  }
+  
+  	#container-body .row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem; /* 카드 사이 간격 */
+	}
+	
+	/*
+	.card-text {
+  	overflow-x: auto;
+	}*/
+	
+	.card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.card-title {
+  color: #2c3e50;
+}
+
+.chart-col {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+}
+
+.row.flex-nowrap {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 8px;
+}
+
+.row.flex-nowrap::-webkit-scrollbar {
+  height: 6px;
+}
+.row.flex-nowrap::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+</style>
+
+<script>
+	
+	let stompServer={};
+
+	function init(){
+		$.ajax({
+		  url: 'https://192.168.1.102:8761/api/servers',
+		  type: 'GET',
+		  dataType: 'json',
+		  success: function (datas) {
+			stompServer['list']={};
+			stompServer['list'] = datas.reduce((acc, item) => {	  const key = item.name;
+																  if (!acc[key]) {
+																    acc[key] = [];
+																  }
+																  acc[key].push(item);
+																  return acc;}, {});												  
+			stompConnect();
+		  },
+		  error: function (xhr, status, error) {
+		    console.error(status, error);
+		  }
+		});
+	}
+	
+	let stompClient = null;
+	function stompConnect() {
+		const socket = new WebSocket('wss://192.168.1.102:8761/stomp');
+		stompClient = Stomp.over(socket);
+		stompClient.debug = null;
+
+
+		stompClient.connect({}, function(frame) {
+			for(var name in stompServer['list']){
+				for(var order in stompServer['list'][name]){
+					let  server = stompServer['list'][name][order];
+					let  serverId= server.seq;
+					let  serverName= server.name;
+					let  serverHost= server.host;
+					stompClient.subscribe('/topic/monitoring/'+serverId, (message) => {
+						const datas = JSON.parse(message.body);
+						if(!stompServer[serverId]){
+							stompServer[serverId]={};
+							stompServer[serverId]['row']=createRowDom(serverId, serverName, serverHost);
+						}
+						
+						var time = datas.time;
+						for(let i=0; i<datas.lists.length; i++){
+							var label = datas.lists[i].label;
+							var opt = datas.lists[i].opt;
+							var value = datas.lists[i].value;
+							var pass=true;
+							
+							var point ='';
+							
+							if(label=='process_cpu_usage' || label=='system_cpu_usage'){
+								opt = label;
+								label='cpu';
+							}
+							if(label=='jvm_threads_daemon_threads' || label=='jvm_threads_live_threads'
+								|| label=='jvm_threads_peak_threads' || label=='jvm_threads_started_threads_total'){
+								opt = label;
+								label='jvm_threads';
+							}
+							if(label=='tomcat_sessions_active_current_sessions' || label=='tomcat_sessions_active_max_sessions'
+								|| label=='tomcat_sessions_alive_max_seconds' || label=='tomcat_sessions_created_sessions_total'
+								|| label=='tomcat_sessions_expired_sessions_total' || label=='tomcat_sessions_rejected_sessions_total'){
+								opt = label;
+								label='tomcat_session';
+							}
+							if(label=='executor_pool_core_threads' //|| label=='executor_pool_max_threads'
+								|| label=='executor_pool_size_threads' || label=='executor_active_threads'){
+								opt = label;
+								label='executor_pool';
+							}
+							const chartToStomp = stompServer[serverId];
+							switch(label){
+								case 'cpu':
+									point='%'
+									pass=false;
+									break;
+								case 'jvm_memory_committed_bytes':
+									point='MB'
+									pass=true;
+									break;
+								case 'jvm_memory_max_bytes':
+									point='MB'
+									pass=true;
+									break;
+								case 'jvm_memory_used_bytes':
+									point='MB'
+									pass=false;
+									break;
+								case 'jvm_threads':
+									point='count'
+									pass=false;
+									break;
+								case 'jvm_threads_states_threads':
+									point='count'
+									pass=false;
+									break;
+								case 'tomcat_session':
+									point='count'
+									pass=true;
+									break;
+								case 'executor_pool':
+									point='count'
+									pass=false;
+									break;
+								default:
+									break;
+							}
+							
+							if (pass) {
+								continue;
+							}
+							if (!chartToStomp[label]) {
+								chartToStomp[label] = {}
+								createChartDom(serverId, label);
+							}
+							if (!chartToStomp[label]['time']) {
+								chartToStomp[label]['time'] = getLast10SecondsTimestamps();
+							}
+		
+							if (!chartToStomp[label][opt]) {
+								chartToStomp[label][opt] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+							}
+							chartToStomp[label][opt].shift();
+							chartToStomp[label][opt].push( point =='%' ? truncatedForPercent(value) :
+														   point =='MB'? translateForByte(value) :
+														   value);
+						}
+						for(fkey in stompServer[serverId]){
+							if(fkey=='row'){
+								continue;
+							}
+							
+							const datas = Object.keys(stompServer[serverId][fkey])
+							  .filter(key => key !== 'init' && key !== 'time') 
+							  .map(key => {
+								var length = stompServer[serverId][fkey][key].length;
+							    return stompServer[serverId][fkey][key][length-1];
+							});
+							if(!stompServer[serverId][fkey]['init']){
+								stompServer[serverId][fkey]['init']={};
+							}
+							
+							if(!stompServer[serverId][fkey]['init']['chart']){
+								stompServer[serverId][fkey]['init']['chart'] = onInitChart(stompServer[serverId][fkey],fkey+serverId, fkey, '');
+							}else{
+								stompServer[serverId][fkey]['time'].shift();
+								stompServer[serverId][fkey]['time'].push(time);
+								stompServer[serverId][fkey]['init']['chart'].addData(datas, time);
+							}
+						}
+						
+					});
+				}
+			}
+		});
+	}
+	
+</script>
+
+
+<script>
+	
+	function translateForByte(bytes){
+		bytes = Number(bytes) < 0 ? 0 : bytes;
+		return parseFloat( (bytes / 1024 / 1024).toFixed(2) );
+	}
+	
+	function truncatedForPercent(percent){
+		//return Math.floor(percent * 1000) / 1000;
+		return Math.floor(percent * 1000)/10;
+	}
+	
+	
+	function getLast10SecondsTimestamps() {
+	  const timestamps = [];
+	  const now = new Date();
+	
+	  for (let i = 0; i < 10; i++) {
+	    const pastTime = new Date(now.getTime() - i * 1000); // i초 전
+	    const timeStr = pastTime.toTimeString().split(' ')[0]; // HH:MM:SS 포맷
+	    timestamps.unshift(timeStr); // 시간 순서를 과거 → 현재로 정렬
+	  }
+	
+	  return timestamps;
+	}
+	
+	function onInitChart(stompServerData, elId, chartName ,point){
+		const datas = stompServerData;
+		const serieses = Object.keys(datas)
+							  .filter(key => key !== 'init' && key !== 'time')
+							  .map(key => ({
+								name: key,
+							    data: datas[key]
+							}));
+							
+		const el = document.getElementById(elId);
+		const data = {
+			categories: getLast10SecondsTimestamps(),
+			series: serieses
+		};
+		const options = {
+				chart: {title: chartName, width: 300, height: 300},
+				xAxis: {pointOnColumn: false, title: {text: '시간'}},
+				yAxis: {title: point, min:0, max: 100},
+				series: {shift: true},//eventDetectType: 'grouped'
+				exportMenu:{visible: false},
+				legend: { visible: false ,align: 'bottom'},
+		};
+		
+		return toastui.Chart.areaChart({el, data, options});
+	}
+	
+function createRowDom(serverId, serverName, serverHost) {
+	const container = document.querySelector('#container-body');
+
+	const card = document.createElement('div');
+	card.className = 'card mt-4 shadow-sm border-0';
+
+	const cardBody = document.createElement('div');
+	cardBody.className = 'card-body';
+
+	const title = document.createElement('h5');
+	title.className = 'card-title fw-bold';
+	title.textContent = serverName;
+
+	const subtitle = document.createElement('h6');
+	subtitle.className = 'card-subtitle mb-2 text-muted';
+	subtitle.textContent = serverHost;
+
+	const cardText = document.createElement('div');
+	cardText.className = 'card-text';
+
+	const row = document.createElement('div');
+	row.className = 'row flex-nowrap overflow-auto gap-2';
+	row.id = 'row' + serverId;
+
+	cardText.appendChild(row);
+	cardBody.appendChild(title);
+	cardBody.appendChild(subtitle);
+	cardBody.appendChild(cardText);
+	card.appendChild(cardBody);
+	container.appendChild(card);
+
+	return row;
+}
+
+function createChartDom(serverId, name) {
+	const row = document.querySelector('#row' + serverId);
+	const col = document.createElement('div');
+	col.className = "col chart-col";
+	col.id = name + serverId;
+	col.style.minWidth = '300px';
+	row.appendChild(col);
+}
+
+	window.onload = function () {
+		 init();
+	}
+
+</script>
+
+<body style="min-width:1650px">
+	<nav class="navbar bg-dark navbar-dark">
+		<div class="container-fluid d-flex justify-content-between align-items-center">
+			<!-- 왼쪽 영역 -->
+			<div class="d-flex align-items-center">
+				<a class="navbar-brand" href="#">TEST MSA SERVER</a>
+				<ul class="navbar-nav flex-row ms-3">
+					<li class="nav-item me-3">
+						<a class="nav-link text-white" th:href="@{/cms/main}">메인</a>
+					</li>
+					<li class="nav-item me-3">
+						<a class="nav-link text-white" th:href="@{/cms/monitoring}">모니터링</a>
+					</li>
+					<li class="nav-item me-3">
+						<a class="nav-link text-white" th:href="@{/cms/lotto}">로또</a>
+					</li>
+				</ul>
+			</div>
+
+			<!-- 오른쪽 영역 -->
+			<div>
+				<form class="d-flex" role="search">
+					<button class="btn btn-success btn-sm" type="submit">Login</button>
+				</form>
+			</div>
+		</div>
+	</nav>
+	<div class="container-fluid" id="container-body">
+	</div>
+
+</body>
+
+</html>
