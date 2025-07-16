@@ -113,7 +113,7 @@ public class ActuatorScheduler {
 					 //log.info("stomp server : "+serviceName+", Seq"+serverSeq);
 					 stompPrometheusService.onMessagePrometheus(serverSeq, 1, prometheusList);
 					 //log.info("kafka server : "+serviceName+", Seq"+serverSeq);
-					 kafkaMetricsProducerService.sendMessage(serverSeq, 1, prometheusList);
+					 //kafkaMetricsProducerService.sendMessage(serverSeq, 1, prometheusList);
 				}catch(Exception e){
 					log.error("[ERROR] PerformanceMonitoring in instances error : "+e.getMessage());
 				}

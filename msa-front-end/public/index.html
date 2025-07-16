@@ -6,12 +6,24 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title><%= htmlWebpackPlugin.options.title %></title>
+
+    <link rel="stylesheet" href="/libs/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/libs/jquery-ui/jquery-ui.min.css">
+    <link rel="stylesheet" href="/libs/tui/js/tui-chart/dist/tui-chart.min.css">
+    <link rel="stylesheet" href="/libs/tui/js/tui-grid/dist/tui-grid.min.css">
+    <link rel="stylesheet" href="/libs/tui/js/tui-pagination/dist/tui-pagination.min.css">
+
+    <script src="/libs/js/jquery/jquery.min.js"></script>
+    <script src="/libs/jquery-ui/jquery-ui.min.js"></script>
+    <script src="/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/libs/js/sockjs.min.js"></script>
+    <script src="/libs/js/stomp.min.js"></script>
+    <script src="/libs/tui/js/tui-chart/dist/tui-chart.min.js"></script>
+    <script src="/libs/tui/js/tui-grid/dist/tui-grid.min.js"></script>
+    <script src="/libs/tui/js/tui-pagination/dist/tui-pagination.min.js"></script>
+
   </head>
   <body>
-    <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
     <div id="app"></div>
-    <!-- built files will be auto injected -->
   </body>
 </html>

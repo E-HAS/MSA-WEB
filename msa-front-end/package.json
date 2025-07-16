@@ -5,12 +5,19 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "build:watch": "webpack --watch",
+    "lint": "vue-cli-service lint",
+    "dev": "webpack-dev-server --hot"
   },
   "dependencies": {
+    "@stomp/stompjs": "^7.1.1",
+    "@toast-ui/chart": "^4.6.1",
     "axios": "^1.10.0",
     "core-js": "^3.8.3",
+    "sockjs-client": "^1.6.1",
+    "stompjs": "^2.3.3",
     "vue": "^3.5.17",
+    "vue-router": "^4.5.1",
     "vuex": "^4.1.0"
   },
   "devDependencies": {
@@ -19,11 +26,10 @@
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3",
+    "@vue/compiler-sfc": "^3.5.17",
+    "eslint-plugin-vue": "^10.3.0",
     "vue-loader": "^17.4.2",
     "vue-style-loader": "^4.1.3",
-    "vue-template-compiler": "^2.7.16",
     "webpack": "^5.99.9",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"
