@@ -1,21 +1,23 @@
 <template>
   <div id="container-body">
-    <ServerCard
-      v-for="(info, serverId) in servers"
-      :key="serverId"
-      :id="serverId"
-      :name="info.name"
-      :host="info.host"
-      :chart-data="chartData[serverId]"
-    />
+    <div v-for="(serverList, serverName) in servers" :key="serverName">
+      <div v-for="(info, index) in serverList" :key="index">
+        <ServerCard
+          :id="info.seq"
+          :name="info.name"
+          :host="info.host"
+          :chart-data="chartData[info.seq]"
+        />
+       </div>
+    </div>
   </div>
 </template>
 
 <script setup>
+import ServerCard from '@/components/monitoring/ServerCard.vue';
 import { onMounted, computed } from 'vue';
 import { useStore } from 'vuex';
 import { useMonitoring } from '@/composables/useMonitoring';
-import ServerCard from '@/components/monitoring/ServerCard.vue';
 
 const store = useStore();
 
@@ -39,5 +41,13 @@ onMounted(async () => {
     });
   }
 });
-
 </script>
+
+<style scoped>
+  #container-body .row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem; /* 카드 사이 간격 */
+	}
+	
+</style>

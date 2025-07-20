@@ -54,9 +54,11 @@ export function useMonitoring() {
   }
 
   function connectStomp(onConnect) { // new WebSocket('/monitoring/stomp'), new SockJS('/infra/stomp/monitoring')
-    const socket = new WebSocket('wss://192.168.1.102:8761/stomp');
+    //const socket = new WebSocket('wss://192.168.1.102:8761/stomp');
+    const socket = new WebSocket('/monitoring/stomp');
     const stompClient = Stomp.over(socket)
-    stompClient.debug = () => {}; //stompClient.debug = (msg) => console.log('STOMP debug:', msg);
+    stompClient.debug = () => {}; 
+    //stompClient.debug = (msg) => console.log('STOMP debug:', msg);
 
     stompClient.reconnectDelay = 5000; // 재연결 시도
     stompClient.connect({}, () => onConnect(stompClient), (error) => {
@@ -68,14 +70,12 @@ export function useMonitoring() {
     const parsed = JSON.parse(message.body);
     const time = parsed.time;
     //  {seq: 196, label: 'process_cpu_time_ns_total', opt:'', value: 30328125000}
-
     parsed.lists.forEach(item => {
-
       let { label, opt, value, point } = translateItem(item); // 필요 라벨 필터, 그룹화
 
       if (!label) return;
 
-      store.dispatch('monitoring/initChart', { serverId, label, opt });
+      store.dispatch('monitoring/initChart', { serverId, label, opt, point });
 
       const pointValue = point == '%' ? truncatedForPercent(value)
                         : point == 'MB' ? translateForByte(value)

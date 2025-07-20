@@ -3,7 +3,7 @@ import { getLast10SecondsTimestamps } from '@/utils/helpers';
 export default {
   namespaced: true,
   state: () => ({
-    servers: {},   // 서버 목록 { [serverId]: {name, host} }
+    servers: {},   // 서버 목록 { [name]: {seq, name, host} }
     data: {}       // 실시간 모니터링 데이터
   }),
   getters:{
@@ -21,7 +21,7 @@ export default {
       seq: 11
       */
     },
-    INIT_CHART(state, { serverId, label, opt }) { //  { label : 'cpu' , opt: 'process_cpu_time_ns_total'}
+    INIT_CHART(state, { serverId, label, opt, point}) { //  { label : 'cpu' , opt: 'process_cpu_time_ns_total'}
 
       if (!state.data[serverId]) state.data[serverId] = {}; // 서버 ID 존재 여부
       const serverData = state.data[serverId];
@@ -31,6 +31,9 @@ export default {
       }
       if (!serverData[label][opt]) {
         serverData[label][opt] = Array(10).fill(0);
+      }
+      if(!serverData[label]['point']){
+        serverData[label]['point'] = point;
       }
 
     },
