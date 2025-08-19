@@ -1,5 +1,5 @@
 <template>
-  <div :id="chartId" class="chart-col" style="min-width: 300px;"></div>
+  <div :id="chartId" class="chart-col col" style="min-width: 300px;"></div>
 </template>
 
 <script setup>
@@ -14,11 +14,12 @@ const props = defineProps({
   chartPoint : String,
 });
 
-let chartInstance = null;
-let chartYMax = ref(0);
 onMounted(() => {
   initChart();
 });
+
+let chartInstance = null;
+let chartYMax = ref(0);
 
 watch(() => props.chartData?.time?.[9], () => {
   if (chartInstance && props.chartData?.time) {
@@ -27,14 +28,14 @@ watch(() => props.chartData?.time?.[9], () => {
       .map(k => props.chartData[k].at(-1));
     const newTime = props.chartData.time.at(-1);
     chartInstance.addData(latestValues, newTime);
+   
+    const checkValues = Object.keys(props.chartData)
+      .filter(k => k !== 'init' && k !== 'time' && k !== 'point')
+      .map(k => props.chartData[k]);
 
-    
-    // Y축 최대값 동적
-    const maxValue = Math.max(...latestValues, 10);
-    const yMax = Math.ceil(maxValue * 1.2); // 최대값보다 약간 크게
-    
-    if(chartYMax.value < yMax){
-      // Y축 동적 업데이트
+    const maxValue = Math.max(...checkValues.flat());
+    const yMax = Math.ceil(maxValue * 1.5); // 최대값보다 약간 크게
+    if ( yMax > chartYMax.value) {
       chartInstance.updateOptions({
         yAxis: {
           title: props.chartPoint || '',
@@ -42,12 +43,20 @@ watch(() => props.chartData?.time?.[9], () => {
           max: yMax,
         }
       });
-
       chartYMax.value = yMax;
+    }else {
+      if(props.chartName === 'jvm_memory' ){
+        //console.log(props.chartData);
+      }
+      chartInstance.updateOptions({
+        yAxis: {
+          title: props.chartPoint || '',
+          min: 0,
+          max: yMax,
+        }
+      });
     }
-
   }
-
 });
 
 function initChart() {
@@ -74,18 +83,39 @@ function initChart() {
 
 
 <style scoped>
-.toastui-chart-tooltip-container {
+ .toastui-chart-tooltip{
   position: absolute !important;
+  top: 0;
+  left: 0;
   z-index: 9999;
   pointer-events: none;
 }
 
+.toastui-chart-tooltip-series-wrapper {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toastui-chart-tooltip-series {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+
 .chart-col {
+  position: relative; /* 툴팁 기준점 */
   min-width: 260px;
   background: #f4f8fb;
   padding: 12px;
-  border-left: 4px solid #0d6efd; /* blue stripe */
+  border-left: 4px solid #eeeeee;
   border-radius: 6px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  overflow: hidden;
 }
 </style>

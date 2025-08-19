@@ -53,18 +53,26 @@ export function useMonitoring() {
     return store.dispatch('monitoring/loadServers', data);
   }
 
-  function connectStomp(onConnect) { // new WebSocket('/monitoring/stomp'), new SockJS('/infra/stomp/monitoring')
-    //const socket = new WebSocket('wss://192.168.1.102:8761/stomp');
-    const socket = new WebSocket('/monitoring/stomp');
-    const stompClient = Stomp.over(socket)
-    stompClient.debug = () => {}; 
-    //stompClient.debug = (msg) => console.log('STOMP debug:', msg);
+function connectStomp(onConnect) {
+  const socket = new WebSocket('/monitoring/stomp');
+  const stompClient = Stomp.over(socket);
+  stompClient.debug = () => {};
 
-    stompClient.reconnectDelay = 5000; // 재연결 시도
-    stompClient.connect({}, () => onConnect(stompClient), (error) => {
+  stompClient.reconnectDelay = 5000;
+  stompClient.connect(
+    {},
+    () => onConnect(stompClient),
+    (error) => {
       console.error('STOMP 연결 실패', error);
-    });
-  }
+      // 모든 서버 상태를 Offline 처리
+      Object.keys(store.state.monitoring.servers).forEach(name => {
+        const list = store.state.monitoring.servers[name];
+        list.forEach(s => store.dispatch('monitoring/setStatus', { serverId: s.seq, online: false }));
+      });
+    }
+  );
+}
+
 
   function handleMessage(serverId, message) {
     const parsed = JSON.parse(message.body);

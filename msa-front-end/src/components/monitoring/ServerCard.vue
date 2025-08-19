@@ -1,8 +1,15 @@
 <template>
   <div class="card mt-4 shadow-sm border-0">
     <div class="card-body">
-      <h5 class="card-title fw-bold">{{ name }}</h5>
-      <h6 class="card-subtitle mb-2 text-muted">{{ host }}</h6>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h5 class="card-title fw-bold">{{ name }}</h5>
+          <h6 class="card-subtitle text-muted">{{ host }}</h6>
+        </div>
+        <span :class="['badge', isOnline ? 'bg-success' : 'bg-danger']">
+          {{ chartStatus ? 'Online' : 'Offline' }}
+        </span>
+      </div>
       <div class="row flex-nowrap overflow-auto gap-2">
         <ServerChart
           v-for="(data, key) in chartData"
@@ -18,7 +25,6 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
 import ServerChart from './ServerChart.vue';
 
 const props = defineProps({
@@ -26,6 +32,7 @@ const props = defineProps({
   name: String,
   host: String,
   chartData: Object,
+  chartStatus: String,
 });
 
 </script>
@@ -58,4 +65,6 @@ const props = defineProps({
   background: #ccc;
   border-radius: 10px;
 }
+
+
 </style>

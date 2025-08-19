@@ -7,6 +7,7 @@
           :name="info.name"
           :host="info.host"
           :chart-data="chartData[info.seq]"
+          :chart-status="chartStatus[info.seq]"
         />
        </div>
     </div>
@@ -25,6 +26,7 @@ const { loadServers, connectStomp, handleMessage } = useMonitoring();
 
 const servers = computed(() => store.state.monitoring.servers);
 const chartData = computed(() => store.state.monitoring.data);
+const chartStatus = computed(() => store.state.monitoring.status);
 
 
 onMounted(async () => {

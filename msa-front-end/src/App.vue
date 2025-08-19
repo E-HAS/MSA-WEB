@@ -27,9 +27,7 @@
       </div>
     </nav>
   </div>
-  <div class="container-fluid" id="container-body">
-      <router-view></router-view>
-  </div>
+  <router-view></router-view>
 </template>
 
 
@@ -40,5 +38,3 @@ export default {
   router,
 }
 </script>
-
-<style></style>

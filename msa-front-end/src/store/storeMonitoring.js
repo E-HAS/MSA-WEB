@@ -4,7 +4,8 @@ export default {
   namespaced: true,
   state: () => ({
     servers: {},   // 서버 목록 { [name]: {seq, name, host} }
-    data: {}       // 실시간 모니터링 데이터
+    data: {},       // 실시간 모니터링 데이터
+    status: {},  // 서버별 상태 (온라인 여부)
   }),
   getters:{
   },
@@ -43,7 +44,10 @@ export default {
       chart[opt].push(value);
       chart.time.shift();
       chart.time.push(time);
-    }
+    },
+    SET_STATUS(state, { serverId, online }) {
+    state.status[serverId] = online;
+    },
   },
   actions: {
     loadServers({ commit }, servers) {
@@ -55,6 +59,9 @@ export default {
     },
     pushData({ commit }, payload) {
       commit('PUSH_DATA', payload);
+    },
+    setStatus({ commit }, payload) {
+      commit('SET_STATUS', payload);
     }
   }
 };
