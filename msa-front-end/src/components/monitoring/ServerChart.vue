@@ -83,6 +83,7 @@ function initChart() {
 
 
 <style scoped>
+/*
  .toastui-chart-tooltip{
   position: absolute !important;
   top: 0;
@@ -109,7 +110,7 @@ function initChart() {
 
 
 .chart-col {
-  position: relative; /* 툴팁 기준점 */
+  position: relative; //툴팁 기준점 
   min-width: 260px;
   background: #f4f8fb;
   padding: 12px;
@@ -118,4 +119,5 @@ function initChart() {
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
   overflow: hidden;
 }
+*/
 </style>

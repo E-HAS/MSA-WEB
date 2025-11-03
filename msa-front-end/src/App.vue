@@ -1,19 +1,22 @@
 <template>
-  <div style="min-width:1650px">
-    <nav class="navbar bg-dark navbar-dark">
+  <div style="min-width:700px">
+    <nav class="navbar bg-dark navbar-dark shadow">
       <div class="container-fluid d-flex justify-content-between align-items-center">
         <!-- 왼쪽 영역 -->
         <div class="d-flex align-items-center">
           <a class="navbar-brand" href="/">TEST MSA SERVER</a>
           <ul class="navbar-nav flex-row ms-3">
             <li class="nav-item me-3">
-              <router-link class="nav-link text-white" to="/">메인</router-link>
+              <router-link :class="['nav-link', { active: route.path === '/' }]" 
+              to="/">메인</router-link>
             </li>
             <li class="nav-item me-3">
-              <router-link class="nav-link text-white" to="/monitoring">모니터링</router-link>
+              <router-link :class="['nav-link', { active: route.path.startsWith('/monitoring') }]" 
+              to="/monitoring">모니터링</router-link>
             </li>
             <li class="nav-item me-3">
-              <router-link class="nav-link text-white" to="/lotto">로또</router-link>
+              <router-link :class="['nav-link', { active: route.path.startsWith('/lotto') }]" 
+              to="/lotto">로또</router-link>
             </li>
           </ul>
         </div>
@@ -27,10 +30,17 @@
       </div>
     </nav>
   </div>
-  <router-view></router-view>
+  <body class="container-fluid" id="container-body">
+    <router-view></router-view>
+  </body>
 </template>
 
+<script setup>
+  import { useRoute } from 'vue-router'
+  const route = useRoute();
+</script>
 
+<!--
 <script>
 import router from './router';
 export default {
@@ -38,3 +48,4 @@ export default {
   router,
 }
 </script>
+-->

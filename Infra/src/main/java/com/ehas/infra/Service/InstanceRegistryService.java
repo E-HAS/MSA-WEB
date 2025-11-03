@@ -52,6 +52,7 @@ public class InstanceRegistryService {
 	public Map<String, List> onPrometheusByService(String _serviceName){
 		Map<String, List> instancesList = new HashMap<>();
 		
+		// 1. 서비스 API 호출
 		 registry.getApplication(_serviceName).getInstances().forEach(instance -> {
 				String ip = instance.getIPAddr();
 				int port = instance.getSecurePort();
@@ -59,7 +60,8 @@ public class InstanceRegistryService {
 				String url = instance.isPortEnabled(PortType.SECURE)? "https://" + ip + ":" + port
 						: "http://" + ip + ":" + instance.getPort();
 	            url += "/actuator/prometheus";
-	            
+
+				// 2. 서비스 주소, 서비스 모니터링 정보 저장
 	            instancesList.put(_serviceName+"|"+instance.getHomePageUrl(), actuatorService.onPrometheusMonitoring(url));
 	     });
 		 

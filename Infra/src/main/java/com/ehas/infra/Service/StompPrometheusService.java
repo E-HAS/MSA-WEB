@@ -34,7 +34,7 @@ public class StompPrometheusService{
 																				.time(LocalDateTime.now()
 																					.format(DateTimeFormatter.ofPattern("HH:mm:ss")))
 																				.serverSeq(serverSeq)
-																				.second(1)
+																				.second(second)
 																				.lists(dtos)
 																				.build());
 			

@@ -61,6 +61,7 @@ value:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       topic:
         services-metrics-name: serversMetrics
+
   prometheus:
     check:
       list: process_cpu

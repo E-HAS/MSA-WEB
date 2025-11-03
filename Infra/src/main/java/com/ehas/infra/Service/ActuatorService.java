@@ -86,7 +86,6 @@ public class ActuatorService {
 			int findIndex = line.indexOf(" "); // Label, value 분리
 			if(findIndex > 0) {
 				String label = line.substring(0, findIndex).trim();
-				//String value = line.substring(findIndex+1).trim();
 				
 				String key=label;
 				String[] parts = label.split("_"); 

@@ -46,9 +46,10 @@ public class KafkaMetricsProducerService {
 			
 			String json = objectMapper.writeValueAsString(PrometheusMessageDto.builder()
 																.serverSeq(serverSeq)
-																.second(1)
+																.second(second)
 																.lists(filterDtos)
 																.build());
+			log.info("topic : {}, second : {}, json : {}",topicName, second, json);
 			this.kafkaTemplate.send(topicName, json);
 		} catch (JsonProcessingException e) {
 			log.error("[ERROR] send topic name : "+topicName + " serverSeq : " +serverSeq+" message : "+e.getMessage() );

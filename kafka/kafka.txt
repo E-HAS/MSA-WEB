@@ -1,0 +1,25 @@
+docker build -t kafka-image:latest .
+docker images
+docker run -d --name kafka-server -p 1000:22 -p 2181:2181 -p 9092:9092 --restart=always kafka-image:latest /bin/bash
+
+#docker update --restart=always a42a4ce326d8
+#docker update --restart=no a42a4ce326d8
+docker ps
+docker start kafka-server
+
+- 컨테이너 로그
+docker logs -f kafka-server
+
+- 컨테이너 중지
+docker stop kafka-server
+- 컨테이너 삭제
+docker rm kafka-server
+- 이미지 삭제
+docker rmi kafka-image:latest
+
+- kafka 토픽
+docker exec -it kafka-server /bin/bash
+/opt/kafka/bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+
+./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic serversMetrics
+./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic serversMetrics --from-beginning

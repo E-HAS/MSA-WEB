@@ -52,12 +52,14 @@ public class ActuatorScheduler {
 	
 	@PostConstruct
 	public void init() {
+		// 1. 서버 서비스 목록 초기화
         List<ServerEntity> servers = serverService.findAll();
         for (ServerEntity server : servers) {
             String key = server.getName() + "|" + server.getHost();
             ServerMap.put(key, server.getSeq());
         }
         
+		// 2. 서버 서비스 모니터링 옵션 목록 초기화
         List<ServerPrometheusEntity> serverPrometheuses = serverPrometheusService.findAll();
         for (ServerPrometheusEntity serverPrometheuse : serverPrometheuses) {
             String key = serverPrometheuse.getLabel()+serverPrometheuse.getOpt();
@@ -67,14 +69,16 @@ public class ActuatorScheduler {
 	
 	@Scheduled(cron = "0/1 * * * * ?")
     public void scheduledPerformanceMonitoringForSecond() throws JsonProcessingException {
+		// 1. Eureka Client 서비스 목록 가져오기
 		List<String> services = instanceRegistryService.getServices();
 		
 		for(String serviceName : services) {
+			//2. Eureka Client 서비스에 등록된 서버들 가져오기
 			Map<String, List> instances = instanceRegistryService.onPrometheusByService(serviceName);
 			
 			instances.keySet().parallelStream().forEach(instanceName -> {
 				try {
-					//서버 관련
+					//Eureka Client 서비스 DB 등록 또는 캐싱(MAP)
 					int serverSeq = ServerMap.computeIfAbsent(instanceName, key -> {
 					    String[] strSplits = key.split("\\|");
 					    ServerEntity created = serverService.create(
@@ -87,15 +91,16 @@ public class ActuatorScheduler {
 					    return created.getSeq();
 					});
 					
-					//라벨 관련
+					//Eureka Client 서비스 인스턴스에 대한 모니터링 정보 가져오기
 					List<PrometheusDto> prometheusList = (List<PrometheusDto>) instances.get(instanceName);
 					if(prometheusList.size() < 1) {
 						return;
 					}
+
 					 prometheusList.parallelStream().forEach(PrometheusDto -> {
 							String serverPrometheus = PrometheusDto.getLabel()+PrometheusDto.getOpt();
-							
-							
+
+
 							int serverPrometheusSeq = ServerPrometheusMap.computeIfAbsent(serverPrometheus, key -> {
 							    ServerPrometheusEntity created = serverPrometheusService.create(
 							        ServerPrometheusEntity.builder()
@@ -106,14 +111,14 @@ public class ActuatorScheduler {
 							    );
 							    return created.getSeq();
 							});
-							
+
 							PrometheusDto.setSeq(serverPrometheusSeq);
 							PrometheusDto.setText(null);
 					});
 					 //log.info("stomp server : "+serviceName+", Seq"+serverSeq);
 					 stompPrometheusService.onMessagePrometheus(serverSeq, 1, prometheusList);
 					 //log.info("kafka server : "+serviceName+", Seq"+serverSeq);
-					 //kafkaMetricsProducerService.sendMessage(serverSeq, 1, prometheusList);
+					 kafkaMetricsProducerService.sendMessage(serverSeq, 1, prometheusList);
 				}catch(Exception e){
 					log.error("[ERROR] PerformanceMonitoring in instances error : "+e.getMessage());
 				}
